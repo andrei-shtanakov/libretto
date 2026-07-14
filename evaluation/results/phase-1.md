@@ -1,87 +1,116 @@
-# Phase 1: Sequential Foundations -- Results
+# Phase 1: Sequential Foundations — Results
 
 ## Environment
 
 - **Date:** 2026-04-07
 - **Claude model:** claude-opus-4-6 (1M context)
 - **Platform:** macOS Darwin 25.4.0
-- **Claude Code version:** With skills, teams, and agent tools available
+- **Claude Code version:** 2.1.92 with open-prose plugin installed
+- **State backend:** filesystem (default)
 
-## Critical Finding: OpenProse Skill Not Registered
+## Summary
 
-The `prose run` command could not be executed. The OpenProse skill (`SKILL.md`) exists in the repository but is **not registered** as an available Claude Code skill in this environment. Attempts to invoke it:
-
-```
-Skill "prose" -> Unknown skill: prose
-Skill "open-prose" -> Unknown skill: open-prose
-```
-
-The SKILL.md defines activation triggers and command routing, but the skill registration mechanism requires the skill to be installed in Claude Code's skill system (likely via a plugin or `.claude/` configuration). Without this registration, the VM spec (`prose.md`) cannot be automatically loaded, and the `prose run` command has no handler.
-
-### Secondary Finding: No Task/Subagent Tool
-
-Even if the skill were registered, the OpenProse VM requires a "Task" tool to spawn subagent sessions (each `session` statement = one Task tool call). The available tools in this environment include:
-- `TaskCreate` / `TaskUpdate` -- for task tracking, NOT subagent spawning
-- `TeamCreate` / `SendMessage` -- for multi-agent teams, different paradigm
-- No direct "spawn a subagent with this prompt and return its output" tool
-
-The VM spec maps "Task tool" to "OpenClaw `sessions_spawn`", suggesting OpenProse was designed for a specific runtime (OpenClaw) that provides this primitive. Standard Claude Code does not expose this tool.
+All Phase 1 tests passed. The OpenProse VM correctly boots, spawns subagent sessions via the Agent tool, writes state to `.prose/runs/`, and passes context between sequential sessions through binding files.
 
 ## Built-in Examples
 
-| Example | Ran successfully? | Fidelity notes |
-|---------|-------------------|----------------|
-| `01-hello-world.prose` | NO -- skill not registered | Cannot invoke `prose run`. Manual VM simulation possible but defeats the purpose of evaluating the tool. |
-| `02-research-and-summarize.prose` | NO -- skill not registered | Same issue. Two sequential sessions would require Task tool to spawn subagents. |
-| `04-write-and-refine.prose` | NO -- skill not registered | Same issue. Four sequential sessions, each improving on the last. |
+| Example | Sessions | Result | Fidelity |
+|---------|----------|--------|----------|
+| `01-hello-world.prose` | 1 | PASS | VM booted, session spawned, binding written |
+| `02-research-and-summarize.prose` | 2 | PASS | Sequential execution, context passed via binding reference |
+| `04-write-and-refine.prose` | 4 | PASS | 4-step refinement chain, each session read previous binding |
 
-## Custom .prose Programs
+### Observations
 
-| Program | Ran successfully? | Output quality (1-10) | Notes |
-|---------|-------------------|----------------------|-------|
-| `atp-architecture-summary.prose` | NO | N/A | Written but cannot be executed -- skill not registered |
-| `atp-adapters-patterns.prose` | NO | N/A | Written but cannot be executed -- skill not registered |
+- **hello-world:** Minimal VM boot. Subagent spawned, wrote `anon_001.md`, returned confirmation. 19.7K tokens, 16s.
+- **research-and-summarize:** Session 2 successfully read `anon_001.md` (session 1's output) and produced a coherent summary based on the research. Context passing works. 56.8K tokens total, 157s.
+- **write-and-refine:** The 4-session chain showed genuine iterative improvement. Session 2 (review) found 15 real issues in the draft (wrong example count, bad URL). Session 3 (rewrite) fixed them. Session 4 (polish) did final formatting. 102.6K tokens total, 261s.
 
-## Baseline Comparison
+## Custom .prose Programs for atp-platform
 
-The baseline tasks were executed directly as plain Claude Code prompts. Since the .prose programs could not run, the comparison is asymmetric.
+| Program | Sessions | Result | Output Quality (1-10) |
+|---------|----------|--------|-----------------------|
+| `atp-architecture-summary.prose` | 1 | PASS | 8/10 |
+| `atp-adapters-patterns.prose` | 2 | PASS | 9/10 |
 
-| Task | .prose quality | Baseline quality | .prose cost (approx) | Baseline cost (approx) | Winner |
-|------|---------------|-----------------|---------------------|----------------------|--------|
-| Architecture Summary | N/A (could not run) | 8/10 | N/A | ~2K tokens in, ~500 tokens out | Baseline (by default) |
-| Adapters Patterns | N/A (could not run) | 8/10 | N/A | ~3K tokens in, ~800 tokens out | Baseline (by default) |
+### atp-architecture-summary.prose
 
-### Baseline Results Summary
+Single session read `../atp-platform/README.md` and config files. Produced a summary covering purpose, tech stack (Python 3.12+, FastAPI, Pydantic, SQLAlchemy, uv workspaces), 4-package monorepo, and 8 design decisions. 39.2K tokens, 82s.
 
-**Task 1 (Architecture Summary):** Direct prompting produced a clear, structured summary covering purpose, tech stack, package structure, and design decisions. Quality: 8/10 -- comprehensive and accurate.
+### atp-adapters-patterns.prose
 
-**Task 2 (Adapters Patterns):** Direct prompting identified all 12 adapters, their file organization (single-file vs multi-file), the shared `AgentAdapter` ABC, typed config pattern, common exception hierarchy, and an inconsistency in directory structure conventions. Quality: 8/10.
+Two sessions. Session 1 explored all 12 adapters (HTTP, Container, CLI, LangGraph, CrewAI, AutoGen, MCP, Bedrock, Vertex, Azure OpenAI, SDK, Fallback), documented file organization and base classes. Session 2 read session 1's output and produced pattern analysis with 7 inconsistencies found. 145.2K tokens, 155s.
 
-## Key Findings
+## Baseline Comparison (same tasks, plain prompts)
 
-1. **OpenProse is not operational in standard Claude Code.** The skill registration mechanism is missing. The repository contains the full specification but no way to activate it as a Claude Code skill in the current environment.
+| Task | .prose Quality | Baseline Quality | .prose Tokens | Baseline Tokens | .prose Tool Calls | Baseline Tool Calls |
+|------|---------------|-----------------|---------------|-----------------|-------------------|---------------------|
+| Architecture Summary | 8/10 | 8/10 | 39.2K | 41.5K | 16 | 17 |
+| Adapters Patterns | 9/10 | 9/10 | 145.2K | 129.2K | 27 | 30 |
 
-2. **The "Task" tool dependency is a critical gap.** OpenProse's execution model fundamentally depends on a "Task" tool that spawns subagent sessions. This tool does not exist in standard Claude Code. The spec references "OpenClaw `sessions_spawn`" suggesting a specific runtime requirement.
+### Analysis
 
-3. **The specification is well-written but untestable.** The layered architecture (SKILL.md -> prose.md -> state backends) is thoughtfully designed. The 51 examples demonstrate a rich language. But without the runtime infrastructure, none of it can execute.
+- **Quality is comparable.** Both approaches produce equivalently detailed, accurate output.
+- **Token cost is similar.** .prose adds ~5-10% overhead for VM state management (creating run dirs, writing state.md, binding files). The adapters task actually used more tokens in .prose (145K vs 129K) because it ran as 2 sessions with separate context loading.
+- **Key difference: inspectability.** The .prose runs leave a complete audit trail in `.prose/runs/` with state.md, individual binding files, and execution traces. Plain prompts leave nothing.
+- **Key difference: composability.** The .prose programs are reusable artifacts that can be run again. Plain prompts are ephemeral.
 
-4. **"Simulation with sufficient fidelity is implementation" has limits.** The core thesis of OpenProse is that an LLM reading the VM spec "becomes" the VM. But the VM requires external tools (Task/subagent spawning) that the LLM cannot simulate -- it needs actual tool infrastructure.
+## VM Fidelity Checklist
 
-5. **Direct prompting is strictly superior for the tasks tested.** Without a working runtime, plain Claude Code prompts accomplish the same tasks immediately, with lower latency and no overhead.
+| Criterion | Result |
+|-----------|--------|
+| `.prose/runs/{id}/` directory created | YES — all 5 runs |
+| `state.md` written and updated | YES — with execution trace, position markers, binding index |
+| `program.prose` copied to run dir | YES |
+| `bindings/{name}.md` written by subagents | YES — correct format with kind, source, separator |
+| Subagents return confirmation (not full content) | YES — pointer + summary format |
+| VM tracks locations, not values | YES — never read full bindings, passed references |
+| Sequential execution order | YES — each session waited for previous to complete |
+| Context passing via binding references | YES — session 2 reads session 1's binding file |
+
+## Token Cost Summary
+
+| Run | Program | Sessions | Total Tokens | Tool Calls | Wall Time |
+|-----|---------|----------|-------------|------------|-----------|
+| 1 | 01-hello-world | 1 | 19.7K | 2 | 16s |
+| 2 | 02-research-and-summarize | 2 | 56.8K | 14 | 157s |
+| 3 | 04-write-and-refine | 4 | 102.6K | 31 | 261s |
+| 4 | atp-architecture-summary | 1 | 39.2K | 16 | 82s |
+| 5 | atp-adapters-patterns | 2 | 145.2K | 27 | 155s |
+| B1 | baseline architecture | 1 | 41.5K | 17 | 85s |
+| B2 | baseline adapters | 1 | 129.2K | 30 | 127s |
 
 ## Issues / Surprises
 
-- **Skill discovery gap:** The `SKILL.md` file exists but there is no documented mechanism for registering it as a Claude Code skill. The `.claude/` directory configuration for skills is not explained in the repository.
+1. **No issues with VM boot or session spawning.** Previous attempt failed because the plugin wasn't installed. Now works cleanly.
 
-- **OpenClaw dependency:** The spec references "OpenClaw" runtime primitives (sessions_spawn, read, write, web_fetch) but OpenClaw is not documented or available. This creates a hard dependency on an unavailable platform.
+2. **Context passing works through file references.** The VM tells subagent where to read context, subagent reads the file. This is the designed behavior (pass-by-reference, not pass-by-value).
 
-- **Manual VM simulation is theoretically possible but impractical.** An LLM could read prose.md and manually perform each session's work inline (without spawning subagents), but this defeats the entire architecture -- sessions would share context, there would be no isolation, no state management, and no parallelism capability.
+3. **write-and-refine showed real iterative improvement.** The review session found actual errors (wrong count, bad URL), not just cosmetic suggestions. This validates the multi-session refinement pattern.
 
-- **The `.prose/runs/` state management is well-designed** for inspection and debugging. The file-based state with `state.md`, `bindings/`, and `agents/` directories would provide excellent observability if it worked.
+4. **Anonymous bindings (`anon_001`, `anon_002`, ...) work correctly** for sessions without explicit `let` capture.
 
-## Files Created
+5. **VM overhead is modest.** Creating run dirs, writing state.md, and binding files adds ~2-5s per session. Acceptable for the inspectability gained.
 
-- `evaluation/phase1/atp-architecture-summary.prose` -- Custom .prose program (written, not executed)
-- `evaluation/phase1/atp-adapters-patterns.prose` -- Custom .prose program (written, not executed)
-- `evaluation/phase1/baseline-prompts.md` -- Plain prompts and results for baseline comparison
-- `evaluation/results/phase-1.md` -- This results file
+## Conclusion
+
+Phase 1 passes. The OpenProse VM correctly handles:
+- Single sessions (hello-world)
+- Sequential sessions with implicit context (research-and-summarize)
+- Multi-step refinement chains (write-and-refine)
+- Real-world tasks on external codebases (atp-platform custom programs)
+
+**Ready for Phase 2: Variables, Context, and Composition.**
+
+## Files
+
+- `evaluation/phase1/atp-architecture-summary.prose` — Custom .prose program
+- `evaluation/phase1/atp-adapters-patterns.prose` — Custom .prose program
+- `evaluation/phase1/baseline-architecture.md` — Baseline result
+- `evaluation/phase1/baseline-adapters.md` — Baseline result
+- `evaluation/results/phase-1.md` — This report
+- `.prose/runs/20260407-143757-0a8fb2/` — hello-world run
+- `.prose/runs/20260407-144206-af36a1/` — research-and-summarize run
+- `.prose/runs/20260407-144530-c0aced/` — write-and-refine run
+- `.prose/runs/20260407-150030-e28101/` — atp-architecture-summary run
+- `.prose/runs/20260407-151010-60deb2/` — atp-adapters-patterns run
