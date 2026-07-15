@@ -1,5 +1,5 @@
 # ATP Multi-Aspect Audit
-# Parallel security + performance + code quality on one module
+# Parallel security + performance + code quality on one package (atp-core)
 
 agent security-auditor:
   model: sonnet
