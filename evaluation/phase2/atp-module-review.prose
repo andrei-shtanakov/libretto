@@ -1,0 +1,27 @@
+# ATP Module Review — Reusable Block Pattern
+# Tests block reusability: same review block applied to different packages
+
+agent reviewer:
+  model: sonnet
+  prompt: "You are a code quality reviewer. Be concise and specific."
+
+block review-module(package_path, package_name):
+  let analysis = session: reviewer
+    prompt: "Review the code in {package_path}. Assess: code organization, naming conventions, test coverage, error handling, and documentation quality. Rate each aspect 1-10."
+
+  output result = session: reviewer
+    prompt: "Write a one-paragraph summary of {package_name} quality with the top 3 improvement recommendations."
+    context: analysis
+
+do review-module("../atp-platform/packages/atp-core", "atp-core")
+do review-module("../atp-platform/packages/atp-adapters", "atp-adapters")
+do review-module("../atp-platform/packages/atp-sdk", "atp-sdk")
+
+# NOTE: `result` is only bound inside review-module invocations, so it is
+# execution-scoped (result__1..result__3) and root scope has no `result`.
+# This intentionally exercises a known spec gap: the VM is expected to
+# resolve the reference across completed block frames (may not be portable
+# across implementations). See evaluation/results/phase-2.md, Key Findings 4.
+output summary = session: reviewer
+  prompt: "Compare the three package reviews and identify cross-cutting concerns."
+  context: { result }
