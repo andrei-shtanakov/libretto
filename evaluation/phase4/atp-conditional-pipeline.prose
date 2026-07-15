@@ -1,0 +1,30 @@
+# ATP Conditional Pipeline
+# Different actions based on module analysis results
+
+agent analyst:
+  model: sonnet
+  prompt: "You analyze Python code quality. Be quantitative where possible."
+
+agent test-writer:
+  model: sonnet
+  prompt: "You write pytest tests. Follow existing test patterns in the project."
+
+agent bug-hunter:
+  model: sonnet
+  prompt: "You find bugs through careful code reading. Focus on edge cases and error paths."
+
+let analysis = session: analyst
+  prompt: "Analyze ../atp-platform/packages/atp-core/src/. Estimate test coverage percentage. List modules with poorest coverage."
+
+if **test coverage appears below 60%**:
+  output result = session: test-writer
+    prompt: "Write 3 new test cases for the least-covered module identified in the analysis."
+    context: analysis
+elif **test coverage is between 60-80%**:
+  output result = session: bug-hunter
+    prompt: "The code has moderate coverage. Look for bugs in edge cases that existing tests might miss."
+    context: analysis
+else:
+  output result = session: analyst
+    prompt: "Coverage looks good. Identify the top 3 opportunities for improving code quality beyond testing."
+    context: analysis

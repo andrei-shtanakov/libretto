@@ -1,0 +1,37 @@
+# ATP Iterative Refactoring
+# Loop with error handling: find smell, fix, test, retry if needed
+
+agent detector:
+  model: sonnet
+  prompt: "You find code smells. Be specific: file path, line number, smell type."
+
+agent fixer:
+  model: sonnet
+  prompt: "You fix code smells with minimal, targeted changes. Show exact diffs."
+
+agent tester:
+  model: sonnet
+  prompt: "You verify code changes by reading tests and checking logic."
+
+let smell = session: detector
+  prompt: "Find the single worst code smell in ../atp-platform/packages/atp-core/src/. Return: file path, line range, smell type, why it's bad."
+
+repeat 2:
+  try:
+    let fix = session: fixer
+      prompt: "Fix this code smell with a minimal change. Show the exact diff."
+      context: smell
+
+    let verification = session: tester
+      prompt: "Verify this fix: does it preserve behavior? Could it break anything? Check if related tests would still pass."
+      context: { smell, fix }
+
+    if **verification found problems**:
+      let smell = session: detector
+        prompt: "The previous fix had problems. Find a different approach to fix the same smell."
+        context: { smell, fix, verification }
+    else:
+      output result = fix
+  catch as err:
+    session "Log the error and continue to next iteration"
+      context: err
