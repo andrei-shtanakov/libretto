@@ -14,4 +14,5 @@ Finally, propose a refactoring plan with an ideal base class."
 
 "Review code quality in ../atp-platform/packages/atp-core/: organization,
 naming, test coverage, error handling, docs. Rate 1-10 each. Then do the same
-for atp-adapters and atp-sdk. Finally, compare all three."
+for ../atp-platform/packages/atp-adapters/ and ../atp-platform/packages/atp-sdk/.
+Finally, compare all three."

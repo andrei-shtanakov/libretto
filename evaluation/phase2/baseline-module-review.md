@@ -6,9 +6,9 @@
 
 ## Output
 
-# Code Quality Review — atp-core, atp-adapters, atp-sdk
+### Code Quality Review — atp-core, atp-adapters, atp-sdk
 
-Scope note: tests for all three packages live centrally in `/Users/Andrei_Shtanakov/labs/all_ai_orchestrators/atp-platform/tests/` (mirrored subdirectories under `unit/`), not colocated with the source packages. No files were modified.
+Scope note: tests for all three packages live centrally in `../atp-platform/tests/` (mirrored subdirectories under `unit/`), not colocated with the source packages. No files were modified.
 
 ---
 
