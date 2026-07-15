@@ -1,0 +1,17 @@
+# ATP Evaluator Refactoring Analysis
+# Dependency chain: research -> extract interface -> propose refactoring
+
+agent analyst:
+  model: sonnet
+  prompt: "You are a Python code architecture analyst. Focus on design patterns and abstractions."
+
+let survey = session: analyst
+  prompt: "Read the evaluator implementations in ../atp-platform/packages/atp-core/. List all evaluator classes, their base classes, and the methods each one implements. Focus on the evaluate() method signatures."
+
+let interface = session: analyst
+  prompt: "Based on the survey, extract the common interface shared by all evaluators. Identify: required methods, optional methods, shared parameters, return types."
+  context: survey
+
+output refactoring = session: analyst
+  prompt: "Propose a refactoring plan: define an ideal base class that captures the common interface, list which evaluators would need changes, and estimate the impact of each change."
+  context: { survey, interface }
