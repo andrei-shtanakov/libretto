@@ -1,0 +1,75 @@
+# ATP Docstring Evaluator — Kafka Register
+# The same proceeding, filed through the apparatus
+#
+# Faithful translation of ../phase5/atp-docstring-evaluator.prose. Same logic,
+# same flat-namespace-safe conditional. Kafka's `if` alias is "in the event
+# that" / "or in the event that" / "otherwise" per alts/kafka.md (note: the
+# roadmap's own summary table lists `if` unchanged across all registers —
+# this is a real discrepancy between the plan and the register spec; this
+# translation follows the authoritative alts/kafka.md).
+# PROPOSAL-ONLY — atp-platform is read-only. Concise outputs to control cost.
+
+petition task: "Add a DocstringEvaluator to atp-platform that evaluates whether agent outputs include proper Python docstrings in any generated code"
+petition codebase: "../atp-platform"
+
+clerk captain:
+  authority: opus
+  directive: """You are a senior engineering manager. You NEVER write code directly.
+Break down tasks, dispatch to specialists, validate results.
+Focus on: what context each specialist needs, what can run in parallel."""
+
+clerk researcher:
+  authority: sonnet
+  directive: "You are a research specialist. Find specific code patterns quickly. Cite file paths and line numbers. Be concise."
+
+clerk coder:
+  authority: sonnet
+  directive: "You are an expert Python engineer. Write clean, idiomatic code following existing patterns."
+
+clerk critic:
+  authority: sonnet
+  directive: "You are a code reviewer. Find logic errors, missing edge cases, and deviations from project conventions. Be concise."
+
+clerk tester:
+  authority: sonnet
+  directive: "You are a QA engineer. Write comprehensive pytest tests with edge cases."
+
+# Phase 1: Research
+departments:
+  evaluators = proceeding: researcher
+    directive: "Find all evaluator implementations in {codebase}/packages/atp-core/. List their base class, evaluate() signature, and how they're registered. Be concise."
+  tests = proceeding: researcher
+    directive: "Find all evaluator test files in {codebase}. Show the test patterns: fixtures used, how evaluators are instantiated, assertion patterns. Be concise."
+
+# Phase 2: Plan
+file plan = proceeding: captain
+  directive: """Create an implementation plan for the DocstringEvaluator based on research.
+Specify: file to create, class structure, evaluate() implementation, test file, test cases.
+Follow existing evaluator patterns exactly. Be concise."""
+  dossier: { evaluators, tests }
+
+# Phase 3: Implement + Review
+file implementation = proceeding: coder
+  directive: "Implement the DocstringEvaluator according to the plan. Write the complete file."
+  dossier: { plan, evaluators }
+
+file review = proceeding: critic
+  directive: "Review the implementation. Check: follows base class interface, handles edge cases (no code in output, empty docstrings, partial docstrings), matches project conventions."
+  dossier: { implementation, evaluators }
+
+file final_code = implementation
+in the event that **review found critical issues**:
+  file fixed = proceeding: coder
+    directive: "Fix the critical issues identified in the review."
+    dossier: { implementation, review }
+  final_code = fixed
+
+# Phase 4: Test
+file test_code = proceeding: tester
+  directive: "Write pytest tests for the DocstringEvaluator. Cover: code with good docstrings (pass), code with missing docstrings (fail), code with partial docstrings, non-code output (skip). Follow existing test patterns."
+  dossier: { final_code, tests }
+
+# Phase 5: Integration summary
+verdict result = proceeding: captain
+  directive: "Summarize: what was built, where files go, how to integrate, any remaining items. Be concise."
+  dossier: { final_code, test_code, review }
