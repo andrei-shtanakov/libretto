@@ -102,7 +102,7 @@ Phase 5 passes. Both flagship orchestration patterns run with full fidelity, and
 - `evaluation/phase5/baseline-docstring-evaluator.md` — baseline 1 record
 - `evaluation/phase5/baseline-architecture-doc.md` — baseline 2 output (+ post-hoc score 87)
 - `evaluation/results/phase-5.md` — this report
-- `.prose/runs/20260715-142448-da8425/` — example 30 run
-- `.prose/runs/20260715-143524-bf7cf8/` — example 40 run
-- `.prose/runs/20260715-144402-64bf89/` — atp-docstring-evaluator run
-- `.prose/runs/20260715-150535-0b6c17/` — atp-architecture-doc run
+- `.prose/runs/20260715-142448-da8425/` — example 30 run (gitignored, local only)
+- `.prose/runs/20260715-143524-bf7cf8/` — example 40 run (gitignored, local only)
+- `.prose/runs/20260715-144402-64bf89/` — atp-docstring-evaluator run (gitignored, local only)
+- `.prose/runs/20260715-150535-0b6c17/` — atp-architecture-doc run (gitignored, local only)
