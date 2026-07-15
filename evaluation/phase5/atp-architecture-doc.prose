@@ -1,0 +1,38 @@
+# ATP Architecture Document — RLM Self-Refine
+# Recursively improve an architecture document until quality threshold
+#
+# NOTE: `output` inside a block is treated as register-and-RETURN (terminates
+# the block) — the idiom examples 40-43 rely on. At top level, Phase 4 showed
+# `output` does NOT alter control flow. This ambiguity is a recorded spec gap.
+
+input target: "../atp-platform"
+
+agent writer:
+  model: opus
+  prompt: "You write clear, accurate technical architecture documents."
+
+agent evaluator:
+  model: sonnet
+  prompt: "Score documents 0-100 on: technical accuracy, completeness, clarity, actionability. List specific issues."
+
+block refine(doc, depth):
+  if depth <= 0:
+    output doc
+
+  let eval = session: evaluator
+    prompt: "Evaluate this architecture document. Score 0-100. List the top 3 specific issues to fix."
+    context: doc
+
+  if **score >= 80**:
+    output doc
+
+  let improved = session: writer
+    prompt: "Improve the document by addressing the specific issues identified. Keep what works. Only fix what was flagged."
+    context: { document: doc, evaluation: eval }
+
+  output do refine(improved, depth - 1)
+
+let draft = session: writer
+  prompt: "Write an architecture document for {target}. Cover: project purpose, package structure, data flow, key abstractions, deployment model. Read the actual code — don't guess."
+
+output final = do refine(draft, 3)
