@@ -27,7 +27,9 @@ repeat 2:
       context: { smell, fix }
 
     if **verification found problems**:
-      let smell = session: detector
+      # reassignment, not `let` — flat namespace forbids redeclaring `smell`
+      # (compiler.md "Flat Namespace Requirement"). Roadmap example used `let`.
+      smell = session: detector
         prompt: "The previous fix had problems. Find a different approach to fix the same smell."
         context: { smell, fix, verification }
     else:

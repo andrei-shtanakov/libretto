@@ -21,7 +21,7 @@ flag gap" finding from Phase 2's evaluator analysis.
 
 ## Output
 
-## Coverage Analysis: `atp-core`
+### Coverage Analysis: `atp-core`
 
 **Result: 88% line coverage** (3,772 statements, 458 missed) across `atp/{chaos,core,cost,loader,model_catalog,protocol,scoring,statistics,streaming}`. Per-module (lowest first): `cost/tracker.py` 22%, `cost/models.py` 51%, `core/telemetry.py` 72%, `core/results.py` 75%, `core/logging.py` 85%, `core/security.py` 90%, rest 88–100%. (22 telemetry/settings/metrics tests failed — global-state pollution across test order, not coverage gaps; coverage.py still records line execution on assertion failure.)
 

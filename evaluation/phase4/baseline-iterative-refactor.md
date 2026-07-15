@@ -22,7 +22,7 @@ fix was good, but structurally cannot catch a blind spot the author shares.
 
 ## Output
 
-## Findings
+### Findings
 
 **Location:** `packages/atp-core/atp/core/security.py`, function `redact_dict_secrets` (lines 1240–1281).
 
