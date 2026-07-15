@@ -1,0 +1,77 @@
+# ATP Docstring Evaluator — Captain's Chair Pattern
+# Build a new evaluator for atp-platform that checks Python docstrings
+#
+# NOTE: all produced code is PROPOSAL-ONLY — atp-platform is a read-only
+# neighbor; nothing is written into it.
+
+input task: "Add a DocstringEvaluator to atp-platform that evaluates whether agent outputs include proper Python docstrings in any generated code"
+input codebase: "../atp-platform"
+
+agent captain:
+  model: opus
+  prompt: """You are a senior engineering manager. You NEVER write code directly.
+Break down tasks, dispatch to specialists, validate results.
+Focus on: what context each specialist needs, what can run in parallel."""
+
+agent researcher:
+  model: sonnet
+  prompt: "You are a research specialist. Find specific code patterns quickly. Cite file paths and line numbers."
+
+agent coder:
+  model: sonnet
+  prompt: "You are an expert Python engineer. Write clean, idiomatic code following existing patterns."
+
+agent critic:
+  model: sonnet
+  prompt: "You are a code reviewer. Find logic errors, missing edge cases, and deviations from project conventions."
+
+agent tester:
+  model: sonnet
+  prompt: "You are a QA engineer. Write comprehensive pytest tests with edge cases."
+
+# Phase 1: Research
+# NOTE: the path below is kept verbatim from the roadmap, but evaluators
+# actually live in {codebase}/atp/evaluators/ (not packages/atp-core/) —
+# researchers discover this and adapt; see phase-5.md. Reruns should expect
+# the same redirect.
+parallel:
+  evaluators = session: researcher
+    prompt: "Find all evaluator implementations in {codebase}/packages/atp-core/. List their base class, evaluate() signature, and how they're registered."
+  tests = session: researcher
+    prompt: "Find all evaluator test files in {codebase}. Show the test patterns: fixtures used, how evaluators are instantiated, assertion patterns."
+
+# Phase 2: Plan
+let plan = session: captain
+  prompt: """Create an implementation plan for the DocstringEvaluator based on research.
+Specify: file to create, class structure, evaluate() implementation, test file, test cases.
+Follow existing evaluator patterns exactly."""
+  context: { evaluators, tests }
+
+# Phase 3: Implement + Review
+let implementation = session: coder
+  prompt: "Implement the DocstringEvaluator according to the plan. Write the complete file."
+  context: { plan, evaluators }
+
+let review = session: critic
+  prompt: "Review the implementation. Check: follows base class interface, handles edge cases (no code in output, empty docstrings, partial docstrings), matches project conventions."
+  context: { implementation, evaluators }
+
+# declare once, reassign in branch — the roadmap's `let final_code` in BOTH
+# branches would violate the flat-namespace rule (compiler.md), same bug
+# Copilot flagged in Phase 4's program
+let final_code = implementation
+if **review found critical issues**:
+  let fixed = session: coder
+    prompt: "Fix the critical issues identified in the review."
+    context: { implementation, review }
+  final_code = fixed
+
+# Phase 4: Test
+let test_code = session: tester
+  prompt: "Write pytest tests for the DocstringEvaluator. Cover: code with good docstrings (pass), code with missing docstrings (fail), code with partial docstrings, non-code output (skip). Follow existing test patterns."
+  context: { final_code, tests }
+
+# Phase 5: Integration summary
+output result = session: captain
+  prompt: "Summarize: what was built, where files go, how to integrate, any remaining items."
+  context: { final_code, test_code, review }
