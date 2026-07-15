@@ -1,0 +1,26 @@
+# ATP Multi-Aspect Audit
+# Parallel security + performance + code quality on one module
+
+agent security-auditor:
+  model: sonnet
+  prompt: "You are a security specialist. Find vulnerabilities, injection risks, auth issues."
+
+agent perf-analyst:
+  model: sonnet
+  prompt: "You are a performance engineer. Find bottlenecks, N+1 queries, memory issues."
+
+agent quality-reviewer:
+  model: sonnet
+  prompt: "You are a code quality expert. Find DRY violations, complexity issues, missing tests."
+
+parallel (on-fail: "continue"):
+  security = session: security-auditor
+    prompt: "Audit ../atp-platform/packages/atp-core/ for security issues. Focus on: input validation, auth checks, SQL injection, path traversal. List findings with severity (critical/high/medium/low)."
+  performance = session: perf-analyst
+    prompt: "Analyze ../atp-platform/packages/atp-core/ for performance issues. Focus on: database queries, caching opportunities, async patterns, resource cleanup. List findings with impact (high/medium/low)."
+  quality = session: quality-reviewer
+    prompt: "Review ../atp-platform/packages/atp-core/ for code quality. Focus on: DRY violations, cyclomatic complexity, test coverage gaps, documentation. List findings with priority."
+
+output report = session: quality-reviewer
+  prompt: "Combine all three audit perspectives into a unified report. Group by file/module. Prioritize: security-critical first, then performance, then quality."
+  context: { security, performance, quality }
