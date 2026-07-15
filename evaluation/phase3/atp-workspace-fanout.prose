@@ -1,0 +1,20 @@
+# ATP Workspace Fan-Out Review
+# Parallel analysis of all 4 workspace packages, then synthesis
+
+agent reviewer:
+  model: sonnet
+  prompt: "You are a code reviewer focused on architecture and quality."
+
+parallel:
+  core = session: reviewer
+    prompt: "Review ../atp-platform/packages/atp-core/. Summarize: purpose, key modules, code quality, test coverage. Keep to 200 words."
+  adapters = session: reviewer
+    prompt: "Review ../atp-platform/packages/atp-adapters/. Summarize: purpose, adapter count, shared patterns, quality. Keep to 200 words."
+  dashboard = session: reviewer
+    prompt: "Review ../atp-platform/packages/atp-dashboard/. Summarize: purpose, UI approach, API integration, quality. Keep to 200 words."
+  sdk = session: reviewer
+    prompt: "Review ../atp-platform/packages/atp-sdk/. Summarize: purpose, public API surface, documentation, quality. Keep to 200 words."
+
+output synthesis = session: reviewer
+  prompt: "Synthesize the four package reviews into a unified workspace health report. Identify: strongest package, weakest package, shared issues, and top 3 cross-cutting recommendations."
+  context: { core, adapters, dashboard, sdk }
