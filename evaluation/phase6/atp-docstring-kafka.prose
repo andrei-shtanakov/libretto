@@ -35,6 +35,10 @@ clerk tester:
   directive: "You are a QA engineer. Write comprehensive pytest tests with edge cases."
 
 # Phase 1: Research
+# NOTE: the path below is kept verbatim from the roadmap, but evaluators
+# actually live in {codebase}/atp/evaluators/ (not packages/atp-core/) —
+# researchers discover this and adapt; see ../phase5/atp-docstring-evaluator.prose
+# and phase-6.md. Reruns should expect the same redirect.
 departments:
   evaluators = proceeding: researcher
     directive: "Find all evaluator implementations in {codebase}/packages/atp-core/. List their base class, evaluate() signature, and how they're registered. Be concise."
