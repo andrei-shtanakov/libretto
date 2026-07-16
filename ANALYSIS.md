@@ -2,6 +2,17 @@
 
 > Язык программирования для AI-сессий. 90 файлов, 896KB, 0 runtime-зависимостей.
 
+> **Обновление 2026-07-16.** Статус репозитория: активный downstream / research
+> fork апстрима [`openprose/prose`](https://github.com/openprose/prose)
+> (апстрим ушёл в responsibility-модель + TypeScript Reactor runtime; этот репо
+> сохраняет spec-as-VM `.prose` и перенимает протоколы — receipts, compile IR,
+> materiality — на Python-тулинге). Семифазная эмпирическая оценка
+> (`evaluation/results/final-verdict.md`) подтвердила faithful-исполнение всего
+> языка при **2–6× token premium**; ~51% затрат представительного запуска —
+> оверхед границ сессий (~46K токенов floor на сессию). Вывод: инструмент
+> надёжности/аудируемости, не эффективности. План развития:
+> `docs/plans/2026-07-16-development-plan.md`.
+
 ---
 
 ## 1.1. Назначение и роль в экосистеме

@@ -194,6 +194,61 @@ session "Execute main workflow"
 
 ---
 
+#### rubric-gated-critique
+
+A single critic's *severity label* is noisy: across near-identical runs the
+same defect has been labeled CRITICAL once and "minor" another time
+(evaluation Phase 6). Any gate of the form `if **critic found critical
+issues**` inherits that noise.
+
+For high-stakes gates, ground the label instead of trusting it:
+
+```prose
+# Good: rubric forces the critic to justify severity against fixed criteria
+let review = session: critic
+  prompt: """Review the change. For each issue, assign severity using this
+  rubric — CRITICAL: exploitable security flaw, data loss, or broken build;
+  MAJOR: incorrect behavior on realistic inputs; MINOR: style/clarity.
+  Justify each severity against the rubric."""
+  context: change
+
+# Better, for irreversible actions: independent critics + majority
+parallel:
+  a = session: critic
+    prompt: "Review strictly for correctness. Apply the severity rubric."
+    context: change
+  b = session: critic
+    prompt: "Review strictly for security. Apply the severity rubric."
+    context: change
+
+if **at least two reviews independently report a CRITICAL issue**:
+  session "Halt and escalate to the user"
+```
+
+The strongest critic is one that **executes** the artifact rather than
+reading it — an execution-grounded critic proved a real critical bug that
+reading-based review had missed (evaluation Phase 5).
+
+#### leaf-constraint
+
+Sessions with coordination-flavored role prompts spontaneously spawn their
+own nested subagent orchestration (observed repeatedly in evaluation). A
+leaf session that delegates duplicates cost and escapes the program's
+structure and audit trail.
+
+Add an explicit constraint to leaf prompts:
+
+```prose
+agent implementer:
+  model: sonnet
+  prompt: """You implement code changes directly. Do the work yourself in
+  this session — do NOT launch subagents or delegate to other agents."""
+```
+
+Reserve delegation for the program itself: if a task needs decomposition,
+express it as sessions in `.prose`, where it stays visible, bounded, and
+auditable.
+
 ## Cost Efficiency Patterns
 
 #### model-tiering
@@ -222,6 +277,13 @@ Match model capability to task complexity:
 | Ambiguous problems, unclear requirements | Opus   | Needs to reason through uncertainty       |
 
 **Rule of thumb:** If you can write a checklist for the task, Sonnet can do it. If the task requires genuine creativity or navigating ambiguity, use Opus.
+
+**Measured impact:** choosing tier per role rather than per program saved
+~40% on a representative run — a figure two independent stdlib tools
+(cost-analyzer and program-improver) converged on in evaluation Phase 7.
+Each session also carries a fixed context-loading floor (~46K tokens
+observed), so the cheapest session is the one you don't spawn: prefer fewer,
+better-scoped sessions before tuning their models.
 
 ```prose
 agent captain:
