@@ -71,6 +71,7 @@ def inspect_run(raw: RawLedger) -> dict[str, Any]:
                     "condition": detail.get("condition"),
                     "outcome": detail.get("outcome"),
                     "branch": detail.get("branch"),
+                    "reason": detail.get("reason"),
                 }
             )
 

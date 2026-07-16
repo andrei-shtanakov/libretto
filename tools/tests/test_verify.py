@@ -69,6 +69,42 @@ def test_torn_write_is_warning_not_error(tmp_path: Path) -> None:
     assert any("torn write" in warning for warning in result.warnings)
 
 
+def test_torn_write_on_first_receipt_is_warning(tmp_path: Path) -> None:
+    receipts = build_chain([{"statement_id": "s001"}])
+    fresh_manifest = {
+        "v": "openprose.run.v1",
+        "run_id": "20260716-120000-test01",
+        "program": "examples/test.prose",
+        "state_backend": "filesystem",
+        "status": "running",
+        "receipt_count": 0,
+        "ledger_head": None,
+    }
+    run_dir = write_run(tmp_path / "run", receipts, manifest=fresh_manifest)
+
+    result = verify_ledger(load_run(run_dir))
+    assert result.ok
+    assert any("torn write" in warning for warning in result.warnings)
+
+
+def test_unavailable_basis_with_nonzero_tokens_rejected(tmp_path: Path) -> None:
+    receipt = make_receipt(
+        "s001",
+        prev=None,
+        usage={
+            "basis": "unavailable",
+            "input_tokens": 5,
+            "output_tokens": 0,
+            "model": "none",
+        },
+    )
+    run_dir = write_run(tmp_path / "run", [receipt], manifest=False)
+
+    result = verify_ledger(load_run(run_dir))
+    assert not result.ok
+    assert any("unavailable" in error for error in result.errors)
+
+
 def test_missing_manifest_is_warning(tmp_path: Path) -> None:
     receipts = build_chain([{"statement_id": "s001"}])
     run_dir = write_run(tmp_path / "run", receipts, manifest=False)

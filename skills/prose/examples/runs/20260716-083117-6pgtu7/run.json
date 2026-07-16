@@ -5,5 +5,5 @@
   "state_backend": "filesystem",
   "status": "completed",
   "receipt_count": 9,
-  "ledger_head": "sha256:8b027e40fa0e0a20255e0b4e458b19f56590a59bc467d2e4f6ca48234dd409db"
+  "ledger_head": "sha256:7263aaa713cc2042f6bb5f3832068b6f3bec82f73d63ed3a85290aefe5427459"
 }

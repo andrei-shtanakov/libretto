@@ -65,7 +65,7 @@ A concrete `rendered` example:
 | `surprise_cause` | enum \| null | `input` \| `self` \| `external`; null until materiality semantics land (Phase 4) |
 | `usage` | object | Token/cost attribution — see below |
 | `error` | object \| null | On `failed`: `{"type": string, "message": string, "retry_count": number}`; null otherwise |
-| `detail` | object \| null | Kind-specific payload. For `discretion`: `{"condition": string, "outcome": string, "branch": string \| null}` — the replay primitive. For `control`: loop/join bookkeeping. Null for plain sessions |
+| `detail` | object \| null | Kind-specific payload. For `discretion`: `{"condition": string, "outcome": string, "branch": string \| null, "reason": string \| null}` — the replay primitive. `outcome` MUST be a stable literal a replayer can consume without parsing (`"true"`/`"false"` for boolean conditions, the chosen option name for `choice`); free-text justification goes in `reason`. For `control`: loop/join bookkeeping. Null for plain sessions |
 | `reused_from` | object \| null | Reserved for Phase 4 skip semantics: `{"run_id", "statement_id", "output_fingerprint"}`. Always null in v1 |
 | `prev` | string \| null | `content_hash` of the previous receipt in this ledger; null for the first line |
 | `hash_algorithm` | string | Always `"sha256"` |
@@ -216,9 +216,11 @@ be added as a new optional field, never by reinterpreting existing ones.
 1. Append exactly one receipt per completed statement instance — after the
    statement's effects are durable (binding written, state.md updated).
 2. Discretion evaluations always emit a `discretion` receipt with
-   `detail.condition` (the marker text), `detail.outcome` (the decision as
-   evaluated), and `detail.branch` (which branch was taken, if branching) —
-   this is what makes deterministic replay possible.
+   `detail.condition` (the marker text), `detail.outcome` (a **stable
+   literal** — `"true"`/`"false"` or the chosen option name, never mixed
+   with prose), `detail.branch` (which branch was taken, if branching), and
+   optionally `detail.reason` (free-text justification) — this is what
+   makes deterministic replay possible without parsing.
 3. A `failed` statement still gets its receipt (with `error` populated) —
    failures are part of the record, including each retry
    (`error.retry_count`).

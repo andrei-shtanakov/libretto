@@ -38,22 +38,21 @@ def load_run(run_dir: str | Path) -> RawLedger:
         raise LedgerLoadError(f"receipts.jsonl not found in {root}")
 
     lines: list[dict[str, Any]] = []
-    for lineno, raw in enumerate(
-        ledger_path.read_text(encoding="utf-8").splitlines(), start=1
-    ):
-        if not raw.strip():
-            continue
-        try:
-            parsed = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise LedgerLoadError(
-                f"receipts.jsonl line {lineno}: invalid JSON ({exc.msg})"
-            ) from exc
-        if not isinstance(parsed, dict):
-            raise LedgerLoadError(
-                f"receipts.jsonl line {lineno}: expected a JSON object"
-            )
-        lines.append(parsed)
+    with ledger_path.open(encoding="utf-8") as fh:
+        for lineno, raw in enumerate(fh, start=1):
+            if not raw.strip():
+                continue
+            try:
+                parsed = json.loads(raw)
+            except json.JSONDecodeError as exc:
+                raise LedgerLoadError(
+                    f"receipts.jsonl line {lineno}: invalid JSON ({exc.msg})"
+                ) from exc
+            if not isinstance(parsed, dict):
+                raise LedgerLoadError(
+                    f"receipts.jsonl line {lineno}: expected a JSON object"
+                )
+            lines.append(parsed)
 
     manifest: dict[str, Any] | None = None
     manifest_path = root / "run.json"

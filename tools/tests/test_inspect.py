@@ -13,7 +13,7 @@ def _mixed_run(tmp_path: Path) -> Path:
     receipts = build_chain(
         [
             {
-                "statement_id": "s001",
+                "statement_id": "run",
                 "kind": "control",
                 "agent": None,
                 "detail": {"event": "run_start"},

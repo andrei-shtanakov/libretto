@@ -100,14 +100,15 @@ def _verify_manifest(
         return
 
     # Torn write: head/count trail the ledger by exactly one receipt.
-    if count >= 2:
-        prev_of_last = raw.lines[-1].get("prev")
-        if manifest.ledger_head == prev_of_last and manifest.receipt_count == count - 1:
-            result.warnings.append(
-                "run.json trails the ledger by one receipt (torn write): "
-                "append succeeded but the head update did not"
-            )
-            return
+    # Covers the first receipt too (ledger has one line, manifest still
+    # has ledger_head=null / receipt_count=0).
+    prev_of_last = raw.lines[-1].get("prev")
+    if manifest.ledger_head == prev_of_last and manifest.receipt_count == count - 1:
+        result.warnings.append(
+            "run.json trails the ledger by one receipt (torn write): "
+            "append succeeded but the head update did not"
+        )
+        return
 
     if manifest.ledger_head != last_hash:
         result.errors.append(

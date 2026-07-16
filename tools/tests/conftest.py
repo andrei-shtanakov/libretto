@@ -94,7 +94,7 @@ def valid_run(tmp_path: Path) -> Path:
     receipts = build_chain(
         [
             {
-                "statement_id": "s001",
+                "statement_id": "run",
                 "kind": "control",
                 "agent": None,
                 "detail": {"event": "run_start"},
@@ -105,9 +105,9 @@ def valid_run(tmp_path: Path) -> Path:
                     "model": "none",
                 },
             },
-            {"statement_id": "s002"},
+            {"statement_id": "s001"},
             {
-                "statement_id": "s003",
+                "statement_id": "run",
                 "kind": "control",
                 "agent": None,
                 "detail": {"event": "run_end", "outcome": "completed"},

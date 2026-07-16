@@ -7,7 +7,7 @@ model dump. Use these for typed inspection only.
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 RECEIPT_SCHEMA = "openprose.receipt.v1"
 RUN_SCHEMA = "openprose.run.v1"
@@ -33,6 +33,18 @@ class Usage(BaseModel):
     input_tokens: int = Field(ge=0)
     output_tokens: int = Field(ge=0)
     model: str
+
+    @model_validator(mode="after")
+    def _unavailable_means_zero(self) -> "Usage":
+        """Contract rule: basis 'unavailable' requires zeroed token counts."""
+        if self.basis == "unavailable" and (
+            self.input_tokens != 0 or self.output_tokens != 0
+        ):
+            raise ValueError(
+                "usage.basis 'unavailable' requires input_tokens and "
+                "output_tokens to be 0"
+            )
+        return self
 
 
 class ErrorInfo(BaseModel):
