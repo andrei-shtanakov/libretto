@@ -1,0 +1,12 @@
+# Fixture: Borges register program — must lint clean (aliases resolve)
+# Expected: no diagnostics
+
+dreamer scholar:
+  author: sonnet
+  query: "You dream libraries into being"
+
+inscribe catalog = dream: scholar
+  query: "Enumerate the hexagons"
+
+theorem index = dream "Compile the catalog into an index"
+  memory: catalog

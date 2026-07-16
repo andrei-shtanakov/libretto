@@ -51,8 +51,12 @@ Determine:
 - evidence: Specific quotes supporting classification
 - summary: One-line description"""
 
+# Declare once, assign in whichever branch/option applies — flat
+# namespace forbids declaring the same name in multiple branches.
+let outcome = ""
+
 if **classification indicates transient error (API timeout, network failure) not caused by program**:
-  output result = {
+  outcome = {
     status: "transient-error",
     classification: classification,
     recommendation: "Re-run the program; no structural changes needed"
@@ -166,7 +170,7 @@ choice **user approval**:
         permissions:
           write: [ANTIPATTERNS_PATH]
 
-    output result = {
+    outcome = {
       status: classification.outcome_type,
       improved_prose_path: "{run_id}/outputs/improved.prose",
       patterns_added: new_patterns.names,
@@ -179,7 +183,7 @@ choice **user approval**:
       permissions:
         write: ["{run_id}/outputs/*"]
 
-    output result = {
+    outcome = {
       status: classification.outcome_type,
       improved_prose_path: "{run_id}/outputs/improved.prose"
     }
@@ -197,14 +201,16 @@ choice **user approval**:
         permissions:
           write: [ANTIPATTERNS_PATH]
 
-    output result = {
+    outcome = {
       status: classification.outcome_type,
       patterns_added: new_patterns.names,
       antipatterns_added: new_antipatterns.names
     }
 
   option "none":
-    output result = {
+    outcome = {
       status: "review-complete",
       learnings: pattern_candidates
     }
+
+output result = outcome

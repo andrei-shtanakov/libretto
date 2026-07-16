@@ -87,8 +87,9 @@ let analysis = session: analyst
   """
   context: inspection_path
 
+let outcome = ""
 if **no actionable opportunities found**:
-  output result = {
+  outcome = {
     status: "no-improvements-needed",
     analysis: analysis,
     message: "Inspection showed clean VM execution"
@@ -150,7 +151,7 @@ input selection: """
 """
 
 if **user selected none or wants to skip**:
-  output result = {
+  outcome = {
     status: "skipped",
     analysis: analysis,
     research: research
@@ -234,10 +235,12 @@ let prs = implementations | map:
 # Output
 # ============================================================
 
-output result = {
+outcome = {
   status: "complete",
   target_run: analysis.target_run,
   opportunities_found: analysis.opportunities,
   opportunities_implemented: implementations,
   prs_created: prs
 }
+
+output result = outcome

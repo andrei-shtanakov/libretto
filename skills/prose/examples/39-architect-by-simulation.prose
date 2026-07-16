@@ -274,4 +274,4 @@ Follow the existing format in those files."""
 
 output spec = final_spec
 output handoffs = accumulated_handoffs
-output review = review
+output review_summary = review

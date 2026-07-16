@@ -302,7 +302,7 @@ if **the guardian recommends halting**:
   """
 
   if **the user declined to override**:
-    output result = {
+    output guardian_halt_result = {
       status: "halted-by-guardian",
       proposals: approved,
       risks: risks

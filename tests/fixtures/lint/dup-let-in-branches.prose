@@ -1,0 +1,11 @@
+# Fixture: flat-namespace violation — same name declared in both branches
+# Expected: OP005 on the second declaration
+
+let review = session "Review the change"
+
+if **review found issues**:
+  let verdict = session "Summarize concerns"
+    context: review
+else:
+  let verdict = session "Summarize approval"
+    context: review

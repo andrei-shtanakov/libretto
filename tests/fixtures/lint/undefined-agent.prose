@@ -1,0 +1,15 @@
+# Fixture: session references an agent that is never defined
+# Expected: OP006 (undefined agent), plus OP007 for an undefined block
+
+agent researcher:
+  model: sonnet
+  prompt: "You research topics"
+
+let findings = session: researcher
+  prompt: "Research the topic"
+
+let summary = session: writer
+  prompt: "Summarize the findings"
+  context: findings
+
+do missing-pipeline

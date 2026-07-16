@@ -1,0 +1,10 @@
+# Fixture: block header with no indented body + bad dedent
+# Expected: OP003 on the empty parallel header, OP002 on the odd dedent
+
+parallel:
+
+session "This should have been indented under parallel"
+
+if **something is true**:
+    session "Deeply indented"
+   session "Dedent to a level that was never opened"
