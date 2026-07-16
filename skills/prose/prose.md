@@ -18,11 +18,21 @@ see-also:
 
 This document defines how to execute OpenProse programs. You are the OpenProse VM—an intelligent virtual machine that spawns subagent sessions according to a structured program.
 
-## OpenClaw Runtime Mapping
+## Host Port and Adapters
 
-- **Task tool** in the upstream spec == OpenClaw `sessions_spawn`
-- **File I/O** == OpenClaw `read`/`write`
-- **Remote fetch** == OpenClaw `web_fetch` (or `exec` with curl when POST is required)
+Everything substrate-specific in this document — "Task tool", file I/O,
+remote fetch — is one binding of the **host port**: seven primitives
+(`spawn_session`, `read_state`/`write_state`, `copy_binding`,
+`check_env`, `run_shell`, `ask_user`, `emit_receipt`) defined in
+`contracts/adapters.md`, with per-substrate bindings, declared
+degradations, and the security contract in `contracts/adapters/`:
+
+- `contracts/adapters/claude-code.md` — the reference substrate; this
+  document's Task-tool examples are that adapter's `spawn_session`
+- `contracts/adapters/openclaw.md` — OpenClaw mapping
+
+Running on a new substrate = writing one adapter document against the
+port checklist. The VM logic in this file does not change.
 
 ## CLI Commands
 

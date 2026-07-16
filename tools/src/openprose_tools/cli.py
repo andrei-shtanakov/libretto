@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .cost import compare_runs, cost_run, render_cost_text
+from .doctor import run_doctor
 from .inspect_run import inspect_run, render_text
 from .ir import check_ir, default_ir_path
 from .ledger import LedgerLoadError, load_run
@@ -68,7 +69,26 @@ def main(argv: list[str] | None = None) -> int:
         help="baseline run dir to compare against",
     )
 
+    p_doctor = sub.add_parser(
+        "doctor",
+        help="keyless workspace health check (specs, state, IRs, ledgers)",
+    )
+    p_doctor.add_argument(
+        "root", nargs="?", default=".", help="workspace root (default: cwd)"
+    )
+
     args = parser.parse_args(argv)
+
+    if args.command == "doctor":
+        checks = run_doctor(args.root)
+        for check in checks:
+            print(f"{check.status.upper():4} {check.name}: {check.detail}")
+        failed = sum(1 for c in checks if c.status == "fail")
+        print(
+            f"doctor: {'OK' if failed == 0 else 'FAIL'} "
+            f"({len(checks)} checks, {failed} failures)"
+        )
+        return 0 if failed == 0 else 1
 
     if args.command == "cost":
         try:
