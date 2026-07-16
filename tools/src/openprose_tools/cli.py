@@ -56,8 +56,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "ir-check":
         source = Path(args.source)
-        if not source.is_file():
-            print(f"error: source not found: {source}", file=sys.stderr)
+        try:
+            source.read_bytes()  # exit 2 covers missing AND unreadable
+        except OSError as exc:
+            print(f"error: source unreadable: {exc}", file=sys.stderr)
             return 2
         result = check_ir(source, args.ir)
         for warning in result.warnings:

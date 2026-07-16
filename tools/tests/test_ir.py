@@ -168,3 +168,31 @@ def test_cli_ir_check(tmp_path: Path, capsys) -> None:
     assert main(["ir-check", str(source)]) == 0
     assert "ir-check: OK" in capsys.readouterr().out
     assert main(["ir-check", str(tmp_path / "nope.prose")]) == 2
+
+
+def test_unreadable_files_do_not_crash(tmp_path: Path, monkeypatch) -> None:
+    source = write_case(tmp_path)
+
+    # Unreadable IR: check_ir degrades to a clean error, no exception.
+    real_read_text = Path.read_text
+
+    def failing_read_text(self: Path, *args: Any, **kwargs: Any) -> str:
+        if self.suffix == ".json":
+            raise OSError("permission denied")
+        return real_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", failing_read_text)
+    result = check_ir(source)
+    monkeypatch.undo()
+    assert not result.ok
+    assert any("IR unreadable" in error for error in result.errors)
+
+    # Unreadable source: freshness check degrades; CLI exits 2.
+    def failing_read_bytes(self: Path) -> bytes:
+        raise OSError("permission denied")
+
+    monkeypatch.setattr(Path, "read_bytes", failing_read_bytes)
+    result = check_ir(source)
+    assert not result.ok
+    assert any("source unreadable" in error for error in result.errors)
+    assert main(["ir-check", str(source)]) == 2

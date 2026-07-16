@@ -139,6 +139,9 @@ def check_ir(
 
     try:
         raw = json.loads(ir_file.read_text(encoding="utf-8"))
+    except OSError as exc:
+        result.errors.append(f"IR unreadable: {exc}")
+        return result
     except json.JSONDecodeError as exc:
         result.errors.append(f"IR is not valid JSON: {exc.msg}")
         return result
@@ -188,7 +191,11 @@ def _check_freshness(ir: CompileIr, source: Path, result: IrCheckResult) -> None
     if not source.is_file():
         result.errors.append(f"source not found: {source}")
         return
-    actual = file_content_hash(source)
+    try:
+        actual = file_content_hash(source)
+    except OSError as exc:
+        result.errors.append(f"source unreadable: {exc}")
+        return
     if ir.source.content_hash != actual:
         result.errors.append(
             "stale: source content changed since compile "
