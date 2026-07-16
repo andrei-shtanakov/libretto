@@ -123,8 +123,9 @@ let analysis = session: analyst
   """
   context: { source_info, inspection_path }
 
+let outcome = ""
 if **no actionable opportunities found**:
-  output result = {
+  outcome = {
     status: "no-improvements-needed",
     source_info: source_info,
     analysis: analysis,
@@ -154,7 +155,7 @@ input selection: """
 """
 
 if **user selected none or wants to skip**:
-  output result = {
+  outcome = {
     status: "skipped",
     source_info: source_info,
     analysis: analysis
@@ -226,7 +227,7 @@ if **source_info.can_pr is true**:
       bash: allow
       write: ["**/*.prose"]
 
-  output result = {
+  outcome = {
     status: "pr-created",
     source_info: source_info,
     analysis: analysis,
@@ -266,10 +267,12 @@ else:
     permissions:
       write: [".prose/proposals/*.md"]
 
-  output result = {
+  outcome = {
     status: "proposal-written",
     source_info: source_info,
     analysis: analysis,
     implementation: implementation,
     proposal: proposal_path
   }
+
+output result = outcome

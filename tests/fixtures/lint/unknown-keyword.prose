@@ -1,0 +1,8 @@
+# Fixture: misspelled keyword
+# Expected: OP004 on the typo'd session statement
+
+agent worker:
+  model: haiku
+  prompt: "You do the work"
+
+sesion "This keyword is misspelled"

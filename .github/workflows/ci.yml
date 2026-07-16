@@ -1,0 +1,71 @@
+# Required offline gates (docs/plans/2026-07-16-development-plan.md, Phase 2).
+#
+# Everything here is deterministic and keyless — no model calls. The
+# advisory model-smoke tier is deliberately NOT automated: run a small
+# example manually in an OpenProse-capable host (e.g. `prose run
+# examples/01-hello-world.prose` in Claude Code) before releases.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tools:
+    name: tools (pytest + ruff + pyrefly)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Sync dependencies
+        run: uv sync --dev
+      - name: Ruff (format check + lint)
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+      - name: Pyrefly type check
+        run: uv run pyrefly check
+      - name: Pytest (unit + fixture corpus)
+        run: uv run pytest -q
+
+  lint-programs:
+    name: lint bundled .prose programs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Sync dependencies
+        run: uv sync --project tools
+      - name: Lint examples + stdlib (errors fail; OP009 warnings allowed)
+        run: |
+          uv run --project tools openprose-tools lint \
+            skills/prose/examples/*.prose skills/prose/lib/*.prose
+
+  verify-runs:
+    name: verify committed run ledgers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Sync dependencies
+        run: uv sync --project tools
+      - name: Chain-verify the keyless replay corpus
+        run: |
+          set -e
+          for run in skills/prose/examples/runs/*/; do
+            echo "== $run"
+            uv run --project tools openprose-tools verify "$run"
+          done
+      - name: Inspect determinism (byte-identical --json)
+        run: |
+          set -e
+          for run in skills/prose/examples/runs/*/; do
+            uv run --project tools openprose-tools inspect "$run" --json > a.json
+            uv run --project tools openprose-tools inspect "$run" --json > b.json
+            diff a.json b.json
+          done

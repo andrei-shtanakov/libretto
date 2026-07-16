@@ -1,0 +1,15 @@
+# Fixture: constructs bundled programs use but compiler.md doesn't define
+# Expected: OP009 warnings (not errors) — pending spec decision
+
+import "web-search" from "github:anthropic/skills"
+
+agent worker:
+  model: haiku
+  prompt: "You do the work"
+
+loop until **done** (max: 3):
+  session "Try the thing"
+  break
+
+assert everything != "broken":
+  "Guard message"

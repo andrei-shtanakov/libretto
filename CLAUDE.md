@@ -79,10 +79,26 @@ These map the same semantics to different keyword sets (e.g., `agent` -> `dreame
 
 ## Validation
 
-There are no unit tests, CI, or build steps. Validation is:
-1. `prose compile <file>` — validates syntax and semantics against `compiler.md`
-2. The 51 examples serve as an implicit test suite — if the VM can interpret them, the spec works
+Two tiers — deterministic (CI-enforced, keyless) and LLM-driven:
+
+**Deterministic (`.github/workflows/ci.yml`, required on every PR):**
+1. `openprose-tools lint <file.prose>` — mechanical subset of `compiler.md`
+   (indentation, keywords across all 6 registers, balanced blocks, flat
+   namespace, agent/block references). Errors fail CI; OP009 warnings mark
+   constructs pending a spec decision. It is a linter, not the compiler.
+2. `openprose-tools verify <run-dir>` — receipt-ledger chain consistency
+   (`contracts/receipt.md`) over the committed runs in `examples/runs/`.
+3. `tests/fixtures/` — regression corpus (lint cases with expected
+   diagnostics; corrupted run ledgers) exercised by `tools/tests/`.
+4. Python quality gates on `tools/`: pytest, ruff, pyrefly.
+
+**LLM-driven (manual, advisory):**
+1. `prose compile <file>` — full semantic validation against `compiler.md`
+2. The 51 examples as the implicit interpretation suite — all must also
+   lint clean
 3. `lib/inspector.prose` — post-run evaluation of execution fidelity
+4. Model smoke before releases: `prose run examples/01-hello-world.prose`
+   in an OpenProse-capable host (deliberately not automated in CI)
 
 ## Repo scope & boundaries
 

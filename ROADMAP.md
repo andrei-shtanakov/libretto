@@ -20,6 +20,19 @@
   *Partially done (Phase 1): failed statements emit receipts with `error.type/message/retry_count`. Remaining: line context + agent state capture.*
 - [x] **`prose inspect <run>`** — done (Phase 1, 2026-07-16): deterministic `openprose-tools inspect|verify` over the receipt ledger; `lib/inspector.prose` remains the no-tooling fallback
 
+## P2.5 — Spec decisions surfaced by the linter (2026-07-16)
+
+Bundled programs use four constructs absent from `compiler.md` (reported
+as OP009 warnings by `openprose-tools lint`). Each needs a decision —
+adopt into the grammar or rewrite the programs:
+
+- **`import "skill" from "source"`** — examples 11, 12 (skill imports;
+  grammar only has `use` for programs and the `skills:` agent property)
+- **`return`** — example 50 (early exit at root scope / inside blocks;
+  overlaps with the Phase 0 `output`-as-block-return semantics)
+- **`break`** — example 50 (loop exit; no loop-control statements exist)
+- **`assert <expr>:`** — lib/profiler (guard with error message)
+
 ## P3 — Language Extensions
 
 - **Type annotations for bindings** — optional typing: `let research: ResearchReport = session "..."`. Compile-time validation via `compiler.md`

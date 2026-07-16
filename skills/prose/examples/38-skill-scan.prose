@@ -383,8 +383,10 @@ let skills_to_scan = session "Filter discovered skills"
   context: { discovered, skill_filter, history_check }
 
 # Phase 4: Check if any skills to scan
+let audit_value = ""
+
 if **no skills to scan**:
-  output audit = session "Report no skills found"
+  audit_value = session "Report no skills found"
     prompt: """
       Create brief report indicating no skills found or all filtered out.
       List directories checked and any filter applied.
@@ -443,7 +445,7 @@ else:
     context: final_report
 
   # Phase 8: Output summary
-  output audit = session "Display terminal-friendly summary"
+  audit_value = session "Display terminal-friendly summary"
     prompt: """
       Concise summary for terminal:
       - Total skills scanned
@@ -453,3 +455,6 @@ else:
       - Comparison to previous scan (if history available)
     """
     context: { final_report, history_check, mode }
+
+# Phase 9: Final output
+output audit = audit_value

@@ -201,9 +201,13 @@ let inventory = session: scout
     Return a structured inventory.
   """
 
+# Declare once, assign in whichever branch/checkpoint applies — flat
+# namespace forbids declaring the same name in multiple branches.
+let outcome = ""
+
 # For "check" mode, just show what's available and exit
 if **mode is check**:
-  output result = {
+  outcome = {
     status: "check-complete",
     inventory: inventory,
     hint: "Run with mode:'incremental' to process new logs, or mode:'full' for everything"
@@ -225,7 +229,7 @@ input source_selection: """
 """
 
 if **user selected none or wants to cancel**:
-  output result = {
+  outcome = {
     status: "cancelled",
     inventory: inventory
   }
@@ -291,7 +295,7 @@ let qualified = session: qualifier
   context: { pattern_update, min_frequency }
 
 if **no patterns ready for automation**:
-  output result = {
+  outcome = {
     status: "no-new-automations",
     sessions_analyzed: session_count,
     pattern_update: pattern_update,
@@ -324,7 +328,7 @@ input pattern_selection: """
 """
 
 if **user wants to wait for more maturity**:
-  output result = {
+  outcome = {
     status: "deferred",
     sessions_analyzed: session_count,
     pattern_update: pattern_update,
@@ -402,7 +406,7 @@ input output_location: """
 """
 
 if **user wants preview only**:
-  output result = {
+  outcome = {
     status: "preview",
     sessions_analyzed: session_count,
     pattern_update: pattern_update,
@@ -421,7 +425,7 @@ let written = session: organizer
 # Output
 # ============================================================
 
-output result = {
+outcome = {
   status: "complete",
 
   # Discovery
@@ -443,3 +447,5 @@ output result = {
   # For next run
   next_step: "Run again with mode:'incremental' to process new logs and mature patterns"
 }
+
+output result = outcome

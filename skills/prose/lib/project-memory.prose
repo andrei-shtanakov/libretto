@@ -50,8 +50,9 @@ agent memory:
 # Modes
 # ============================================================
 
+let response = ""
 if **mode is ingest**:
-  output result = resume: memory
+  response = resume: memory
     prompt: """
       Ingest and understand this content:
 
@@ -68,7 +69,7 @@ if **mode is ingest**:
     """
 
 elif **mode is query**:
-  output result = resume: memory
+  response = resume: memory
     prompt: """
       Question: {content}
 
@@ -82,7 +83,7 @@ elif **mode is query**:
     """
 
 elif **mode is update**:
-  output result = resume: memory
+  response = resume: memory
     prompt: """
       Record this update:
 
@@ -100,7 +101,7 @@ elif **mode is update**:
     """
 
 elif **mode is summarize**:
-  output result = resume: memory
+  response = resume: memory
     prompt: """
       Summarize your knowledge about: {content}
 
@@ -116,3 +117,5 @@ elif **mode is summarize**:
 
 else:
   throw "Unknown mode: {mode}. Use: ingest, query, update, or summarize"
+
+output result = response

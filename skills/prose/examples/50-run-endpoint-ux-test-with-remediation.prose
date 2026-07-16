@@ -544,6 +544,9 @@ Include error classification at the end."""
   context: { ws_results, file_results, exec }
 
 # Phase 4: Error Remediation (if needed)
+let diagnosis = ""
+output final_result = ""
+
 if **blocking error detected in synthesis**:
 
   # User checkpoint: investigate?
@@ -555,15 +558,15 @@ if **blocking error detected in synthesis**:
   **
 
   if investigate_decision == "skip":
-    output final_result = { test_results: synthesis, remediation: "skipped" }
+    final_result = { test_results: synthesis, remediation: "skipped" }
 
   elif investigate_decision == "investigate only":
-    let diagnosis = do investigate_error(synthesis.error_summary, ws_results, file_results, exec)
-    output final_result = { test_results: synthesis, diagnosis, remediation: "investigation only" }
+    diagnosis = do investigate_error(synthesis.error_summary, ws_results, file_results, exec)
+    final_result = { test_results: synthesis, diagnosis, remediation: "investigation only" }
 
   else:
     # Full remediation flow
-    let diagnosis = do investigate_error(synthesis.error_summary, ws_results, file_results, exec)
+    diagnosis = do investigate_error(synthesis.error_summary, ws_results, file_results, exec)
 
     # Verification loop
     loop until **diagnosis verified** (max: 3):
@@ -572,7 +575,7 @@ if **blocking error detected in synthesis**:
       if verification.diagnosis_sound:
         break
       else:
-        let diagnosis = resume: researcher
+        diagnosis = resume: researcher
           prompt: """Diagnosis needs refinement:
 
 {verification.critique}
@@ -588,7 +591,7 @@ Investigate: {verification.follow_up_questions}"""
     **
 
     if diagnosis_confirmation != "proceed":
-      output final_result = { test_results: synthesis, diagnosis, remediation: diagnosis_confirmation }
+      final_result = { test_results: synthesis, diagnosis, remediation: diagnosis_confirmation }
 
     else:
       # Triage
@@ -623,15 +626,15 @@ Investigate: {verification.follow_up_questions}"""
                 # Note: This would re-invoke the program - true self-healing
                 session "Log: Triggering re-test after failed deployment"
 
-            output final_result = { test_results: synthesis, diagnosis, triage, fix: fix_result, deploy: deploy_result }
+            final_result = { test_results: synthesis, diagnosis, triage, fix: fix_result, deploy: deploy_result }
           else:
-            output final_result = { test_results: synthesis, diagnosis, triage, fix: fix_result, deploy: "skipped" }
+            final_result = { test_results: synthesis, diagnosis, triage, fix: fix_result, deploy: "skipped" }
 
         option "Bigger change":
           # CEO checkpoint is built into bigger_change_flow
           let change_result = do bigger_change_flow(diagnosis, triage)
-          output final_result = { test_results: synthesis, diagnosis, triage, change: change_result }
+          final_result = { test_results: synthesis, diagnosis, triage, change: change_result }
 
 else:
   # No blocking error
-  output final_result = { test_results: synthesis, remediation: "none needed" }
+  final_result = { test_results: synthesis, remediation: "none needed" }

@@ -216,7 +216,7 @@ Track open questions that need resolution."""
 # ------------------------------
 # Independent review before finalizing
 
-let review = session: reviewer
+let design_review = session: reviewer
   prompt: """Review the complete design across all phase handoffs.
 
 Check for:
@@ -237,14 +237,14 @@ if **review found critical issues that need addressing**:
   let revisions = resume: architect
     prompt: """The review identified issues that need addressing.
 
-Review feedback: {review}
+Review feedback: {design_review}
 
 Revise the relevant phase handoffs to address:
 1. Critical issues (required)
 2. Minor issues (if straightforward)
 
 Document what was changed and why."""
-    context: { accumulated_handoffs, review }
+    context: { accumulated_handoffs, design_review }
 
   # Update accumulated handoffs with revisions
   accumulated_handoffs = "{accumulated_handoffs}\n\n---\n\nREVISIONS:\n{revisions}"
@@ -274,4 +274,4 @@ Follow the existing format in those files."""
 
 output spec = final_spec
 output handoffs = accumulated_handoffs
-output review = review
+output review = design_review
