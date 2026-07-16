@@ -269,3 +269,16 @@ be added as a new optional field, never by reinterpreting existing ones.
 versions (bumping `v`), existing fields are never renamed, retyped, or
 reinterpreted. Consumers MUST ignore unknown fields and MUST refuse ledgers
 whose `v` they do not know.
+
+## Known consumers
+
+This contract is **load-bearing** — external projects verify against
+pinned vendored copies of it. Editing it here does not update them;
+every change must survive their pinned expectations (append-only, `v`
+bump). The committed runs in `examples/runs/` and the corrupted-ledger
+fixtures in `tests/fixtures/runs/` double as consumer integration
+fixtures: never rewrite them post-publication.
+
+| Consumer | Since | Uses |
+| -------- | ----- | ---- |
+| atp-platform | 2026-07-16 | vendored `receipt.md`; ledger verifier (`atp/evaluators/openprose_receipts/`), `receipt_chain` deterministic checker, Grader schema validation |

@@ -167,3 +167,13 @@ recompiles.
 Same policy as receipts: fields may be added under a bumped `v`; never
 renamed, retyped, or reinterpreted. Consumers MUST ignore unknown fields
 and refuse unknown `v` values.
+
+## Known consumers
+
+This contract is **load-bearing** — external projects verify against
+pinned vendored copies (see `contracts/receipt.md` → Known consumers for
+the shared rules; the same discipline applies here).
+
+| Consumer | Since | Uses |
+| -------- | ----- | ---- |
+| atp-platform | 2026-07-16 | vendored `ir.md` alongside the receipt contract (evaluation-input schema) |
