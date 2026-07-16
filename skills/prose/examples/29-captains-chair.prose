@@ -105,9 +105,9 @@ block implement-with-review(implementation_plan):
     let fixed = session: coder
       prompt: "Address the critical issues identified in the review"
       context: { code, review }
-    output result = fixed
-  else:
-    output result = code
+    output fixed
+
+  output code
 
 # ============================================================================
 # Main Workflow: The Captain's Chair in Action
@@ -167,14 +167,12 @@ let plan_review = session: critic
   context: implementation_plan
 
 # Checkpoint: User validates plan before execution
+# (declare-once + reassign: the flat-namespace-safe conditional pattern)
+let final_plan = implementation_plan
 if **the plan review raised critical concerns**:
-  let revised_plan = session: captain
+  final_plan = session: captain
     prompt: "Revise the plan based on critic feedback"
     context: { implementation_plan, plan_review }
-  # Continue with revised plan
-  let final_plan = revised_plan
-else:
-  let final_plan = implementation_plan
 
 # Phase 4: Parallel Implementation
 # --------------------------------
@@ -208,11 +206,16 @@ Summarize what was done and any remaining items."""
 # Final critic pass on complete implementation
 let final_review = do review-cycle(integration)
 
+# Declare once, assign in exactly one branch (flat namespace: a name may
+# only be declared once, even across exclusive branches)
+let wrap_up = ""
 if **final review passed**:
-  output result = session: captain
+  wrap_up = session: captain
     prompt: "Prepare final summary for user: what was implemented, tests added, and next steps"
     context: { integration, final_review }
 else:
-  output result = session: captain
+  wrap_up = session: captain
     prompt: "Summarize what was completed and what issues remain for user attention"
     context: { integration, final_review }
+
+output result = wrap_up

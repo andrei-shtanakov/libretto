@@ -360,6 +360,57 @@ agent classifier:
   prompt: "Categorize items as: spam, not-spam"
 ```
 
+#### race-as-cost-saver
+
+Using `parallel ("first")` or `("any")` expecting to pay only for the
+winning branch.
+
+```prose
+# Bad: assuming the race costs one branch
+parallel ("first"):
+  session: fast-model "Try the quick approach"
+  session: strong-model "Try the thorough approach"
+```
+
+**Why it's bad**: There is no in-flight cancellation on current substrates.
+Losing branches are *discarded*, not cancelled — every spawned branch runs
+to completion and consumes tokens. The real cost of a race is the **sum of
+all branches**. Empirically (evaluation Phase 3), `"first"`/`"any"` are
+latency tools, not cost tools.
+
+**Fix**: Race only when wall-clock latency is worth paying for every branch.
+If cost matters, run the cheap approach first and escalate on failure:
+
+```prose
+# Good: escalate instead of racing
+let attempt = session: fast-model "Try the quick approach"
+if **the quick attempt is inadequate**:
+  attempt = session: strong-model "Try the thorough approach"
+```
+
+#### unbounded-fan-out
+
+Launching a `parallel` block or `parallel for` over a large collection with
+no concurrency bound.
+
+```prose
+# Bad: 200 items -> 200 simultaneous sessions
+parallel for file in repository_files:
+  session "Audit {file}"
+```
+
+**Why it's bad**: All branches spawn simultaneously — substrate rate limits
+and session caps become the only backstop, there is no backpressure, and the
+whole fan-out's cost is committed the moment the block starts.
+
+**Fix**: Bound in-flight branches:
+
+```prose
+# Good: throttled fan-out
+parallel for file in repository_files (max_concurrent: 5):
+  session "Audit {file}"
+```
+
 #### context-bloat
 
 Passing excessive context that the session doesn't need.

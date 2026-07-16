@@ -92,12 +92,12 @@ let plan_critique = session: critic
   context: detailed_plan
 
 # Captain decides if plan needs revision
+# (declare-once + reassign: the flat-namespace-safe conditional pattern)
+let revised_plan = detailed_plan
 if **plan critique identified blocking issues**:
-  let revised_plan = session: planner
+  revised_plan = session: planner
     prompt: "Revise the plan to address critique"
     context: { detailed_plan, plan_critique }
-else:
-  let revised_plan = detailed_plan
 
 # ============================================================================
 # Phase 2: Supervised Execution (20% of effort)

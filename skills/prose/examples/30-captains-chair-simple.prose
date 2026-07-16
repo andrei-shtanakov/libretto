@@ -32,11 +32,16 @@ parallel:
     context: plan
 
 # Step 3: Captain synthesizes and validates
+# (declare once, assign in exactly one branch — flat namespace forbids
+# declaring the same name in both branches)
+let synthesis = ""
 if **critic found issues that affect the work**:
-  output result = session: captain
+  synthesis = session: captain
     prompt: "Integrate the work while addressing critic's concerns"
     context: { work, review }
 else:
-  output result = session: captain
+  synthesis = session: captain
     prompt: "Validate and summarize the completed work"
     context: { work, review }
+
+output result = synthesis

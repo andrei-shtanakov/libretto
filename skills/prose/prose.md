@@ -117,7 +117,8 @@ Traditional dependency injection containers wire up components from configuratio
 | --------------------------- | ---------------------------------------------------------- |
 | `use "handle/slug" as name` | Fetch program from p.prose.md, register in Import Registry |
 | `input topic: "..."`        | Bind value from caller, make available as variable         |
-| `output findings = ...`     | Mark value as output, return to caller on completion       |
+| `output findings = ...`     | Register program output (root scope; register-only)        |
+| `output expr` (in block)    | Return `expr` from the block invocation immediately         |
 | `agent researcher:`         | Register this agent template for later use                 |
 | `session: researcher`       | Resolve the agent, merge properties, spawn the session     |
 | `resume: captain`           | Load agent memory, spawn session with memory context       |
@@ -334,7 +335,7 @@ The VM:
 program := statement\*
 
 statement := useStatement | inputDecl | agentDef | session | resumeStmt
-| letBinding | constBinding | assignment | outputBinding
+| letBinding | constBinding | assignment | outputBinding | outputReturn
 | parallelBlock | repeatBlock | forEachBlock | loopBlock
 | tryBlock | choiceBlock | ifStatement | doBlock | blockDef
 | throwStatement | comment
@@ -343,7 +344,8 @@ statement := useStatement | inputDecl | agentDef | session | resumeStmt
 
 useStatement := "use" STRING ("as" NAME)?
 inputDecl := "input" NAME ":" STRING
-outputBinding := "output" NAME "=" expression
+outputBinding := "output" NAME "=" expression # root scope only
+outputReturn := "output" expression # block bodies only (block return)
 
 # Definitions
 
@@ -594,20 +596,40 @@ Task({ prompt: "Task C", ... })  // result -> c
 
 ### Join Strategies
 
-| Strategy          | Behavior                                  |
-| ----------------- | ----------------------------------------- |
-| `"all"` (default) | Wait for all branches                     |
-| `"first"`         | Return on first completion, cancel others |
-| `"any"`           | Return on first success                   |
-| `"any", count: N` | Wait for N successes                      |
+| Strategy          | Behavior                                          |
+| ----------------- | ------------------------------------------------- |
+| `"all"` (default) | Wait for all branches                             |
+| `"first"`         | Return on first completion; discard other results |
+| `"any"`           | Return on first success; discard other results    |
+| `"any", count: N` | Wait for N successes; discard other results       |
+
+**No in-flight cancellation:** the VM cannot cancel a spawned subagent on
+current substrates. `"first"`/`"any"` choose which results are *used* —
+every spawned branch runs to completion and consumes tokens. The cost of a
+race is the sum of all branches, not the winner.
 
 ### Failure Policies
 
-| Policy                  | Behavior                         |
-| ----------------------- | -------------------------------- |
-| `"fail-fast"` (default) | Fail immediately on any error    |
-| `"continue"`            | Wait for all, then report errors |
-| `"ignore"`              | Treat failures as successes      |
+| Policy                  | Behavior                                             |
+| ----------------------- | ---------------------------------------------------- |
+| `"fail-fast"` (default) | Fail on first observed error; discard other results  |
+| `"continue"`            | Wait for all, then report errors                     |
+| `"ignore"`              | Treat failures as successes                          |
+
+### Concurrency Throttle (max_concurrent)
+
+`parallel (max_concurrent: N):` (and `parallel for ... (max_concurrent: N):`)
+bounds in-flight branches. VM execution:
+
+1. Spawn the first N branches (source order)
+2. As a branch completes, spawn the next pending one
+3. Apply join strategy / failure policy over results as usual
+4. If the join or failure condition resolves the block, **do not spawn**
+   the remaining pending branches — the only case where parallel semantics
+   reduce total cost
+
+Without `max_concurrent`, all branches spawn simultaneously — for large
+fan-outs prefer an explicit throttle.
 
 ---
 
@@ -693,6 +715,20 @@ Query the database to access the content.
 ```
 
 **Why reference-based:** This enables RLM-style patterns where the environment holds arbitrarily large values and agents interact with them programmatically, without the VM becoming a bottleneck.
+
+### Context Resolution Across Frames
+
+Names in `context:` resolve **lexically at the session statement**, through
+the same chain as expressions (see Scope Resolution): current frame →
+enclosing frames → root scope. The VM wires the storage location of
+whichever binding the name resolves to — for a frame-local that is the
+`__{execution_id}`-suffixed file, for a root binding the plain
+`bindings/{name}.md`.
+
+Inside a recursive block, `context: data` therefore refers to **this
+invocation's** `data` parameter, never a parent invocation's. Once a frame
+pops, its locals are unreachable; the caller can only wire what it captured
+from the block's return value.
 
 ---
 
@@ -798,12 +834,41 @@ output sources = session "Extract sources"
   context: raw
 ```
 
-The `output` keyword:
+The `output name = expression` form (valid at root scope only):
 
 - Marks a variable as an output (visible at assignment, not just at file top)
 - Works like `let` but also registers the value as a program output
-- Can appear anywhere in the program body
+- Can appear anywhere at root scope of the program body
+- Is **register-only** — it never alters control flow. `output name = expr`
+  inside a `repeat` or `loop` does NOT break the loop; the binding is
+  reassigned each iteration and the final value is exported
 - Multiple outputs are supported
+
+### Block Return (`output expression`)
+
+Inside a block body, `output` takes a bare expression and is a **return
+statement**. When the VM executes it:
+
+1. Evaluate the expression (spawning a session if it is a session call)
+2. Set the current invocation's return value to the result
+3. **Pop the frame immediately** — remaining statements in the block,
+   including the rest of any enclosing loop inside the block, do not run
+4. Resume the caller at `return_position`; the value binds to the caller's
+   target (e.g. `let x = do search(...)`)
+
+No program output is registered and no root binding is created — block
+locals die with the frame. If an invocation finishes without executing any
+`output`, its return value is the value of the last executed statement.
+
+```prose
+block process(data, depth):
+  if **data under 50k characters** or depth <= 0:
+    output session: analyzer      # base case: early return
+      context: data
+  ...
+  output session: synthesizer     # recursive case: return synthesis
+    context: partials
+```
 
 ### Invoking Imported Programs
 
@@ -1001,9 +1066,13 @@ do review("quantum computing")
 
 1. Push new frame onto call stack
 2. Bind arguments to parameters (scoped to this frame)
-3. Execute block body
+3. Execute block body — until it completes or executes a bare
+   `output <expression>` (block return, which terminates the invocation
+   immediately)
 4. Pop frame from call stack
-5. Return to caller
+5. Return to caller with the block's value: the argument of the first
+   executed `output`, or the value of the last executed statement if no
+   `output` ran
 
 ---
 

@@ -4,6 +4,25 @@ A programming language for AI sessions — zero-dependency, pure-specification.
 
 There is no runtime binary, no package manager, no build system. The entire project is markdown and `.prose` files that an LLM reads to become the OpenProse VM. Simulation with sufficient fidelity is implementation.
 
+## Status
+
+This repository is an **active downstream / research fork** of upstream
+[`openprose/prose`](https://github.com/openprose/prose). Upstream has since
+evolved into a responsibility-based model with a TypeScript runtime
+(Reactor); this repo keeps the original spec-as-VM `.prose` language and
+adopts upstream *protocols* (receipts, compile IR, materiality) on a
+Python verification toolchain instead. See
+`docs/plans/2026-07-16-development-plan.md` for the roadmap.
+
+**What to expect (measured, not aspirational):** a seven-phase empirical
+evaluation (`evaluation/results/final-verdict.md`) found the VM executes the
+full language faithfully, with output quality matching plain single-session
+work — at a **2–6× token premium**, of which roughly half is session-boundary
+overhead (~46K tokens of context floor per session). OpenProse buys
+**reliability, auditability, and reproducibility** — independent critic
+sessions, complete replayable run trails, context isolation — not efficiency.
+Use it when those properties matter; use a plain session when they don't.
+
 ## Quick Start
 
 ```

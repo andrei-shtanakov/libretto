@@ -574,7 +574,9 @@ repeat 2:
       context: { smell, fix }
 
     if **verification found problems**:
-      let smell = session: detector
+      # NOTE (2026-07-16, Phase 0): bare reassignment — a second
+      # `let smell` here violated the flat-namespace rule (E019)
+      smell = session: detector
         prompt: "The previous fix had problems. Find a different approach to fix the same smell."
         context: { smell, fix, verification }
     else:
@@ -619,18 +621,23 @@ agent bug-hunter:
 let analysis = session: analyst
   prompt: "Analyze ../atp-platform/packages/atp-core/src/. Estimate test coverage percentage. List modules with poorest coverage."
 
+# NOTE (2026-07-16, Phase 0): declare-once + reassign — `output result` in
+# every branch was a duplicate declaration (E019/E024)
+let triage = ""
 if **test coverage appears below 60%**:
-  output result = session: test-writer
+  triage = session: test-writer
     prompt: "Write 3 new test cases for the least-covered module identified in the analysis."
     context: analysis
 elif **test coverage is between 60-80%**:
-  output result = session: bug-hunter
+  triage = session: bug-hunter
     prompt: "The code has moderate coverage. Look for bugs in edge cases that existing tests might miss."
     context: analysis
 else:
-  output result = session: analyst
+  triage = session: analyst
     prompt: "Coverage looks good. Identify the top 3 opportunities for improving code quality beyond testing."
     context: analysis
+
+output result = triage
 ```
 
 Save to `evaluation/phase4/atp-conditional-pipeline.prose`.
@@ -754,13 +761,15 @@ let review = session: critic
   prompt: "Review the implementation. Check: follows base class interface, handles edge cases (no code in output, empty docstrings, partial docstrings), matches project conventions."
   context: { implementation, evaluators }
 
+# NOTE (2026-07-16, Phase 0): declare-once + reassign — dual `let final_code`
+# in both branches violated the flat-namespace rule; found in Phase 5
+# (see evaluation/results/phase-5.md)
+let final_code = implementation
 if **review found critical issues**:
   let fixed = session: coder
     prompt: "Fix the critical issues identified in the review."
     context: { implementation, review }
-  let final_code = fixed
-else:
-  let final_code = implementation
+  final_code = fixed
 
 # Phase 4: Test
 let test_code = session: tester

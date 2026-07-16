@@ -141,7 +141,8 @@ The following features are implemented:
 | Retry property         | Implemented | `retry: 3` automatic retry on failure        |
 | Backoff strategy       | Implemented | `backoff: exponential` delay between retries |
 | Input declarations     | Implemented | `input name: "description"`                  |
-| Output bindings        | Implemented | `output name = expression`                   |
+| Output bindings        | Implemented | `output name = expression` (root scope)      |
+| Block return           | Implemented | `output expression` inside block bodies      |
 | Program invocation     | Implemented | `name(input: value)` call imported programs  |
 | Multi-line strings     | Implemented | `"""..."""` preserving whitespace            |
 | String interpolation   | Implemented | `"Hello {name}"` variable substitution       |
@@ -435,7 +436,21 @@ Inputs:
 
 Outputs declare what values a program produces for its caller.
 
-### Syntax
+The `output` keyword has **two distinct forms** depending on where it appears:
+
+| Form                  | Where valid       | Meaning                                  |
+| --------------------- | ----------------- | ---------------------------------------- |
+| `output name = expr`  | Root scope only   | Register `expr` as a program output      |
+| `output expr`         | Block bodies only | Return `expr` from the block immediately |
+
+Root scope means the program body outside any `block` definition or `do:`
+block. The two forms are disambiguated syntactically: `output` followed by
+`IDENTIFIER =` is a program-output declaration; any other `output` is a
+block return.
+
+### Program Outputs (Root Scope)
+
+#### Syntax
 
 ```prose
 output name = expression
@@ -451,22 +466,66 @@ output sources = session "Extract sources"
   context: raw
 ```
 
-### Semantics
+#### Semantics
 
-The `output` keyword:
+The `output name = expression` form:
 
 - Marks a variable as an output (visible at assignment, not just at file top)
 - Works like `let` but also registers the value as a program output
-- Can appear anywhere in the program body
-- Multiple outputs are supported
+- Can appear anywhere at root scope, including inside root-level `if`/`elif`/
+  `else` branches and loops
+- Is **register-only**: it does not alter control flow. In particular,
+  `output name = expr` inside a `repeat` or `loop` does NOT break the loop —
+  the loop continues; the binding is reassigned on each iteration and the
+  final value is what the program exports
+- Multiple outputs are supported (each with a unique name — the flat
+  namespace rule applies)
 
-### Validation Rules
+### Block Return (`output expression`)
 
-| Check                 | Severity | Message                             |
-| --------------------- | -------- | ----------------------------------- |
-| Empty output name     | Error    | Output name cannot be empty         |
-| Duplicate output name | Error    | Output already declared             |
-| Output name conflicts | Error    | Output name conflicts with variable |
+Inside a block body (a named `block` definition or a `do:` block), `output`
+takes a bare expression and acts as a **return statement**:
+
+```prose
+block search(docs, q, depth):
+  if **docs is empty** or depth <= 0:
+    output []                # early return: terminates this invocation
+
+  let evidence = session "Investigate"
+    context: docs
+
+  output evidence            # normal return
+```
+
+#### Semantics
+
+The `output expression` form:
+
+- **Terminates the current block invocation immediately** (early return).
+  Statements after it in the executed path do not run
+- Sets the invocation's return value to the evaluated expression; the value
+  flows to the caller (`let x = do search(...)`)
+- Does NOT register a program output and does NOT create a named binding —
+  the block's locals stay frame-local and are discarded when the frame pops
+- Returns from the **entire block invocation** even when it appears inside a
+  loop or conditional within the block — an `output` inside a `repeat` inside
+  a block exits both the loop and the block
+- Multiple `output` statements may appear in a block body (e.g. one per
+  branch, or a base case above a recursive case); the first one executed wins
+- If a block invocation completes without executing any `output`, its return
+  value is the value of the last executed statement (consistent with `do:`
+  result capture)
+
+#### Validation Rules
+
+| Check                                | Severity | Message                                            |
+| ------------------------------------ | -------- | -------------------------------------------------- |
+| Empty output name                    | Error    | Output name cannot be empty                        |
+| Duplicate output name                | Error    | Output already declared                            |
+| Output name conflicts                | Error    | Output name conflicts with variable                |
+| `output name = expr` in block body   | Error    | Program outputs must be declared at root scope; use `output <expr>` to return from a block |
+| `output expr` at root scope          | Error    | Block return outside a block; use `output name = expr` to declare a program output |
+| Unreachable statements after `output`| Warning  | Statements after an unconditional block return never execute |
 
 ---
 
@@ -996,6 +1055,33 @@ session "Combine results"
 
 This is equivalent to passing an object where each property is a variable reference.
 
+#### Name Resolution Across Block Frames
+
+Every name in a `context:` property — in all four forms, including inside
+`{ ... }` object shorthand — resolves **lexically at the point of the
+session statement**, using the same scope chain as any other expression
+(see `prose.md` Call Stack Management → Scope Resolution):
+
+1. Current block invocation frame's locals and parameters
+2. Enclosing frames, up the call stack
+3. Root scope
+4. Error if not found (undefined variable in context)
+
+A session inside a block may therefore wire in the block's parameters, its
+locals, and root-scope bindings alike. The compiled reference carries the
+frame identity: a name that resolves to a frame-local binding points to that
+invocation's storage (filesystem: `bindings/{name}__{execution_id}.md`), not
+to a root binding of the same name.
+
+After a block invocation returns, its frame is gone: a block's locals are
+**not addressable** from the caller, in `context:` or anywhere else. The
+only value a block exports is its return value — capture it
+(`let x = do search(...)`) and wire `x`.
+
+| Check                                  | Severity | Message                          |
+| -------------------------------------- | -------- | -------------------------------- |
+| Context name not in scope at statement | Error    | Undefined variable in context    |
+
 ### Complete Example
 
 ```prose
@@ -1035,7 +1121,10 @@ const report = session: writer
 
 ### Flat Namespace Requirement
 
-All variable names must be **unique within a program**. No shadowing is allowed across scopes.
+All **root-scope** variable names must be **unique within a program**. Root
+scope is the program body outside any `block` definition — note that
+root-level `if`/`elif`/`else` branches, loop bodies, and parallel branches
+do NOT open a new scope; declarations there are root-scope declarations.
 
 **This is a compile error:**
 
@@ -1047,16 +1136,49 @@ for item in items:
     context: item
 ```
 
-**Why this constraint:** Since bindings are stored as `bindings/{name}.md`, two variables with the same name would collide on the filesystem. Rather than introduce complex scoping rules, we enforce uniqueness.
+So is declaring the same name in two branches of a conditional:
+
+```prose
+if **review passed**:
+  let verdict = session "Summarize approval"     # declares 'verdict'
+else:
+  let verdict = session "Summarize concerns"     # Error: 'verdict' already defined
+```
+
+**The flat-namespace-safe pattern** is declare-once + bare reassignment
+(exactly one declaration; assignments reuse it):
+
+```prose
+let verdict = base_report          # declare once, with the default value
+if **review raised critical concerns**:
+  verdict = session "Summarize concerns"   # bare assignment, not a new `let`
+```
+
+**Why this constraint:** Root-scope bindings are stored as
+`bindings/{name}.md`, so two root declarations with the same name would
+collide on the filesystem. Rather than introduce complex scoping rules at
+root, we enforce uniqueness.
 
 **Collision scenarios this prevents:**
 
-1. Variable inside loop shadows variable outside loop
-2. Variables in different `if`/`elif`/`else` branches with same name
-3. Block parameters shadowing outer variables
-4. Parallel branches reusing outer variable names
+1. Variable inside a root-level loop shadowing a variable outside the loop
+2. Variables in different `if`/`elif`/`else` branches with the same name
+3. Parallel branches reusing outer variable names
 
-**Exception:** Imported programs run in isolated namespaces. A variable `result` in the main program does not collide with `result` in an imported program (they write to different `imports/{handle}--{slug}/bindings/` directories).
+**Exception — block bodies:** Bindings declared inside a `block` body are
+**frame-local**: each invocation gets its own call-stack frame, and the state
+backend stores its bindings per invocation (filesystem:
+`bindings/{name}__{execution_id}.md` — see `prose.md` Call Stack Management
+and `state/filesystem.md`). They cannot collide with root bindings or with
+other invocations of the same block, which is what makes recursion possible
+(a recursive block re-declares its locals in every frame). A block-local
+binding or parameter that shadows a root-scope name is a **Warning**, not an
+error (consistent with the parameter-shadowing rule below).
+
+**Exception — imported programs:** Imported programs run in isolated
+namespaces. A variable `result` in the main program does not collide with
+`result` in an imported program (they write to different
+`imports/{handle}--{slug}/bindings/` directories).
 
 ---
 
@@ -1385,7 +1507,8 @@ By default, parallel blocks wait for all branches to complete. You can specify a
 
 #### First (Race)
 
-Return as soon as the first branch completes, cancel others:
+Return as soon as the first branch completes; the losing branches' results
+are discarded:
 
 ```prose
 parallel ("first"):
@@ -1394,7 +1517,14 @@ parallel ("first"):
   session "Try approach C"
 ```
 
-The first successful result wins. Other branches are cancelled.
+The first successful result wins. The other branches' results are discarded.
+
+> **No in-flight cancellation.** On current substrates the VM cannot cancel
+> a subagent that has already been spawned. `"first"` and `"any"` determine
+> which results are *used*, not which branches *run* — every branch runs to
+> completion and is paid for. The real cost of a race is the **sum of all
+> branches**, not the winner. Budget accordingly (see
+> `guidance/antipatterns.md`).
 
 #### Any (N of M)
 
@@ -1435,7 +1565,9 @@ Control how the parallel block handles branch failures:
 
 #### Fail-Fast (Default)
 
-If any branch fails, fail immediately and cancel other branches:
+If any branch fails, the parallel block fails as soon as that failure is
+observed; results from other branches are discarded (in-flight branches are
+not cancelled — see the note under First (Race)):
 
 ```prose
 parallel:  # Implicit fail-fast
@@ -1475,9 +1607,39 @@ parallel (on-fail: "ignore"):
 session "Continue regardless"
 ```
 
+### Concurrency Throttle (max_concurrent)
+
+By default, a parallel block starts **all** branches simultaneously. For
+large fan-outs this can overwhelm the substrate (rate limits, session caps)
+and removes any cost backpressure. The `max_concurrent` modifier bounds how
+many branches run at once:
+
+```prose
+# At most 3 branches in flight at any moment
+parallel (max_concurrent: 3):
+  session "Review package A"
+  session "Review package B"
+  session "Review package C"
+  session "Review package D"
+  session "Review package E"
+```
+
+Semantics:
+
+- The VM starts branches in source order, keeping at most `max_concurrent`
+  in flight; as one completes, the next pending branch starts
+- Join strategy and failure policy are unchanged — they apply to the same
+  set of branch results as without the throttle
+- With `"first"`/`"any"`, branches not yet started when the join condition
+  is met are **never started** (this is the only case where a throttle
+  reduces total cost; already-running branches still complete)
+- `max_concurrent` also applies to `parallel for` loops, where it is most
+  useful (`parallel for item in items (max_concurrent: 5):`)
+
 ### Combining Modifiers
 
-Join strategies and failure policies can be combined:
+Join strategies, failure policies, and the concurrency throttle can be
+combined:
 
 ```prose
 # Race with resilience
@@ -1491,23 +1653,41 @@ parallel ("any", count: 2, on-fail: "ignore"):
   session "Approach 2"
   session "Approach 3"
   session "Approach 4"
+
+# Throttled fan-out that tolerates failures
+parallel (max_concurrent: 4, on-fail: "continue"):
+  session "Analyze module 1"
+  session "Analyze module 2"
+  session "Analyze module 3"
+  session "Analyze module 4"
+  session "Analyze module 5"
+  session "Analyze module 6"
 ```
 
 ### Execution Semantics
 
 When the OpenProse VM encounters a `parallel:` block:
 
-1. **Fork**: Start all branches concurrently
+1. **Fork**: Start branches concurrently — all at once by default, or at
+   most `max_concurrent` at a time, starting the next pending branch as one
+   completes
 2. **Execute**: Each branch runs independently
 3. **Join**: Wait according to join strategy:
    - `"all"` (default): Wait for all branches
    - `"first"`: Return on first completion
    - `"any"`: Return on first success (or N successes with `count`)
 4. **Handle failures**: According to on-fail policy:
-   - `"fail-fast"` (default): Cancel remaining and fail immediately
+   - `"fail-fast"` (default): Fail as soon as a failure is observed; discard
+     other branches' results
    - `"continue"`: Wait for all, then report failures
    - `"ignore"`: Treat failures as successes
 5. **Continue**: Proceed to the next statement with available results
+
+**Discard ≠ cancel:** join strategies and fail-fast select which results are
+used. Branches already in flight run to completion on current substrates and
+consume tokens regardless of whether their results are used. Not-yet-started
+branches (possible only with `max_concurrent`) are never spawned once the
+join or failure condition resolves the block.
 
 ### Validation Rules
 
@@ -1518,6 +1698,8 @@ When the OpenProse VM encounters a `parallel:` block:
 | Count without "any"                  | Error    | Count is only valid with "any" strategy      |
 | Count less than 1                    | Error    | Count must be at least 1                     |
 | Count exceeds branches               | Warning  | Count exceeds number of parallel branches    |
+| max_concurrent less than 1           | Error    | max_concurrent must be at least 1            |
+| max_concurrent ≥ branch count        | Warning  | max_concurrent has no effect (≥ branches)    |
 | Duplicate variable in parallel       | Error    | Variable already defined                     |
 | Variable conflicts with agent        | Error    | Variable name conflicts with agent name      |
 | Undefined variable in object context | Error    | Undefined variable in context                |
@@ -2677,6 +2859,8 @@ The validator checks programs for errors and warnings before execution.
 | E026 | Missing required input                   |
 | E027 | Unknown input name in invocation         |
 | E028 | Unknown output property access           |
+| E029 | Program output declared in block body    |
+| E030 | Block return (`output expr`) at root scope |
 
 ### Warnings (Non-blocking)
 
@@ -2857,6 +3041,7 @@ All core features through Tier 12 have been implemented. Potential future enhanc
 program     → statement* EOF
 statement   → useStatement | inputDecl | agentDef | session | resumeStmt
             | letBinding | constBinding | assignment | outputBinding
+            | outputReturn
             | parallelBlock | repeatBlock | forEachBlock | loopBlock
             | tryBlock | choiceBlock | ifStatement | doBlock | blockDef
             | throwStatement | comment
@@ -2864,8 +3049,12 @@ statement   → useStatement | inputDecl | agentDef | session | resumeStmt
 # Program Composition
 useStatement → "use" string ( "as" IDENTIFIER )?
 inputDecl   → "input" IDENTIFIER ":" string
-outputBinding → "output" IDENTIFIER "=" expression
+outputBinding → "output" IDENTIFIER "=" expression   # root scope only
+outputReturn  → "output" expression                  # block bodies only
 programCall → IDENTIFIER "(" ( IDENTIFIER ":" expression )* ")"
+
+# Disambiguation: "output" IDENTIFIER "=" parses as outputBinding;
+# any other "output" parses as outputReturn.
 
 # Definitions
 agentDef    → "agent" IDENTIFIER ":" NEWLINE INDENT agentProperty* DEDENT
@@ -2882,15 +3071,18 @@ params      → "(" IDENTIFIER ( "," IDENTIFIER )* ")"
 
 # Control Flow
 parallelBlock → "parallel" parallelMods? ":" NEWLINE INDENT parallelBranch* DEDENT
-parallelMods  → "(" ( joinStrategy | onFail | countMod ) ( "," ( joinStrategy | onFail | countMod ) )* ")"
+parallelMods  → "(" parallelMod ( "," parallelMod )* ")"
+parallelMod   → joinStrategy | onFail | countMod | maxConcurrentMod
 joinStrategy  → string                              # "all" | "first" | "any"
 onFail        → "on-fail" ":" string                # "fail-fast" | "continue" | "ignore"
 countMod      → "count" ":" NUMBER                  # only valid with "any"
+maxConcurrentMod → "max_concurrent" ":" NUMBER      # bound in-flight branches
 parallelBranch → ( IDENTIFIER "=" )? statement
 
 # Loops
 repeatBlock → "repeat" NUMBER ( "as" IDENTIFIER )? ":" NEWLINE INDENT statement* DEDENT
-forEachBlock → "parallel"? "for" IDENTIFIER ( "," IDENTIFIER )? "in" collection ":" NEWLINE INDENT statement* DEDENT
+forEachBlock → "parallel"? "for" IDENTIFIER ( "," IDENTIFIER )? "in" collection parallelMods? ":" NEWLINE INDENT statement* DEDENT
+             # parallelMods (e.g. max_concurrent) valid only with "parallel" prefix
 loopBlock   → "loop" ( ( "until" | "while" ) discretion )? loopMods? ( "as" IDENTIFIER )? ":" NEWLINE INDENT statement* DEDENT
 loopMods    → "(" "max" ":" NUMBER ")"
 
