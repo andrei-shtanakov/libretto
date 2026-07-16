@@ -26,7 +26,10 @@ def _tokens(line: dict[str, Any]) -> tuple[int, int, str, str]:
 
 
 def _bucket(target: dict[str, dict[str, int]], key: str, i: int, o: int) -> None:
-    row = target.setdefault(key, {"receipts": 0, "input_tokens": 0, "output_tokens": 0})
+    row = target.get(key)
+    if row is None:
+        row = {"receipts": 0, "input_tokens": 0, "output_tokens": 0}
+        target[key] = row
     row["receipts"] += 1
     row["input_tokens"] += i
     row["output_tokens"] += o

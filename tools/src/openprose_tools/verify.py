@@ -93,10 +93,15 @@ def _check_reuse_consistency(
         usage.get("input_tokens") != 0
         or usage.get("output_tokens") != 0
         or usage.get("basis") != "exact"
+        or usage.get("model") != "none"
     ):
         result.errors.append(
             f"{where}: a skipped receipt with reused_from must carry "
-            "zero usage with basis 'exact'"
+            "zero usage with basis 'exact' and model 'none'"
+        )
+    if line.get("surprise_cause") is not None:
+        result.errors.append(
+            f"{where}: surprise_cause must be null on skipped receipts"
         )
     if line.get("output_fingerprint") != reused.get("output_fingerprint"):
         result.errors.append(

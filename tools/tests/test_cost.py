@@ -157,6 +157,41 @@ def test_skipped_with_nonzero_usage_rejected(tmp_path: Path) -> None:
     assert any("zero usage" in error for error in result.errors)
 
 
+def test_skipped_with_real_model_or_surprise_rejected(tmp_path: Path) -> None:
+    reused = {"run_id": "x", "statement_id": "s001", "output_fingerprint": FP}
+    bad_model = make_receipt(
+        "s001",
+        prev=None,
+        status="skipped",
+        output_fingerprint=FP,
+        reused_from=reused,
+        usage={
+            "basis": "exact",
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "model": "sonnet",  # must be "none" on skipped reuse
+        },
+    )
+    run = write_run(tmp_path / "bad-model", [bad_model])
+    result = verify_ledger(load_run(run))
+    assert not result.ok
+    assert any("model 'none'" in error for error in result.errors)
+
+    bad_surprise = make_receipt(
+        "s001",
+        prev=None,
+        status="skipped",
+        output_fingerprint=FP,
+        reused_from=reused,
+        surprise_cause="input",  # must be null on skipped
+        usage=ZERO_EXACT,
+    )
+    run = write_run(tmp_path / "bad-surprise", [bad_surprise])
+    result = verify_ledger(load_run(run))
+    assert not result.ok
+    assert any("surprise_cause must be null" in error for error in result.errors)
+
+
 def test_cli_cost_and_compare(tmp_path: Path, capsys) -> None:
     baseline = _rendered_run(tmp_path)
     resumed = _skipped_run(tmp_path)
