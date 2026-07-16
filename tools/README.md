@@ -16,6 +16,7 @@ uv run openprose-tools verify <run-dir>
 uv run openprose-tools lint <file.prose> [...]
 uv run openprose-tools ir-check <file.prose> [--ir <path>]
 uv run openprose-tools cost <run-dir> [--json] [--compare <baseline-run>]
+uv run openprose-tools doctor [root]
 ```
 
 - **inspect** — headless summary of a run: dispositions
@@ -50,6 +51,13 @@ uv run openprose-tools cost <run-dir> [--json] [--compare <baseline-run>]
   `usage.basis`; skip share and `reused_from` provenance; `--compare`
   reports the delta between a baseline run and a (possibly skip-heavy)
   re-run. Integer percentages, deterministic output.
+
+- **doctor** — keyless workspace health check: spec/contract files
+  present, state directory writable, compiled IRs fresh, run ledgers
+  chain-consistent (pre-receipt legacy runs are recognized and skipped,
+  not flagged). The host-capability half of `prose doctor` (can this
+  substrate actually spawn sessions, etc.) is the embodied VM's job —
+  see `SKILL.md` and `contracts/adapters.md`.
 
 `<run-dir>` is a `.prose/runs/{run-id}/` directory containing
 `receipts.jsonl` (+ `run.json`). Committed sample runs live in

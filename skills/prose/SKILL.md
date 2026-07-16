@@ -8,11 +8,13 @@ metadata: { "openclaw": { "emoji": "🪶", "homepage": "https://www.prose.md" } 
 
 OpenProse is a programming language for AI sessions. LLMs are simulators—when given a detailed system description, they don't just describe it, they _simulate_ it. The `prose.md` specification describes a virtual machine with enough fidelity that a Prose Complete system reading it _becomes_ that VM. Simulation with sufficient fidelity is implementation. **You are the Prose Complete system.**
 
-## OpenClaw Runtime Mapping
+## Host Port and Adapters
 
-- **Task tool** in the upstream spec == OpenClaw `sessions_spawn`
-- **File I/O** == OpenClaw `read`/`write`
-- **Remote fetch** == OpenClaw `web_fetch` (or `exec` with curl when POST is required)
+Substrate bindings live in adapter documents, not here:
+`contracts/adapters.md` defines the seven host primitives + security
+contract; `contracts/adapters/claude-code.md` (reference) and
+`contracts/adapters/openclaw.md` bind them. On an unlisted substrate,
+follow the "Writing a new adapter" checklist in `contracts/adapters.md`.
 
 ## When to Activate
 
@@ -37,6 +39,7 @@ When a user invokes `prose <command>`, intelligently route based on intent:
 | `prose compile <file>`  | Load `compiler.md`, validate + emit compile IR (`contracts/ir.md`) |
 | `prose compile --check <file>` | Freshness gate: `openprose-tools ir-check` — never recompiles |
 | `prose inspect <run>`   | Deterministic run summary (see Inspecting Runs below)         |
+| `prose doctor`          | Workspace + host health check (see Doctor below)              |
 | `prose update`          | Run migration (see Migration section below)                   |
 | `prose examples`        | Show or run example programs from `examples/`                 |
 | Other                   | Intelligently interpret based on context                      |
@@ -284,6 +287,28 @@ those artifacts — prefer tooling over LLM re-reading:
 
 Never recompute or "fix" receipts by hand — the ledger is append-only and
 `verify` exists precisely to catch edits.
+
+---
+
+## Doctor (`prose doctor`)
+
+Two halves — run both and report together:
+
+1. **Deterministic half** (when tooling is available):
+   ```sh
+   uv run --project <repo>/tools openprose-tools doctor [root]
+   ```
+   Checks spec/contract files, state-directory writability, compile-IR
+   freshness, and run-ledger chain consistency. Keyless, exit 0/1.
+2. **Host half** (you, against `contracts/adapters.md`): confirm the
+   seven host primitives are actually available on this substrate —
+   can you spawn a subagent (`spawn_session`)? read/write `.prose/`
+   files? run shell with a timeout? ask the user (or is this headless —
+   then flag `ask_user` as unavailable)? Name the active adapter
+   (`contracts/adapters/*.md`) and any of its declared degradations that
+   currently apply (e.g. hook-blocked binding writes).
+
+Report failures plainly; never "fix" artifacts to make checks pass.
 
 ---
 
