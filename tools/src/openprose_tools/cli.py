@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 
+from .cost import compare_runs, cost_run, render_cost_text
 from .inspect_run import inspect_run, render_text
 from .ir import check_ir, default_ir_path
 from .ledger import LedgerLoadError, load_run
@@ -52,7 +53,57 @@ def main(argv: list[str] | None = None) -> int:
         help="IR path (default: <source-dir>/dist/<stem>.ir.json)",
     )
 
+    p_cost = sub.add_parser(
+        "cost",
+        help="token rollup by statement/agent/model; skip share; comparison",
+    )
+    p_cost.add_argument("run_dir", help="path to .prose/runs/<run-id>")
+    p_cost.add_argument(
+        "--json", action="store_true", help="emit machine-readable JSON"
+    )
+    p_cost.add_argument(
+        "--compare",
+        default=None,
+        metavar="BASELINE_RUN",
+        help="baseline run dir to compare against",
+    )
+
     args = parser.parse_args(argv)
+
+    if args.command == "cost":
+        try:
+            raw = load_run(args.run_dir)
+        except LedgerLoadError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        summary = cost_run(raw)
+        if args.compare:
+            try:
+                baseline = cost_run(load_run(args.compare))
+            except LedgerLoadError as exc:
+                print(f"error: {exc}", file=sys.stderr)
+                return 2
+            comparison = compare_runs(baseline, summary)
+            if args.json:
+                print(
+                    json.dumps(comparison, sort_keys=True, ensure_ascii=False, indent=2)
+                )
+            else:
+                print(
+                    f"baseline {comparison['baseline']['run_id']}: "
+                    f"{comparison['baseline']['tokens']} tokens\n"
+                    f"candidate {comparison['candidate']['run_id']}: "
+                    f"{comparison['candidate']['tokens']} tokens "
+                    f"({comparison['candidate']['skipped']} skipped)\n"
+                    f"delta: {comparison['delta_tokens']} tokens "
+                    f"(saved {comparison['saved_percent']}%)"
+                )
+            return 0
+        if args.json:
+            print(json.dumps(summary, sort_keys=True, ensure_ascii=False, indent=2))
+        else:
+            print(render_cost_text(summary))
+        return 0
 
     if args.command == "ir-check":
         source = Path(args.source)

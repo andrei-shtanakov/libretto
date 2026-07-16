@@ -140,6 +140,8 @@ The following features are implemented:
 | Throw statement        | Implemented | `throw` or `throw "message"`                 |
 | Retry property         | Implemented | `retry: 3` automatic retry on failure        |
 | Backoff strategy       | Implemented | `backoff: exponential` delay between retries |
+| Material inputs        | Implemented | `material: [research]` narrows skip identity |
+| Budget declaration     | Implemented | `budget: 500000 tokens` program spend cap    |
 | Input declarations     | Implemented | `input name: "description"`                  |
 | Output bindings        | Implemented | `output name = expression` (root scope)      |
 | Block return           | Implemented | `output expression` inside block bodies      |
@@ -394,6 +396,42 @@ Use statements are processed before any agent definitions or sessions. The OpenP
 3. Registers programs in the Import Registry for later invocation
 
 ---
+
+## Budget Declaration
+
+A program may cap its own spend. At most one `budget:` declaration,
+placed with the input declarations (before any executable statement):
+
+```prose
+budget: 500000 tokens
+# or
+budget: $5.00
+```
+
+### Semantics
+
+- **Token budgets** are enforced directly against the receipt ledger: the
+  VM sums `usage.input_tokens + usage.output_tokens` across receipts and
+  halts before spawning any session that follows an overage (see
+  `prose.md`, Budget Enforcement). Enforcement is only as exact as the
+  recorded `usage.basis` — a budget tracked from estimated usage is an
+  estimated gate, and the halt receipt says so.
+- **Dollar budgets** require the VM to convert tokens to money using the
+  prices it knows for each model; this is always an **estimate** and MUST
+  be treated as advisory. Prefer token budgets for hard caps.
+- Overage never kills the ledger: the VM emits a `control` receipt
+  (`detail: {"event": "budget_exceeded", …}`), writes `run.json` status
+  `halted`, and stops spawning. Already-running parallel branches
+  complete (no in-flight cancellation) and their receipts are recorded.
+
+### Validation Rules
+
+| Check                                   | Severity | Message                                    |
+| --------------------------------------- | -------- | ------------------------------------------ |
+| Multiple budget declarations            | Error    | Budget already declared                    |
+| Budget after executable statement       | Error    | Budget must precede executable statements  |
+| Non-positive budget                     | Error    | Budget must be positive                    |
+| Dollar budget                           | Warning  | Dollar budgets are estimates; prefer tokens |
 
 ## Input Declarations
 
@@ -813,6 +851,38 @@ session: researcher
   model: opus
   prompt: "Specialized research task"
 ```
+
+### Material Inputs (`material:`)
+
+By default, a session's memo identity is **all** of its wired context: on
+a re-run, the VM may skip the session only if every input fingerprint is
+unchanged (see `prose.md`, Skip Semantics). `material:` narrows that to
+the parts that actually matter:
+
+```prose
+let report = session "Summarize the findings"
+  context: { research, style_guide }
+  material: [research]          # style_guide changes don't force a re-run
+
+let verdict = session "Judge the executive summary"
+  context: review
+  material: [review.summary]    # only the 'summary' facet is material
+```
+
+- Entries are wired context names, optionally with one `.facet` segment.
+  A **facet** is a named top-level `## section` of the binding's markdown
+  (fingerprinted separately — `contracts/receipt.md`, Facets).
+- `material:` affects **skip decisions only** — the session still receives
+  its full `context:` when it does run.
+- Declaring `material: []` is an error (it would make the session
+  unconditionally skippable); omit the property instead to mean "all
+  context is material".
+
+| Check                                    | Severity | Message                                  |
+| ---------------------------------------- | -------- | ---------------------------------------- |
+| `material:` name not in session context  | Error    | Material input not wired via context     |
+| Empty `material: []`                     | Error    | Material list cannot be empty            |
+| `material:` without `context:`           | Error    | Material requires wired context          |
 
 ### Execution Semantics
 
@@ -3046,7 +3116,8 @@ All core features through Tier 12 have been implemented. Potential future enhanc
 
 ```
 program     → statement* EOF
-statement   → useStatement | inputDecl | agentDef | session | resumeStmt
+statement   → useStatement | inputDecl | budgetDecl | agentDef | session
+            | resumeStmt
             | letBinding | constBinding | assignment | outputBinding
             | outputReturn
             | parallelBlock | repeatBlock | forEachBlock | loopBlock
@@ -3121,6 +3192,12 @@ sessionProperty → "model:" ( "sonnet" | "opus" | "haiku" )
                 | "context:" ( IDENTIFIER | array | objectContext )
                 | "retry:" NUMBER
                 | "backoff:" ( "none" | "linear" | "exponential" )
+                | "material:" "[" facetRef ( "," facetRef )* "]"
+facetRef    → IDENTIFIER ( "." IDENTIFIER )?   # binding or binding.facet
+
+# Budget (program level, at most one, before executable statements)
+budgetDecl  → "budget:" ( NUMBER "tokens" | MONEY )
+MONEY       → "$" NUMBER ( "." DIGIT DIGIT )?
 
 # Bindings
 letBinding  → "let" IDENTIFIER "=" expression

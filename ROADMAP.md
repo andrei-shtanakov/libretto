@@ -8,7 +8,10 @@
 
 ## P1 — Runtime Reliability
 
-- **Cost budgets** — `budget: $5.00` at program level. VM tracks spend via token counting and halts on overage. Add property to grammar (`compiler.md`) + enforcement logic in VM (`prose.md`)
+- [x] **Cost budgets** — done (Phase 4, 2026-07-16): `budget: N tokens`
+  (exact w.r.t. recorded usage) or `budget: $X` (estimate) in grammar;
+  VM halt-on-overage with `budget_exceeded` control receipt (`prose.md`,
+  Budget Enforcement)
 - **Concurrency limits** — `parallel (max_concurrent: N):` for rate limiting. Currently parallel launches all branches simultaneously without limits
 - **Pause/cancel protocol** — standardize substrate interaction for graceful stop. Format: marker in `state.md` + VM check before each session spawn
 
