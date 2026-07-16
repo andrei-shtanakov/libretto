@@ -1,56 +1,56 @@
-# OpenProse Evaluation Roadmap — Implementation Plan
+# Libretto Evaluation Roadmap — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Systematically evaluate OpenProse as a practical orchestration tool by running built-in examples, writing custom .prose programs against atp-platform, and comparing results with plain Claude Code prompts.
+**Goal:** Systematically evaluate Libretto as a practical orchestration tool by running built-in examples, writing custom .libretto programs against atp-platform, and comparing results with plain Claude Code prompts.
 
-**Architecture:** Each of 7 phases follows a spiral pattern: (1) run built-in examples, (2) write and run custom .prose targeting atp-platform, (3) run the same task as a plain prompt baseline, (4) record findings. Phases 6-7 add syntax experiments and stdlib meta-analysis.
+**Architecture:** Each of 7 phases follows a spiral pattern: (1) run built-in examples, (2) write and run custom .libretto targeting atp-platform, (3) run the same task as a plain prompt baseline, (4) record findings. Phases 6-7 add syntax experiments and stdlib meta-analysis.
 
-**Tech Stack:** OpenProse VM (specification-as-VM via `prose.md`), Claude Code with Task tool, atp-platform as test target (local at `../atp-platform`, live at `https://pr0sto.space`).
+**Tech Stack:** Libretto VM (specification-as-VM via `libretto.md`), Claude Code with Task tool, atp-platform as test target (local at `../atp-platform`, live at `https://pr0sto.space`).
 
 ---
 
 ## How This Plan Works
 
 This is a **research/evaluation** plan, not a traditional coding project. Each task produces:
-- `.prose` program files in `evaluation/` directory
-- Run artifacts in `.prose/runs/`
+- `.libretto` program files in `evaluation/` directory
+- Run artifacts in `.libretto/runs/`
 - Findings logged in `evaluation/results/phase-N.md`
 
-**Running a .prose program** means invoking the OpenProse skill: type `prose run <file>` in Claude Code. The VM loads `prose.md` + `state/filesystem.md` and executes. Each `session` becomes a real Task tool call spawning a subagent.
+**Running a .libretto program** means invoking the Libretto skill: type `libretto run <file>` in Claude Code. The VM loads `libretto.md` + `state/filesystem.md` and executes. Each `session` becomes a real Task tool call spawning a subagent.
 
-**Baseline comparison** means performing the same task as a plain Claude Code prompt (no .prose), then comparing quality, cost, and approach.
+**Baseline comparison** means performing the same task as a plain Claude Code prompt (no .libretto), then comparing quality, cost, and approach.
 
-**Important:** After each `prose run`, inspect `.prose/runs/` for the latest run directory. Check `state.md` for execution trace and `bindings/` for outputs.
+**Important:** After each `libretto run`, inspect `.libretto/runs/` for the latest run directory. Check `state.md` for execution trace and `bindings/` for outputs.
 
 ### File structure
 
 ```
 evaluation/
 ├── phase1/
-│   ├── atp-architecture-summary.prose     # Custom: simple one-step
-│   ├── atp-adapters-patterns.prose        # Custom: two-step sequential
+│   ├── atp-architecture-summary.libretto     # Custom: simple one-step
+│   ├── atp-adapters-patterns.libretto        # Custom: two-step sequential
 │   └── baseline-prompts.md               # Plain prompts for baseline comparison
 ├── phase2/
-│   ├── atp-evaluator-refactoring.prose    # Custom: dependency chain with variables
-│   ├── atp-module-review.prose            # Custom: reusable block
+│   ├── atp-evaluator-refactoring.libretto    # Custom: dependency chain with variables
+│   ├── atp-module-review.libretto            # Custom: reusable block
 │   └── baseline-prompts.md
 ├── phase3/
-│   ├── atp-workspace-fanout.prose         # Custom: parallel across 4 packages
-│   ├── atp-multi-audit.prose              # Custom: parallel security+perf+quality
+│   ├── atp-workspace-fanout.libretto         # Custom: parallel across 4 packages
+│   ├── atp-multi-audit.libretto              # Custom: parallel security+perf+quality
 │   └── baseline-prompts.md
 ├── phase4/
-│   ├── atp-iterative-refactor.prose       # Custom: loop + error handling
-│   ├── atp-conditional-pipeline.prose     # Custom: conditional branching
+│   ├── atp-iterative-refactor.libretto       # Custom: loop + error handling
+│   ├── atp-conditional-pipeline.libretto     # Custom: conditional branching
 │   └── baseline-prompts.md
 ├── phase5/
-│   ├── atp-docstring-evaluator.prose      # Custom: Captain's Chair for real feature
-│   ├── atp-architecture-doc.prose         # Custom: RLM self-refine
+│   ├── atp-docstring-evaluator.libretto      # Custom: Captain's Chair for real feature
+│   ├── atp-architecture-doc.libretto         # Custom: RLM self-refine
 │   └── baseline-prompts.md
 ├── phase6/
-│   ├── atp-docstring-borges.prose         # Borges syntax version
-│   ├── atp-docstring-kafka.prose          # Kafka syntax version
-│   ├── atp-docstring-homer.prose          # Homer syntax version
+│   ├── atp-docstring-borges.libretto         # Borges syntax version
+│   ├── atp-docstring-kafka.libretto          # Kafka syntax version
+│   ├── atp-docstring-homer.libretto          # Homer syntax version
 │   └── syntax-comparison.md              # Side-by-side analysis
 └── results/
     ├── phase-1.md
@@ -74,17 +74,17 @@ Every `results/phase-N.md` uses this structure:
 
 | Example | Ran successfully? | Fidelity notes |
 |---------|-------------------|----------------|
-| `NN-name.prose` | yes/no/partial | ... |
+| `NN-name.libretto` | yes/no/partial | ... |
 
-## Custom .prose Programs
+## Custom .libretto Programs
 
 | Program | Ran successfully? | Output quality (1-10) | Notes |
 |---------|-------------------|----------------------|-------|
-| `name.prose` | yes/no/partial | N | ... |
+| `name.libretto` | yes/no/partial | N | ... |
 
 ## Baseline Comparison
 
-| Task | .prose quality | Baseline quality | .prose cost (approx) | Baseline cost (approx) | Winner |
+| Task | .libretto quality | Baseline quality | .libretto cost (approx) | Baseline cost (approx) | Winner |
 |------|---------------|-----------------|---------------------|----------------------|--------|
 | ... | N/10 | N/10 | ~tokens | ~tokens | ... |
 
@@ -100,8 +100,8 @@ Every `results/phase-N.md` uses this structure:
 ## Task 1: Setup and Phase 1 — Sequential Foundations
 
 **Files:**
-- Create: `evaluation/phase1/atp-architecture-summary.prose`
-- Create: `evaluation/phase1/atp-adapters-patterns.prose`
+- Create: `evaluation/phase1/atp-architecture-summary.libretto`
+- Create: `evaluation/phase1/atp-adapters-patterns.libretto`
 - Create: `evaluation/phase1/baseline-prompts.md`
 - Create: `evaluation/results/phase-1.md`
 
@@ -110,16 +110,16 @@ Every `results/phase-N.md` uses this structure:
 - [ ] **Step 1: Run hello-world**
 
 ```
-prose run examples/01-hello-world.prose
+libretto run examples/01-hello-world.libretto
 ```
 
 After it completes, inspect the run:
 
 ```bash
-ls .prose/runs/
+ls .libretto/runs/
 # Find the latest directory, then:
-ls .prose/runs/<latest>/
-cat .prose/runs/<latest>/state.md
+ls .libretto/runs/<latest>/
+cat .libretto/runs/<latest>/state.md
 ```
 
 Record: Did the VM boot? Was a subagent spawned? Was state.md created?
@@ -127,15 +127,15 @@ Record: Did the VM boot? Was a subagent spawned? Was state.md created?
 - [ ] **Step 2: Run research-and-summarize**
 
 ```
-prose run examples/02-research-and-summarize.prose
+libretto run examples/02-research-and-summarize.libretto
 ```
 
-Inspect: Are there two entries in state.md (two sequential sessions)? Check `.prose/runs/<latest>/bindings/` for any outputs.
+Inspect: Are there two entries in state.md (two sequential sessions)? Check `.libretto/runs/<latest>/bindings/` for any outputs.
 
 - [ ] **Step 3: Run write-and-refine**
 
 ```
-prose run examples/04-write-and-refine.prose
+libretto run examples/04-write-and-refine.libretto
 ```
 
 Inspect: Does the second session's output show evidence of improving the first session's work?
@@ -144,7 +144,7 @@ Inspect: Does the second session's output show evidence of improving the first s
 
 Fill in the "Built-in Examples" table in `evaluation/results/phase-1.md` with findings from steps 1-3.
 
-### Part B: Write and run custom .prose for atp-platform
+### Part B: Write and run custom .libretto for atp-platform
 
 - [ ] **Step 5: Create the evaluation directory**
 
@@ -152,7 +152,7 @@ Fill in the "Built-in Examples" table in `evaluation/results/phase-1.md` with fi
 mkdir -p evaluation/phase1
 ```
 
-- [ ] **Step 6: Write atp-architecture-summary.prose**
+- [ ] **Step 6: Write atp-architecture-summary.libretto**
 
 ```prose
 # ATP Architecture Summary
@@ -161,17 +161,17 @@ mkdir -p evaluation/phase1
 session "Read the README.md and key configuration files in ../atp-platform. Produce a concise architecture summary covering: project purpose, tech stack, package structure (atp-core, atp-adapters, atp-dashboard, atp-sdk), and key design decisions."
 ```
 
-Save to `evaluation/phase1/atp-architecture-summary.prose`.
+Save to `evaluation/phase1/atp-architecture-summary.libretto`.
 
-- [ ] **Step 7: Run atp-architecture-summary.prose**
+- [ ] **Step 7: Run atp-architecture-summary.libretto**
 
 ```
-prose run evaluation/phase1/atp-architecture-summary.prose
+libretto run evaluation/phase1/atp-architecture-summary.libretto
 ```
 
-Inspect `.prose/runs/<latest>/state.md` and any bindings. Rate the output quality 1-10.
+Inspect `.libretto/runs/<latest>/state.md` and any bindings. Rate the output quality 1-10.
 
-- [ ] **Step 8: Write atp-adapters-patterns.prose**
+- [ ] **Step 8: Write atp-adapters-patterns.libretto**
 
 ```prose
 # ATP Adapters Pattern Analysis
@@ -182,12 +182,12 @@ session "Explore the directory structure of ../atp-platform/packages/atp-adapter
 session "Based on the exploration above, write a summary of common patterns across all adapters. Include: shared interface, initialization conventions, error handling approach, and any inconsistencies between adapters."
 ```
 
-Save to `evaluation/phase1/atp-adapters-patterns.prose`.
+Save to `evaluation/phase1/atp-adapters-patterns.libretto`.
 
-- [ ] **Step 9: Run atp-adapters-patterns.prose**
+- [ ] **Step 9: Run atp-adapters-patterns.libretto**
 
 ```
-prose run evaluation/phase1/atp-adapters-patterns.prose
+libretto run evaluation/phase1/atp-adapters-patterns.libretto
 ```
 
 Check: Does the second session's output reference findings from the first? Is context passed implicitly or lost?
@@ -212,13 +212,13 @@ Save to `evaluation/phase1/baseline-prompts.md`.
 
 - [ ] **Step 11: Run baselines**
 
-Execute each prompt above as a plain Claude Code request (no .prose). Save the outputs mentally for comparison.
+Execute each prompt above as a plain Claude Code request (no .libretto). Save the outputs mentally for comparison.
 
 - [ ] **Step 12: Record Phase 1 results**
 
 Fill in `evaluation/results/phase-1.md` using the results template. Key questions to answer:
 - Did the VM correctly spawn subagents?
-- Was `.prose/runs/` state written?
+- Was `.libretto/runs/` state written?
 - How does output quality compare to plain prompts?
 - What was the approximate token overhead of the VM layer?
 
@@ -234,8 +234,8 @@ git commit -m "evaluation: Phase 1 — sequential foundations results"
 ## Task 2: Phase 2 — Variables, Context, Composition
 
 **Files:**
-- Create: `evaluation/phase2/atp-evaluator-refactoring.prose`
-- Create: `evaluation/phase2/atp-module-review.prose`
+- Create: `evaluation/phase2/atp-evaluator-refactoring.libretto`
+- Create: `evaluation/phase2/atp-module-review.libretto`
 - Create: `evaluation/phase2/baseline-prompts.md`
 - Create: `evaluation/results/phase-2.md`
 
@@ -244,7 +244,7 @@ git commit -m "evaluation: Phase 1 — sequential foundations results"
 - [ ] **Step 1: Run variables-and-context**
 
 ```
-prose run examples/13-variables-and-context.prose
+libretto run examples/13-variables-and-context.libretto
 ```
 
 Inspect: Are `bindings/` files created with named outputs? Does `context: { a, b }` wire correctly?
@@ -252,7 +252,7 @@ Inspect: Are `bindings/` files created with named outputs? Does `context: { a, b
 - [ ] **Step 2: Run composition-blocks**
 
 ```
-prose run examples/14-composition-blocks.prose
+libretto run examples/14-composition-blocks.libretto
 ```
 
 Inspect: Are blocks invoked correctly? Do parameterized blocks receive arguments?
@@ -260,12 +260,12 @@ Inspect: Are blocks invoked correctly? Do parameterized blocks receive arguments
 - [ ] **Step 3: Run inline-sequences**
 
 ```
-prose run examples/15-inline-sequences.prose
+libretto run examples/15-inline-sequences.libretto
 ```
 
 - [ ] **Step 4: Record built-in results**
 
-### Part B: Write and run custom .prose
+### Part B: Write and run custom .libretto
 
 - [ ] **Step 5: Create phase2 directory**
 
@@ -273,7 +273,7 @@ prose run examples/15-inline-sequences.prose
 mkdir -p evaluation/phase2
 ```
 
-- [ ] **Step 6: Write atp-evaluator-refactoring.prose**
+- [ ] **Step 6: Write atp-evaluator-refactoring.libretto**
 
 ```prose
 # ATP Evaluator Refactoring Analysis
@@ -295,17 +295,17 @@ output refactoring = session: analyst
   context: { survey, interface }
 ```
 
-Save to `evaluation/phase2/atp-evaluator-refactoring.prose`.
+Save to `evaluation/phase2/atp-evaluator-refactoring.libretto`.
 
-- [ ] **Step 7: Run atp-evaluator-refactoring.prose**
+- [ ] **Step 7: Run atp-evaluator-refactoring.libretto**
 
 ```
-prose run evaluation/phase2/atp-evaluator-refactoring.prose
+libretto run evaluation/phase2/atp-evaluator-refactoring.libretto
 ```
 
 Inspect `bindings/survey.md`, `bindings/interface.md`, `bindings/refactoring.md`. Check: Does each binding contain substantive content? Does `context: { survey, interface }` actually pass both?
 
-- [ ] **Step 8: Write atp-module-review.prose**
+- [ ] **Step 8: Write atp-module-review.libretto**
 
 ```prose
 # ATP Module Review — Reusable Block Pattern
@@ -332,12 +332,12 @@ output summary = session: reviewer
   context: { result }
 ```
 
-Save to `evaluation/phase2/atp-module-review.prose`.
+Save to `evaluation/phase2/atp-module-review.libretto`.
 
-- [ ] **Step 9: Run atp-module-review.prose**
+- [ ] **Step 9: Run atp-module-review.libretto**
 
 ```
-prose run evaluation/phase2/atp-module-review.prose
+libretto run evaluation/phase2/atp-module-review.libretto
 ```
 
 Key check: Does the block execute 3 times with different arguments? Are bindings scoped per invocation (look for `result__<execution_id>.md` files)?
@@ -368,8 +368,8 @@ git commit -m "evaluation: Phase 2 — variables, context, composition results"
 ## Task 3: Phase 3 — Parallelism
 
 **Files:**
-- Create: `evaluation/phase3/atp-workspace-fanout.prose`
-- Create: `evaluation/phase3/atp-multi-audit.prose`
+- Create: `evaluation/phase3/atp-workspace-fanout.libretto`
+- Create: `evaluation/phase3/atp-multi-audit.libretto`
 - Create: `evaluation/phase3/baseline-prompts.md`
 - Create: `evaluation/results/phase-3.md`
 
@@ -378,13 +378,13 @@ git commit -m "evaluation: Phase 2 — variables, context, composition results"
 - [ ] **Step 1: Run parallel-reviews**
 
 ```
-prose run examples/16-parallel-reviews.prose
+libretto run examples/16-parallel-reviews.libretto
 ```
 
 - [ ] **Step 2: Run parallel-research**
 
 ```
-prose run examples/17-parallel-research.prose
+libretto run examples/17-parallel-research.libretto
 ```
 
 Check: Were 3 Task calls dispatched concurrently (look at state.md timestamps)?
@@ -392,14 +392,14 @@ Check: Were 3 Task calls dispatched concurrently (look at state.md timestamps)?
 - [ ] **Step 3: Run advanced-parallel**
 
 ```
-prose run examples/19-advanced-parallel.prose
+libretto run examples/19-advanced-parallel.libretto
 ```
 
 Check: Does `on-fail: "continue"` work when a branch fails?
 
 - [ ] **Step 4: Record built-in results**
 
-### Part B: Write and run custom .prose
+### Part B: Write and run custom .libretto
 
 - [ ] **Step 5: Create phase3 directory**
 
@@ -407,7 +407,7 @@ Check: Does `on-fail: "continue"` work when a branch fails?
 mkdir -p evaluation/phase3
 ```
 
-- [ ] **Step 6: Write atp-workspace-fanout.prose**
+- [ ] **Step 6: Write atp-workspace-fanout.libretto**
 
 ```prose
 # ATP Workspace Fan-Out Review
@@ -432,17 +432,17 @@ output synthesis = session: reviewer
   context: { core, adapters, dashboard, sdk }
 ```
 
-Save to `evaluation/phase3/atp-workspace-fanout.prose`.
+Save to `evaluation/phase3/atp-workspace-fanout.libretto`.
 
-- [ ] **Step 7: Run atp-workspace-fanout.prose**
+- [ ] **Step 7: Run atp-workspace-fanout.libretto**
 
 ```
-prose run evaluation/phase3/atp-workspace-fanout.prose
+libretto run evaluation/phase3/atp-workspace-fanout.libretto
 ```
 
 Measure: wall-clock time. Check state.md to see if parallel branches ran concurrently. Verify all 4 bindings exist before synthesis runs.
 
-- [ ] **Step 8: Write atp-multi-audit.prose**
+- [ ] **Step 8: Write atp-multi-audit.libretto**
 
 ```prose
 # ATP Multi-Aspect Audit
@@ -473,12 +473,12 @@ output report = session: quality-reviewer
   context: { security, performance, quality }
 ```
 
-Save to `evaluation/phase3/atp-multi-audit.prose`.
+Save to `evaluation/phase3/atp-multi-audit.libretto`.
 
-- [ ] **Step 9: Run atp-multi-audit.prose**
+- [ ] **Step 9: Run atp-multi-audit.libretto**
 
 ```
-prose run evaluation/phase3/atp-multi-audit.prose
+libretto run evaluation/phase3/atp-multi-audit.libretto
 ```
 
 Check: Does `on-fail: "continue"` allow the report to generate even if one auditor fails?
@@ -487,7 +487,7 @@ Check: Does `on-fail: "continue"` allow the report to generate even if one audit
 
 Baseline: run the same 4-package review as a single sequential prompt. Time it. Compare quality.
 
-Fill in `evaluation/results/phase-3.md`. Key metric: parallel .prose time vs sequential baseline time.
+Fill in `evaluation/results/phase-3.md`. Key metric: parallel .libretto time vs sequential baseline time.
 
 - [ ] **Step 11: Commit Phase 3**
 
@@ -501,8 +501,8 @@ git commit -m "evaluation: Phase 3 — parallelism results"
 ## Task 4: Phase 4 — Control Flow
 
 **Files:**
-- Create: `evaluation/phase4/atp-iterative-refactor.prose`
-- Create: `evaluation/phase4/atp-conditional-pipeline.prose`
+- Create: `evaluation/phase4/atp-iterative-refactor.libretto`
+- Create: `evaluation/phase4/atp-conditional-pipeline.libretto`
 - Create: `evaluation/phase4/baseline-prompts.md`
 - Create: `evaluation/results/phase-4.md`
 
@@ -511,7 +511,7 @@ git commit -m "evaluation: Phase 3 — parallelism results"
 - [ ] **Step 1: Run fixed-loops**
 
 ```
-prose run examples/20-fixed-loops.prose
+libretto run examples/20-fixed-loops.libretto
 ```
 
 Check: Does `repeat 3` create exactly 3 sessions? Does `for-each` iterate correctly?
@@ -519,7 +519,7 @@ Check: Does `repeat 3` create exactly 3 sessions? Does `for-each` iterate correc
 - [ ] **Step 2: Run error-handling**
 
 ```
-prose run examples/22-error-handling.prose
+libretto run examples/22-error-handling.libretto
 ```
 
 Check: Does `try/catch` spawn a different subagent on failure? Does `throw` propagate?
@@ -527,14 +527,14 @@ Check: Does `try/catch` spawn a different subagent on failure? Does `throw` prop
 - [ ] **Step 3: Run conditionals**
 
 ```
-prose run examples/25-conditionals.prose
+libretto run examples/25-conditionals.libretto
 ```
 
 Check: How does the VM evaluate `**condition**` — does it use LLM judgment? Is the branch choice reasonable?
 
 - [ ] **Step 4: Record built-in results**
 
-### Part B: Write and run custom .prose
+### Part B: Write and run custom .libretto
 
 - [ ] **Step 5: Create phase4 directory**
 
@@ -542,7 +542,7 @@ Check: How does the VM evaluate `**condition**` — does it use LLM judgment? Is
 mkdir -p evaluation/phase4
 ```
 
-- [ ] **Step 6: Write atp-iterative-refactor.prose**
+- [ ] **Step 6: Write atp-iterative-refactor.libretto**
 
 ```prose
 # ATP Iterative Refactoring
@@ -586,12 +586,12 @@ repeat 2:
       context: err
 ```
 
-Save to `evaluation/phase4/atp-iterative-refactor.prose`.
+Save to `evaluation/phase4/atp-iterative-refactor.libretto`.
 
-- [ ] **Step 7: Run atp-iterative-refactor.prose**
+- [ ] **Step 7: Run atp-iterative-refactor.libretto**
 
 ```
-prose run evaluation/phase4/atp-iterative-refactor.prose
+libretto run evaluation/phase4/atp-iterative-refactor.libretto
 ```
 
 Key checks:
@@ -600,7 +600,7 @@ Key checks:
 - Does `try/catch` activate if a subagent fails?
 - Does the loop terminate early when `output result = fix` is reached?
 
-- [ ] **Step 8: Write atp-conditional-pipeline.prose**
+- [ ] **Step 8: Write atp-conditional-pipeline.libretto**
 
 ```prose
 # ATP Conditional Pipeline
@@ -640,21 +640,21 @@ else:
 output result = triage
 ```
 
-Save to `evaluation/phase4/atp-conditional-pipeline.prose`.
+Save to `evaluation/phase4/atp-conditional-pipeline.libretto`.
 
-- [ ] **Step 9: Run atp-conditional-pipeline.prose**
+- [ ] **Step 9: Run atp-conditional-pipeline.libretto**
 
 ```
-prose run evaluation/phase4/atp-conditional-pipeline.prose
+libretto run evaluation/phase4/atp-conditional-pipeline.libretto
 ```
 
 Check: Which branch was taken? Was the LLM's condition evaluation reasonable given the actual state of atp-platform?
 
 - [ ] **Step 10: Run baselines and record results**
 
-Baseline: describe the same iterative logic in a plain prompt. Compare: does the .prose structure produce more reliable branching?
+Baseline: describe the same iterative logic in a plain prompt. Compare: does the .libretto structure produce more reliable branching?
 
-Fill in `evaluation/results/phase-4.md`. **Key finding:** Does formal control flow in .prose add reliability over natural language instructions?
+Fill in `evaluation/results/phase-4.md`. **Key finding:** Does formal control flow in .libretto add reliability over natural language instructions?
 
 - [ ] **Step 11: Commit Phase 4**
 
@@ -668,8 +668,8 @@ git commit -m "evaluation: Phase 4 — control flow results"
 ## Task 5: Phase 5 — Captain's Chair + RLM
 
 **Files:**
-- Create: `evaluation/phase5/atp-docstring-evaluator.prose`
-- Create: `evaluation/phase5/atp-architecture-doc.prose`
+- Create: `evaluation/phase5/atp-docstring-evaluator.libretto`
+- Create: `evaluation/phase5/atp-architecture-doc.libretto`
 - Create: `evaluation/phase5/baseline-prompts.md`
 - Create: `evaluation/results/phase-5.md`
 
@@ -678,7 +678,7 @@ git commit -m "evaluation: Phase 4 — control flow results"
 - [ ] **Step 1: Run captains-chair-simple**
 
 ```
-prose run examples/30-captains-chair-simple.prose
+libretto run examples/30-captains-chair-simple.libretto
 ```
 
 This requires an `input task`. The VM should prompt for it. Provide: "Review the test infrastructure in ../atp-platform"
@@ -688,7 +688,7 @@ Check: Does captain plan before executor acts? Does critic actually find issues?
 - [ ] **Step 2: Run rlm-self-refine**
 
 ```
-prose run examples/40-rlm-self-refine.prose
+libretto run examples/40-rlm-self-refine.libretto
 ```
 
 Provide inputs: artifact = "A brief explanation of the atp-platform architecture", criteria = "Technical accuracy, completeness, clarity"
@@ -697,7 +697,7 @@ Check: Does the recursive block actually recurse? Does it terminate on score >= 
 
 - [ ] **Step 3: Record built-in results**
 
-### Part B: Write and run custom .prose
+### Part B: Write and run custom .libretto
 
 - [ ] **Step 4: Create phase5 directory**
 
@@ -705,7 +705,7 @@ Check: Does the recursive block actually recurse? Does it terminate on score >= 
 mkdir -p evaluation/phase5
 ```
 
-- [ ] **Step 5: Write atp-docstring-evaluator.prose**
+- [ ] **Step 5: Write atp-docstring-evaluator.libretto**
 
 This is the full Captain's Chair pattern applied to a real feature task.
 
@@ -782,12 +782,12 @@ output result = session: captain
   context: { final_code, test_code, review }
 ```
 
-Save to `evaluation/phase5/atp-docstring-evaluator.prose`.
+Save to `evaluation/phase5/atp-docstring-evaluator.libretto`.
 
-- [ ] **Step 6: Run atp-docstring-evaluator.prose**
+- [ ] **Step 6: Run atp-docstring-evaluator.libretto**
 
 ```
-prose run evaluation/phase5/atp-docstring-evaluator.prose
+libretto run evaluation/phase5/atp-docstring-evaluator.libretto
 ```
 
 This is the most complex run yet. Check:
@@ -797,7 +797,7 @@ This is the most complex run yet. Check:
 - Is the review meaningful (catches real issues)?
 - Does the conditional revision work?
 
-- [ ] **Step 7: Write atp-architecture-doc.prose**
+- [ ] **Step 7: Write atp-architecture-doc.libretto**
 
 ```prose
 # ATP Architecture Document — RLM Self-Refine
@@ -836,12 +836,12 @@ let draft = session: writer
 output final = do refine(draft, 3)
 ```
 
-Save to `evaluation/phase5/atp-architecture-doc.prose`.
+Save to `evaluation/phase5/atp-architecture-doc.libretto`.
 
-- [ ] **Step 8: Run atp-architecture-doc.prose**
+- [ ] **Step 8: Run atp-architecture-doc.libretto**
 
 ```
-prose run evaluation/phase5/atp-architecture-doc.prose
+libretto run evaluation/phase5/atp-architecture-doc.libretto
 ```
 
 Check: How many refinement iterations occurred? Did quality actually improve across iterations? Did it converge or oscillate?
@@ -868,9 +868,9 @@ git commit -m "evaluation: Phase 5 — Captain's Chair and RLM results"
 ## Task 6: Phase 6 — Alternative Syntaxes
 
 **Files:**
-- Create: `evaluation/phase6/atp-docstring-borges.prose`
-- Create: `evaluation/phase6/atp-docstring-kafka.prose`
-- Create: `evaluation/phase6/atp-docstring-homer.prose`
+- Create: `evaluation/phase6/atp-docstring-borges.libretto`
+- Create: `evaluation/phase6/atp-docstring-kafka.libretto`
+- Create: `evaluation/phase6/atp-docstring-homer.libretto`
 - Create: `evaluation/phase6/syntax-comparison.md`
 - Create: `evaluation/results/phase-6.md`
 
@@ -898,9 +898,9 @@ git commit -m "evaluation: Phase 5 — Captain's Chair and RLM results"
 mkdir -p evaluation/phase6
 ```
 
-- [ ] **Step 2: Write atp-docstring-borges.prose**
+- [ ] **Step 2: Write atp-docstring-borges.libretto**
 
-Translate the Captain's Chair program from Phase 5 into Borges register. The logic stays identical — only keywords change. Also load the Borges register: the VM needs `alts/borges.md` loaded alongside `prose.md`.
+Translate the Captain's Chair program from Phase 5 into Borges register. The logic stays identical — only keywords change. Also load the Borges register: the VM needs `alts/borges.md` loaded alongside `libretto.md`.
 
 ```prose
 # ATP Docstring Evaluator — Borges Register
@@ -964,18 +964,18 @@ theorem result = dream: captain
   memory: { final_code, test_code, review }
 ```
 
-Save to `evaluation/phase6/atp-docstring-borges.prose`.
+Save to `evaluation/phase6/atp-docstring-borges.libretto`.
 
 - [ ] **Step 3: Run with Borges register**
 
 Tell the VM to load the Borges register:
 ```
-prose run evaluation/phase6/atp-docstring-borges.prose
+libretto run evaluation/phase6/atp-docstring-borges.libretto
 ```
 
 Note: you may need to tell the VM to load `alts/borges.md` for keyword translation. If the VM doesn't recognize Borges keywords natively, load the register file first.
 
-- [ ] **Step 4: Write atp-docstring-kafka.prose**
+- [ ] **Step 4: Write atp-docstring-kafka.libretto**
 
 Same translation using Kafka keywords:
 
@@ -1040,15 +1040,15 @@ verdict result = proceeding: captain
   dossier: { final_code, test_code, review }
 ```
 
-Save to `evaluation/phase6/atp-docstring-kafka.prose`.
+Save to `evaluation/phase6/atp-docstring-kafka.libretto`.
 
 - [ ] **Step 5: Run with Kafka register**
 
 ```
-prose run evaluation/phase6/atp-docstring-kafka.prose
+libretto run evaluation/phase6/atp-docstring-kafka.libretto
 ```
 
-- [ ] **Step 6: Write atp-docstring-homer.prose**
+- [ ] **Step 6: Write atp-docstring-homer.libretto**
 
 Same translation using Homer keywords:
 
@@ -1113,12 +1113,12 @@ glory result = trial: captain
   tidings: { final_code, test_code, review }
 ```
 
-Save to `evaluation/phase6/atp-docstring-homer.prose`.
+Save to `evaluation/phase6/atp-docstring-homer.libretto`.
 
 - [ ] **Step 7: Run with Homer register**
 
 ```
-prose run evaluation/phase6/atp-docstring-homer.prose
+libretto run evaluation/phase6/atp-docstring-homer.libretto
 ```
 
 - [ ] **Step 8: Write syntax-comparison.md**
@@ -1174,20 +1174,20 @@ git commit -m "evaluation: Phase 6 — alternative syntax experiment results"
 - Create: `evaluation/results/phase-7.md`
 - Create: `evaluation/results/final-verdict.md`
 
-**Prerequisite:** Phases 1-5 completed (runs exist in `.prose/runs/` to analyze).
+**Prerequisite:** Phases 1-5 completed (runs exist in `.libretto/runs/` to analyze).
 
 - [ ] **Step 1: Run inspector on a Phase 5 run**
 
 Find the Captain's Chair run from Phase 5:
 
 ```bash
-ls .prose/runs/
+ls .libretto/runs/
 ```
 
-Pick the run from `atp-docstring-evaluator.prose`. Then:
+Pick the run from `atp-docstring-evaluator.libretto`. Then:
 
 ```
-prose run lib/inspector.prose
+libretto run lib/inspector.libretto
 ```
 
 When prompted for inputs:
@@ -1200,7 +1200,7 @@ Check: Does the inspector produce meaningful fidelity scores? Does it detect any
 - [ ] **Step 2: Run cost-analyzer on Phase 5 run**
 
 ```
-prose run lib/cost-analyzer.prose
+libretto run lib/cost-analyzer.libretto
 ```
 
 (Provide the same run_path.) Check: Does it break down cost per session? Can we see the orchestration overhead?
@@ -1208,10 +1208,10 @@ prose run lib/cost-analyzer.prose
 - [ ] **Step 3: Run program-improver on a custom program**
 
 ```
-prose run lib/program-improver.prose
+libretto run lib/program-improver.libretto
 ```
 
-Target: `evaluation/phase3/atp-workspace-fanout.prose` (or another custom program).
+Target: `evaluation/phase3/atp-workspace-fanout.libretto` (or another custom program).
 
 Check: Does it suggest real improvements? Are the suggestions applicable?
 
@@ -1224,11 +1224,11 @@ Fill in `evaluation/results/phase-7.md`. Key question: Does the self-improvement
 Synthesize findings from all 7 phases:
 
 ```markdown
-# OpenProse Evaluation — Final Verdict
+# Libretto Evaluation — Final Verdict
 
 ## Summary Table
 
-| Phase | Feature | .prose vs Baseline | Key Finding |
+| Phase | Feature | .libretto vs Baseline | Key Finding |
 |-------|---------|-------------------|-------------|
 | 1 | Sequential | ... | ... |
 | 2 | Variables/Blocks | ... | ... |
@@ -1240,7 +1240,7 @@ Synthesize findings from all 7 phases:
 
 ## Verdict
 
-Is OpenProse practically useful, or is the concept more interesting than its execution?
+Is Libretto practically useful, or is the concept more interesting than its execution?
 
 ### Strengths
 - ...
@@ -1248,10 +1248,10 @@ Is OpenProse practically useful, or is the concept more interesting than its exe
 ### Weaknesses
 - ...
 
-### When to use OpenProse
+### When to use Libretto
 - ...
 
-### When NOT to use OpenProse
+### When NOT to use Libretto
 - ...
 
 ## Recommendations

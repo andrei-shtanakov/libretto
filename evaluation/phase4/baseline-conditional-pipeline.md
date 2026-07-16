@@ -1,6 +1,6 @@
 # Baseline: Conditional Pipeline (plain prompt, single session, NL branching)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM
+- Model: sonnet, general-purpose agent, no Libretto VM
 - Cost: 91.6K tokens, 16 tool calls, 147s wall time
 - Coverage found: **88%** | Branch taken: **>80% → top-3 quality opportunities**
 - Prompt: see baseline-prompts.md, Task 2
@@ -8,9 +8,9 @@
 ## Key observation
 
 Same measured coverage (88%) and same branch selection (>80% → quality) as the
-.prose `atp-conditional-pipeline` run. The NL-expressed branch condition ("if
+.libretto `atp-conditional-pipeline` run. The NL-expressed branch condition ("if
 below 60%… if 60-80%… if above 80%…") resolved identically to the formal
-`if/elif/else` discretion in the .prose version — both grounded the decision in
+`if/elif/else` discretion in the .libretto version — both grounded the decision in
 a real `pytest --cov` run, not a guess. On this task, formal control flow added
 no branch-selection reliability over the natural-language conditional: both got
 it right because both measured first.

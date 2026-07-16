@@ -11,16 +11,16 @@ from pathlib import Path
 
 import pytest
 
-from openprose_tools.ir import check_ir
-from openprose_tools.ledger import load_run
-from openprose_tools.lint import REGISTER_ALIASES, lint_file
-from openprose_tools.verify import verify_ledger
+from libretto_tools.ir import check_ir
+from libretto_tools.ledger import load_run
+from libretto_tools.lint import REGISTER_ALIASES, lint_file
+from libretto_tools.verify import verify_ledger
 
 REPO = Path(__file__).resolve().parents[2]
 LINT_FIXTURES = REPO / "tests" / "fixtures" / "lint"
 RUN_FIXTURES = REPO / "tests" / "fixtures" / "runs"
 IR_FIXTURES = REPO / "tests" / "fixtures" / "ir"
-ALTS = REPO / "skills" / "prose" / "alts"
+ALTS = REPO / "skills" / "libretto" / "alts"
 
 in_repo = pytest.mark.skipif(
     not LINT_FIXTURES.is_dir(), reason="fixture corpus requires repo checkout"
@@ -30,7 +30,7 @@ in_repo = pytest.mark.skipif(
 def _lint_cases() -> list[Path]:
     if not LINT_FIXTURES.is_dir():
         return []
-    return sorted(LINT_FIXTURES.glob("*.prose"))
+    return sorted(LINT_FIXTURES.glob("*.libretto"))
 
 
 def _run_cases() -> list[Path]:
@@ -61,7 +61,7 @@ def test_fixture_corpus_is_present() -> None:
 @pytest.mark.parametrize("case", _ir_cases(), ids=lambda p: p.name)
 def test_ir_fixture(case: Path) -> None:
     expected = json.loads((case / "expected.json").read_text())
-    result = check_ir(case / "program.prose")
+    result = check_ir(case / "program.libretto")
 
     assert result.ok == expected["ok"]
     if "error_contains" in expected:
@@ -73,11 +73,11 @@ def test_ir_fixture(case: Path) -> None:
 @in_repo
 def test_committed_example_irs_are_fresh() -> None:
     """Every committed IR in examples/dist/ validates against its source."""
-    dist = REPO / "skills" / "prose" / "examples" / "dist"
+    dist = REPO / "skills" / "libretto" / "examples" / "dist"
     irs = sorted(dist.glob("*.ir.json"))
     assert irs, "examples/dist is empty"
     for ir_path in irs:
-        source = dist.parent / f"{ir_path.name.removesuffix('.ir.json')}.prose"
+        source = dist.parent / f"{ir_path.name.removesuffix('.ir.json')}.libretto"
         result = check_ir(source, ir_path)
         assert result.ok, (ir_path.name, result.errors)
 
@@ -135,8 +135,8 @@ def test_register_aliases_in_sync_with_alts() -> None:
 @in_repo
 def test_all_bundled_programs_lint_clean() -> None:
     """Every bundled example and stdlib program is error-free."""
-    programs = sorted((REPO / "skills" / "prose" / "examples").glob("*.prose"))
-    programs += sorted((REPO / "skills" / "prose" / "lib").glob("*.prose"))
+    programs = sorted((REPO / "skills" / "libretto" / "examples").glob("*.libretto"))
+    programs += sorted((REPO / "skills" / "libretto" / "lib").glob("*.libretto"))
     assert programs
     errors = [
         diag.render()

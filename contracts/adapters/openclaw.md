@@ -2,7 +2,7 @@
 
 Binds the host port (`contracts/adapters.md`) to OpenClaw. Extracted
 from the inline "OpenClaw Runtime Mapping" that previously lived in
-`SKILL.md`/`prose.md`; this document is now the canonical mapping.
+`SKILL.md`/`libretto.md`; this document is now the canonical mapping.
 
 ## Primitive bindings
 

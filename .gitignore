@@ -1,5 +1,8 @@
 # Claude Code local files
 .claude/
 
-# OpenProse runtime state
+# Libretto runtime state
+.libretto/
+
+# Legacy OpenProse runtime state
 .prose/

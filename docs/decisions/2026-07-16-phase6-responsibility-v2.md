@@ -7,23 +7,23 @@ model" risk); seven-phase evaluation verdict.
 
 ## Question
 
-Should `open-prose` add the upstream responsibility model — `*.prose.md`
+Should `libretto` add the upstream responsibility model — `*.libretto.md`
 files with `kind: responsibility`, `### Goal / Maintains / Requires /
 Continuity`, plus `watch:`/gateway external-driven wake — on top of the
-v1 imperative `.prose` language? Or is v1 + the Phase 1–5 contract stack
+v1 imperative `.libretto` language? Or is v1 + the Phase 1–5 contract stack
 (receipts, IR, materiality, adapters) this repo's complete scope?
 
 ## What adoption would mean (plan tasks 6.2–6.3)
 
-- A second, additive source format: `*.prose.md` responsibilities;
-  existing `.prose` programs mapped to `function` / `### Execution`.
+- A second, additive source format: `*.libretto.md` responsibilities;
+  existing `.libretto` programs mapped to `function` / `### Execution`.
 - Terminology sync with upstream: `Maintains`, `Requires`, `Continuity`,
   `Receipt`, `World-model`.
 - `watch:` / gateway as external wake (ROADMAP P3 item) — deferred until
   here because it only makes sense with standing responsibilities.
 - VM semantics for *standing* truth-maintenance: re-evaluation cycles,
   wake sources, facet subscriptions — substantially more spec surface in
-  `prose.md`, and a second execution model to keep faithful.
+  `libretto.md`, and a second execution model to keep faithful.
 
 ## Arguments FOR adopting (Option A)
 
@@ -83,9 +83,9 @@ annotated as Phase-6-gated.
 
 **Accepted: Option B — defer.**
 
-`open-prose` scope is v1 imperative `.prose` plus the Phase 1–5 contract
+`libretto` scope is v1 imperative `.libretto` plus the Phase 1–5 contract
 stack: receipts, IR, materiality, adapters, and Python verification
-tooling. Responsibility v2 (`*.prose.md`, standing jobs,
+tooling. Responsibility v2 (`*.libretto.md`, standing jobs,
 `watch:`/gateway) remains Phase-6-gated and will only be reconsidered
 when one of the revisit criteria above is met.
 

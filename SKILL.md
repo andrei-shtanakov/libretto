@@ -1,1 +1,1 @@
-skills/prose/SKILL.md
+skills/libretto/SKILL.md

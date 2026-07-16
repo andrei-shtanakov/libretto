@@ -1,8 +1,8 @@
-# OpenProse Compile IR — `openprose.compile-ir.v1`
+# Libretto Compile IR — `libretto.compile-ir.v1`
 
 The machine contract between the **intelligent compiler** (an LLM reading
 `compiler.md`) and **deterministic tooling** (runtime, CI, inspectors).
-`prose compile <file>` freezes what it understood about a program —
+`libretto compile <file>` freezes what it understood about a program —
 statement inventory, agent/block tables, session wiring, properties,
 diagnostics — into one content-addressed JSON artifact that tools can
 validate without a model.
@@ -11,17 +11,17 @@ Division of labor:
 
 - The **LLM compiler** produces the IR: it resolves semantics (context
   wiring, agent binding, property merging) that no regex can.
-- **`openprose-tools ir-check`** validates it: schema, content hash,
+- **`libretto-tools ir-check`** validates it: schema, content hash,
   source freshness, and internal consistency are mechanically decidable.
-- The **VM** consumes it at run time (`prose.md`): statement IDs and
+- The **VM** consumes it at run time (`libretto.md`): statement IDs and
   wiring come from a fresh IR rather than being re-derived mid-run.
 
 ## Artifact layout
 
 | Context | Path |
 | ------- | ---- |
-| User project | `.prose/dist/{program-stem}.ir.json` |
-| Active pointer | `.prose/dist/manifest.active.json` — `{"programs": {"<source path>": "<ir path>"}}` |
+| User project | `.libretto/dist/{program-stem}.ir.json` |
+| Active pointer | `.libretto/dist/manifest.active.json` — `{"programs": {"<source path>": "<ir path>"}}` |
 | This repo's committed corpus | `examples/dist/{example-stem}.ir.json` |
 
 An IR is **stale** the moment its source file's bytes change; stale IRs
@@ -33,10 +33,10 @@ A concrete (abbreviated) instance:
 
 ```json
 {
-  "v": "openprose.compile-ir.v1",
-  "program": "examples/16-parallel-reviews.prose",
+  "v": "libretto.compile-ir.v1",
+  "program": "examples/16-parallel-reviews.libretto",
   "source": {
-    "path": "examples/16-parallel-reviews.prose",
+    "path": "examples/16-parallel-reviews.libretto",
     "content_hash": "sha256:35db…"
   },
   "state_backend": "filesystem",
@@ -77,7 +77,7 @@ A concrete (abbreviated) instance:
 
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
-| `v` | string | Always `"openprose.compile-ir.v1"` |
+| `v` | string | Always `"libretto.compile-ir.v1"` |
 | `program` | string | Source path as invoked (display identity) |
 | `source.path` | string | Path of the compiled file |
 | `source.content_hash` | string | `sha256:` over the source file's exact bytes — the freshness anchor |
@@ -104,7 +104,7 @@ keys.
 
 Every statement gets an entry, in **source order**, with:
 
-- `id` — per `openprose.statement-id.v1` (`contracts/receipt.md`).
+- `id` — per `libretto.statement-id.v1` (`contracts/receipt.md`).
   **Static base IDs only** (`s001`, `s002`, …): the IR describes the
   program, not an execution — dynamic suffixes (`.x/.i/.b/.d`) appear
   only in receipts. IDs are dense and ascending from `s001`.
@@ -138,13 +138,13 @@ differs — and never in formatting.
 ## Freshness (`compile --check`)
 
 An IR is **fresh** iff `source.content_hash` equals the sha256 of the
-current source bytes. `openprose-tools ir-check <file.prose>`:
+current source bytes. `libretto-tools ir-check <file.libretto>`:
 
 - exit 0 — IR exists, valid, fresh
 - exit 1 — IR missing, schema-invalid, internally inconsistent, or stale
 - exit 2 — source unreadable
 
-`prose compile --check` (SKILL.md) is the embodied alias: it runs
+`libretto compile --check` (SKILL.md) is the embodied alias: it runs
 `ir-check` when tooling is available and reports; it never silently
 recompiles.
 

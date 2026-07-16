@@ -2,8 +2,8 @@
 #
 # Everything here is deterministic and keyless — no model calls. The
 # advisory model-smoke tier is deliberately NOT automated: run a small
-# example manually in an OpenProse-capable host (e.g. `prose run
-# examples/01-hello-world.prose` in Claude Code) before releases.
+# example manually in a Libretto-capable host (e.g. `libretto run
+# examples/01-hello-world.libretto` in Claude Code) before releases.
 
 name: ci
 
@@ -34,7 +34,7 @@ jobs:
         run: uv run pytest -q
 
   lint-programs:
-    name: lint bundled .prose programs
+    name: lint bundled .libretto programs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,14 +43,14 @@ jobs:
         run: uv sync --project tools
       - name: Lint examples + stdlib (errors fail; OP009 warnings allowed)
         run: |
-          uv run --project tools openprose-tools lint \
-            skills/prose/examples/*.prose skills/prose/lib/*.prose
+          uv run --project tools libretto-tools lint \
+            skills/libretto/examples/*.libretto skills/libretto/lib/*.libretto
       - name: ir-check committed compile IRs (freshness gate)
         run: |
           set -e
-          for ir in skills/prose/examples/dist/*.ir.json; do
-            src="skills/prose/examples/$(basename "$ir" .ir.json).prose"
-            uv run --project tools openprose-tools ir-check "$src" --ir "$ir"
+          for ir in skills/libretto/examples/dist/*.ir.json; do
+            src="skills/libretto/examples/$(basename "$ir" .ir.json).libretto"
+            uv run --project tools libretto-tools ir-check "$src" --ir "$ir"
           done
 
   verify-runs:
@@ -64,15 +64,15 @@ jobs:
       - name: Chain-verify the keyless replay corpus
         run: |
           set -e
-          for run in skills/prose/examples/runs/*/; do
+          for run in skills/libretto/examples/runs/*/; do
             echo "== $run"
-            uv run --project tools openprose-tools verify "$run"
+            uv run --project tools libretto-tools verify "$run"
           done
       - name: Inspect determinism (byte-identical --json)
         run: |
           set -e
-          for run in skills/prose/examples/runs/*/; do
-            uv run --project tools openprose-tools inspect "$run" --json > a.json
-            uv run --project tools openprose-tools inspect "$run" --json > b.json
+          for run in skills/libretto/examples/runs/*/; do
+            uv run --project tools libretto-tools inspect "$run" --json > a.json
+            uv run --project tools libretto-tools inspect "$run" --json > b.json
             diff a.json b.json
           done

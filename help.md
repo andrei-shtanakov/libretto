@@ -1,1 +1,1 @@
-skills/prose/help.md
+skills/libretto/help.md

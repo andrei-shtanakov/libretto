@@ -10,15 +10,15 @@
     }
   },
   "blocks": {},
-  "content_hash": "sha256:ca9b2744eb9799a5900e4cd0ffea882bb83c2d1fac62e2210de2393d1758be12",
+  "content_hash": "sha256:8f278ffe0964429a481a85c2771bf4ea47465bff4a8e722bd68d16b7b0d84438",
   "diagnostics": [],
   "hash_algorithm": "sha256",
   "inputs": {},
   "outputs": {},
-  "program": "program.prose",
+  "program": "program.libretto",
   "source": {
     "content_hash": "sha256:3a8d49c9573b0fc13ba37e954d7c60e7551a64e74eeb39f94c2bd14d415bb692",
-    "path": "program.prose"
+    "path": "program.libretto"
   },
   "state_backend": "postgres",
   "statements": [
@@ -39,5 +39,5 @@
       "prompt_hash": "sha256:3d3c4a8117c978e4de40a505bd3a2e74ffa6f8fc8a30c745a33af18fd1a90046"
     }
   ],
-  "v": "openprose.compile-ir.v1"
+  "v": "libretto.compile-ir.v1"
 }

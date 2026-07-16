@@ -1,17 +1,17 @@
-# OpenProse Development Plan (2026-07-16)
+# Libretto Development Plan (2026-07-16)
 
 > **For agentic workers:** This is a roadmap-level development plan. Individual
 > phases should be broken into per-task implementation plans (in this directory)
 > before execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Evolve `open-prose` from a spec-only research repo into an active
+**Goal:** Evolve `libretto` from a spec-only research repo into an active
 downstream of upstream `openprose/prose` — keeping the zero-dependency
 spec-as-VM core, adopting upstream *protocols* (receipts, IR, materiality),
 and adding a thin deterministic tooling layer in Python that fits the
 surrounding ecosystem.
 
 **Architecture:** Two-layer model. Layer 1 (unchanged identity): markdown
-specs + `.prose` programs that an LLM embodies — no runtime binary required
+specs + `.libretto` programs that an LLM embodies — no runtime binary required
 to *run* a program. Layer 2 (new): machine-readable artifacts the VM is
 required to emit (receipts, compile IR) plus a small Python package that
 deterministically *verifies* those artifacts offline — replay, inspect,
@@ -27,9 +27,9 @@ justifies it.
 
 - **External** (dev-workspace analyses, not shipped in this repo — they live
   in the polyrepo coordination workspace and are unavailable in a standalone
-  clone): *"OpenProse — lessons from prose"* (2026-07-16) — what to adopt
+  clone): *"Libretto — lessons from prose"* (2026-07-16) — what to adopt
   from upstream `prose` (receipts, IR, materiality, fixtures, doctor); and
-  *"prose / open-prose comparison"* (2026-07-16) — provenance, divergence,
+  *"prose / libretto comparison"* (2026-07-16) — provenance, divergence,
   governance gaps. Their actionable conclusions are restated in this plan,
   which is self-contained without them.
 - `evaluation/results/final-verdict.md` — 7-phase empirical evaluation:
@@ -56,7 +56,7 @@ archive. Rationale:
 
 ## Global Constraints
 
-- Zero-dependency rule applies to the *spec core*: running a `.prose` program
+- Zero-dependency rule applies to the *spec core*: running a `.libretto` program
   must never require the Python tooling. Tooling is for verification, CI, and
   inspection only.
 - All Python code **introduced by this plan** (the `tools/` package,
@@ -84,17 +84,17 @@ archive. Rationale:
   used by atp-platform). Revisit at end of Phase 4. YAGNI until then.
 - **No HTTP serve / network surface.** Upstream documents this as trusted-
   network-only; we simply don't build it.
-- **No breaking change to `.prose` v1 syntax** in Phases 0–4. Responsibility-
-  style `*.prose.md` (Phase 6) is additive.
+- **No breaking change to `.libretto` v1 syntax** in Phases 0–4. Responsibility-
+  style `*.libretto.md` (Phase 6) is additive.
 
 ---
 
 ## Phase 0 — Spec hygiene (close known defects; no new tech)
 
-Direct output of the evaluation's "For the OpenProse project" recommendations.
+Direct output of the evaluation's "For the Libretto project" recommendations.
 Cheap, high-confidence, all inside existing `.md` files.
 
-**Files:** Modify `compiler.md`, `prose.md`, `guidance/antipatterns.md`,
+**Files:** Modify `compiler.md`, `libretto.md`, `guidance/antipatterns.md`,
 `guidance/patterns.md`, `README.md`, `ANALYSIS.md`, 2 broken example files.
 
 - [ ] **0.1** Close the `output`-as-return-inside-blocks spec gap in
@@ -106,10 +106,10 @@ Cheap, high-confidence, all inside existing `.md` files.
 - [ ] **0.2** Specify cross-frame `context: { x }` resolution (currently
   unspecified; evaluation flagged it).
 - [ ] **0.3** Add `max_concurrent:` to `parallel:` grammar in `compiler.md` +
-  enforcement semantics in `prose.md` (ROADMAP P1; the evaluation's "most
+  enforcement semantics in `libretto.md` (ROADMAP P1; the evaluation's "most
   concrete correctness/safety gap").
 - [ ] **0.4** Fix the specs that currently **promise** cancellation the VM
-  cannot deliver: `prose.md:600` ("Return on first completion, cancel
+  cannot deliver: `libretto.md:600` ("Return on first completion, cancel
   others") and `compiler.md:1388` ("cancel others"). Reword to "discard
   losing branches (no in-flight cancellation on current substrates)" and add
   the cost consequence to `guidance/antipatterns.md`: real cost of a race =
@@ -127,10 +127,10 @@ Cheap, high-confidence, all inside existing `.md` files.
   ~46K token/session floor).
 - [ ] **0.8** Write handoff note to `../prograph-vault/authored/notes/`:
   register `prose/` checkout in `COWORK_CONTEXT.md` (external upstream
-  clone) and record the `open-prose` → `prose` migration relationship.
+  clone) and record the `libretto` → `prose` migration relationship.
   *(Handoff only — we do not edit neighbor repos.)*
 
-**Verification:** `prose compile` (embodied) passes over all 51 examples;
+**Verification:** `libretto compile` (embodied) passes over all 51 examples;
 every RLM example (40–43) compiles under the new `output` rule.
 
 ---
@@ -142,13 +142,13 @@ This is the single highest-leverage adoption from upstream: it makes the
 repo's killer feature (auditability) *checkable by code*.
 
 **Files:**
-- Create: `contracts/receipt.md` (normative spec, `openprose.receipt.v1`)
+- Create: `contracts/receipt.md` (normative spec, `libretto.receipt.v1`)
 - Create: `contracts/vendored/prose-receipt-schema/` (pinned upstream copy +
   `SOURCE.md` with commit hash)
-- Modify: `prose.md`, `state/filesystem.md` (VM must append receipts),
+- Modify: `libretto.md`, `state/filesystem.md` (VM must append receipts),
   `primitives/session.md` (minimal `emit_receipt` host primitive)
-- Create: `tools/` — `uv init` Python package `openprose-tools`
-- Create: `tools/src/openprose_tools/{models.py,inspect.py,verify.py,cli.py}`
+- Create: `tools/` — `uv init` Python package `libretto-tools`
+- Create: `tools/src/libretto_tools/{models.py,inspect.py,verify.py,cli.py}`
 - Create: `tools/tests/`
 - Create: `examples/runs/` — 2–3 committed sample runs (keyless replay corpus)
 
@@ -157,7 +157,7 @@ example instance:
 
 ```json
 {
-  "v": "openprose.receipt.v1",
+  "v": "libretto.receipt.v1",
   "run_id": "20260716-093000-a1b2c3",
   "statement_id": "s014",
   "kind": "session",
@@ -203,38 +203,38 @@ truncated-but-internally-consistent ledger is detectable.
   the rule that receipts are append-only and written *alongside* (not
   instead of) human-readable `state.md`.
 - [ ] **1.2** Fix the **minimal statement-ID contract now**, in
-  `contracts/receipt.md` (`openprose.statement-id.v1`): deterministic
+  `contracts/receipt.md` (`libretto.statement-id.v1`): deterministic
   derivation from source (e.g. `s{NNN}` in source order after block
   expansion, with a documented rule for loop iterations and parallel
   branches: `s014.i2`, `s014.b1`). Phase 3's IR **adopts** this contract as
   its ID scheme — it must not redefine it, so committed sample runs from
   this phase remain valid post-IR.
-- [ ] **1.3** Update `prose.md` + `state/filesystem.md`: the VM MUST append a
+- [ ] **1.3** Update `libretto.md` + `state/filesystem.md`: the VM MUST append a
   receipt after every statement completion; discretion evaluations
   (`**...**`) MUST record their outcome (this is the deterministic-replay
   primitive from ROADMAP P2). Define the minimal `emit_receipt` host
   primitive in `primitives/session.md` (append one canonical-JSON line to
-  the run's `receipts.jsonl`, update `ledger_head`) so `prose.md` never
+  the run's `receipts.jsonl`, update `ledger_head`) so `libretto.md` never
   mandates behavior that isn't a named host capability. The full adapter
   contract still arrives in Phase 5; this is a forward-compatible stub.
 - [ ] **1.4** Bootstrap `tools/` with `uv`; pydantic models mirroring
   `receipt.md`; `pyrefly init`.
-- [ ] **1.5** Implement `openprose-tools inspect <run-dir> [--json]`:
+- [ ] **1.5** Implement `libretto-tools inspect <run-dir> [--json]`:
   headless summary — dispositions (rendered/skipped/failed), token/cost
   rollup per statement and per agent (with `usage.basis` breakdown), failed
   statements, chain-consistency result. Deterministic reader over
   `receipts.jsonl` + `state.md`; no LLM.
-- [ ] **1.6** Implement `openprose-tools verify <run-dir>`: schema
+- [ ] **1.6** Implement `libretto-tools verify <run-dir>`: schema
   validation + chain consistency + `ledger_head` anchor check; non-zero
   exit on breakage.
-- [ ] **1.7** Run 2–3 small `.prose` programs for real, commit their run dirs
+- [ ] **1.7** Run 2–3 small `.libretto` programs for real, commit their run dirs
   under `examples/runs/` as the keyless replay corpus (valid under the
-  frozen `openprose.statement-id.v1`, so they survive Phase 3).
-- [ ] **1.8** Re-point ROADMAP P2 `prose inspect <run>`: the embodied skill
+  frozen `libretto.statement-id.v1`, so they survive Phase 3).
+- [ ] **1.8** Re-point ROADMAP P2 `libretto inspect <run>`: the embodied skill
   command delegates to the deterministic tool when available, falls back to
-  `lib/inspector.prose` otherwise.
+  `lib/inspector.libretto` otherwise.
 
-**Verification:** `uv run pytest` green; `openprose-tools inspect --json`
+**Verification:** `uv run pytest` green; `libretto-tools inspect --json`
 over each committed sample run produces stable output (byte-identical across
 two invocations); `verify` passes on committed runs and fails on a
 deliberately corrupted fixture.
@@ -249,18 +249,18 @@ First CI this repo has ever had.
 **Files:**
 - Create: `tests/fixtures/` (invalid syntax, ambiguous wiring, missing state
   backend, malformed receipts, broken chain, non-compiling namespace cases)
-- Create: `tools/src/openprose_tools/lint.py` (deterministic `.prose` checks)
+- Create: `tools/src/libretto_tools/lint.py` (deterministic `.libretto` checks)
 - Create: `.github/workflows/ci.yml`
 - Modify: `CLAUDE.md`, `README.md` (validation story)
 
 - [ ] **2.1** Extract the deterministically checkable subset of `compiler.md`
-  into `openprose-tools lint <file.prose>`: indentation consistency, known
+  into `libretto-tools lint <file.libretto>`: indentation consistency, known
   keyword set (all 6 registers via the alts keyword tables), balanced blocks,
   flat-namespace duplicate-`let` detection, `session`/`agent` reference
   resolution. *Explicitly documented as a linter, not the compiler — the LLM
   remains the semantic compiler.*
 - [ ] **2.2** Build the fixture corpus: for each known failure class from the
-  evaluation and lessons doc, a minimal `.prose` (or corrupted run dir) +
+  evaluation and lessons doc, a minimal `.libretto` (or corrupted run dir) +
   expected diagnostic. Separate `tests/fixtures/` (CI-only) from `examples/`
   (distributable, all must pass lint).
 - [ ] **2.3** CI tiers in `.github/workflows/ci.yml`:
@@ -278,18 +278,18 @@ fixture PRs fail the required tier.
 
 ## Phase 3 — Compile IR + `compile --check` (P1 from lessons doc)
 
-Makes `prose compile` produce a deterministic, content-addressed artifact —
+Makes `libretto compile` produce a deterministic, content-addressed artifact —
 the contract between the intelligent (LLM) compiler and deterministic tooling.
 
 **Files:**
-- Create: `contracts/ir.md` (`openprose.compile-ir.v1`)
+- Create: `contracts/ir.md` (`libretto.compile-ir.v1`)
 - Modify: `compiler.md` (compile MUST emit the IR JSON), `SKILL.md` (routing)
-- Create: `tools/src/openprose_tools/ir.py` (pydantic model + validator +
+- Create: `tools/src/libretto_tools/ir.py` (pydantic model + validator +
   staleness check)
 - Create: fixtures for malformed IR in `tests/fixtures/`
 
 **IR content (v1):** source files + content hashes; statement/block graph
-with `statement_id`s per the **Phase 1 `openprose.statement-id.v1` contract**
+with `statement_id`s per the **Phase 1 `libretto.statement-id.v1` contract**
 (the IR adopts the existing scheme; it does not redefine it); declared agents
 and their prompts' hashes;
 sessions with wiring (`context:`, bindings in/out); state backend;
@@ -297,13 +297,13 @@ permissions/tools; retry/backoff/timeout properties; diagnostics.
 
 - [ ] **3.1** Write `contracts/ir.md` with full field table and canonical
   JSON serialization rules (sorted keys, no floats for hashes).
-- [ ] **3.2** Update `compiler.md`: `prose compile <file>` writes
-  `.prose/dist/<program>.ir.json` (+ `manifest.active.json` pointer);
+- [ ] **3.2** Update `compiler.md`: `libretto compile <file>` writes
+  `.libretto/dist/<program>.ir.json` (+ `manifest.active.json` pointer);
   IR is the source of `statement_id`s at run time.
-- [ ] **3.3** Implement `openprose-tools ir-check <file.prose>`: exit
+- [ ] **3.3** Implement `libretto-tools ir-check <file.libretto>`: exit
   non-zero if IR missing or stale (source hash mismatch) or schema-invalid.
   Wire into CI required tier for `examples/` that ship committed IR.
-- [ ] **3.4** `prose run` (in `prose.md`): if fresh IR exists, the VM MUST
+- [ ] **3.4** `libretto run` (in `libretto.md`): if fresh IR exists, the VM MUST
   take statement IDs and wiring from it rather than re-deriving.
 
 **Verification:** compile one example (embodied), `ir-check` passes; touch
@@ -317,14 +317,14 @@ Attacks the dominant economic fact (~46K token/session floor, ~51% overhead):
 expensive LLM work must not run when nothing material changed.
 
 **Files:** Modify `compiler.md` (grammar: `material:`, `budget:`),
-`prose.md` (skip semantics, budget enforcement), `contracts/receipt.md`
+`libretto.md` (skip semantics, budget enforcement), `contracts/receipt.md`
 (skipped/surprise semantics already reserved in v1);
 Modify `tools/` (`inspect` gains cost/skip analytics, `cost <run>` command).
 
 - [ ] **4.1** Grammar: optional `material: [binding.field, ...]` on `session`;
   program-level `budget: $N` (ROADMAP P1) with VM halt-on-overage semantics
   driven by receipt usage rollup.
-- [ ] **4.2** VM skip rule in `prose.md`: before spawning a session, compare
+- [ ] **4.2** VM skip rule in `libretto.md`: before spawning a session, compare
   input fingerprints against the last receipt for the same `statement_id`
   (same run for `repeat` loops; previous run when re-running a program with
   `--resume`); if unmoved → `status: skipped`, binding reused, no spawn.
@@ -332,13 +332,13 @@ Modify `tools/` (`inspect` gains cost/skip analytics, `cost <run>` command).
   the new run dir**, and record provenance in the receipt
   (`reused_from: {run_id, statement_id, output_fingerprint}`). Run dirs stay
   self-contained (a committed/archived run never dangles a reference into
-  another run); the fingerprint match is verifiable by `openprose-tools
+  another run); the fingerprint match is verifiable by `libretto-tools
   verify`. Reference-without-copy is rejected for v1 — it breaks the
   keyless-replay corpus and cross-machine reproducibility.
 - [ ] **4.3** Fingerprint spec: sha256 over canonical binding content;
   facet = named sub-path of a binding for `material:` granularity. Document
   in `contracts/receipt.md`.
-- [ ] **4.4** `openprose-tools cost <run-dir>`: rollup by statement, agent,
+- [ ] **4.4** `libretto-tools cost <run-dir>`: rollup by statement, agent,
   model tier; % skipped; comparison across two runs of the same program.
 - [ ] **4.5** Evaluation follow-up: re-run one Phase-2-style composition
   program twice with skip semantics; record measured savings in
@@ -362,7 +362,7 @@ surrounding Python ecosystem as consumable contracts.
 - Create: `contracts/adapters.md` — host-port interface: `spawn_session`,
   `read_state`/`write_state`, `copy_binding`, `check_env`, `run_shell`
   (timeout + sandbox metadata), `ask_user`, `emit_receipt`.
-- Modify: `SKILL.md`, `prose.md` — reference the port instead of hard-wiring
+- Modify: `SKILL.md`, `libretto.md` — reference the port instead of hard-wiring
   Claude Code's Task tool; Claude Code mapping becomes *one adapter document*.
 - Create: `contracts/adapters/claude-code.md` (current behavior, incl. the
   known hook-blocks-binding-writes degradation and its fallback).
@@ -374,29 +374,29 @@ surrounding Python ecosystem as consumable contracts.
 - [ ] **5.2** Add a security contract section (lessons §9): remote `use`/
   registry fetch, shell/tool permissions, state backends with credentials,
   agent-memory leakage; unsafe postures must be explicitly named.
-- [ ] **5.3** Add `prose doctor` to `SKILL.md` + `openprose-tools doctor`:
+- [ ] **5.3** Add `libretto doctor` to `SKILL.md` + `libretto-tools doctor`:
   keyless check of spec files present, state backend writable, expected host
   primitives available, IR freshness.
 - [ ] **5.4** Ecosystem handoff note (see Files above).
 
 **Verification:** `doctor` passes in this checkout; a second adapter doc
 (e.g. Codex CLI) can be drafted purely against `adapters.md` without reading
-`prose.md` — dry-run this as a review exercise.
+`libretto.md` — dry-run this as a review exercise.
 
 ---
 
-## Phase 6 — Responsibility v2 (`*.prose.md`) — research track, gated
+## Phase 6 — Responsibility v2 (`*.libretto.md`) — research track, gated
 
 Optional, **only after Phases 1–4 are stable**, and only if the standing-work
 model proves needed here (the ecosystem already has upstream `prose` for
 production standing work — this repo's angle is research/portability).
 
 - [ ] **6.1** ADR first: do we need responsibilities downstream, or is v1
-  imperative `.prose` + receipts the right scope for this repo? (Decision
+  imperative `.libretto` + receipts the right scope for this repo? (Decision
   input: whether anything in the ecosystem wants standing jobs on a
   Python-verifiable substrate.)
-- [ ] **6.2** If yes: additive `*.prose.md` format (`kind: responsibility`,
-  `### Goal/Maintains/Requires/Continuity`), old `.prose` mapped to
+- [ ] **6.2** If yes: additive `*.libretto.md` format (`kind: responsibility`,
+  `### Goal/Maintains/Requires/Continuity`), old `.libretto` mapped to
   `function`/`### Execution`; terminology synchronized with upstream
   (`Maintains`, `Requires`, `Continuity`, `Receipt`, `World-model`).
 - [ ] **6.3** `watch:`/gateway as external-driven wake (ROADMAP P3) lands
@@ -411,7 +411,7 @@ the files it touches:
 
 ```
 SKILL.md                    — router (entry point, unchanged role)
-prose.md                    — VM execution (runtime spec)
+libretto.md                    — VM execution (runtime spec)
 compiler.md                 — language spec (normative)
 contracts/receipt.md        — audit/replay contract        (Phase 1)
 contracts/ir.md             — machine compile contract     (Phase 3)
@@ -436,12 +436,12 @@ guidance/, lib/, state/, primitives/, alts/ — unchanged
 | 6 Responsibility v2 | 1–4 stable | L | Mental-model break; ADR-gated |
 
 Phases 0→1→2 are the committed near-term path (they close every P0 item from
-the lessons doc and every "For the OpenProse project" recommendation from the
+the lessons doc and every "For the Libretto project" recommendation from the
 evaluation). Phases 3–5 are planned; Phase 6 is a gated research option.
 
 ## Self-review notes
 
-- Every "For the OpenProse project" recommendation from
+- Every "For the Libretto project" recommendation from
   `evaluation/results/final-verdict.md` maps to a Phase 0 task (0.1–0.6).
 - Every P0/P1 row of the lessons doc's priority table maps to Phases 1–5;
   P2 responsibilities → Phase 6; P3 full runtime → explicit Non-Goal.

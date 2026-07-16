@@ -1,14 +1,14 @@
-# OpenProse Evaluation Roadmap
+# Libretto Evaluation Roadmap
 
-Systematic evaluation of OpenProse as a practical tool for multi-agent orchestration. The roadmap progresses from language primitives to production patterns, using atp-platform (`../atp-platform`) as a real-world test target.
+Systematic evaluation of Libretto as a practical tool for multi-agent orchestration. The roadmap progresses from language primitives to production patterns, using atp-platform (`../atp-platform`) as a real-world test target.
 
 ## Approach: Spiral
 
 Each phase follows the same formula:
 
 1. **Run built-in examples** — verify the language construct works
-2. **Write custom .prose for atp-platform** — test practical value
-3. **Baseline comparison** — same task via plain Claude Code prompt (no .prose)
+2. **Write custom .libretto for atp-platform** — test practical value
+3. **Baseline comparison** — same task via plain Claude Code prompt (no .libretto)
 
 Phases 6-7 add experiments with alternative syntaxes and stdlib self-analysis.
 
@@ -16,8 +16,8 @@ Phases 6-7 add experiments with alternative syntaxes and stdlib self-analysis.
 
 | Criterion | How to measure |
 |-----------|---------------|
-| **Fidelity** | Does the VM correctly interpret constructs? Are subagents actually spawned via Task tool? Does `.prose/runs/` state get written? |
-| **Result quality** | Side-by-side comparison of .prose output vs plain prompt output |
+| **Fidelity** | Does the VM correctly interpret constructs? Are subagents actually spawned via Task tool? Does `.libretto/runs/` state get written? |
+| **Result quality** | Side-by-side comparison of .libretto output vs plain prompt output |
 | **Cost** | Token count and number of tool calls for the same task |
 | **Reproducibility** | Does a second run produce a comparable result? |
 
@@ -35,11 +35,11 @@ ATP is a framework-agnostic AI agent testing platform. Python 3.12+, uv workspac
 
 | Example | What it tests |
 |---------|--------------|
-| `01-hello-world.prose` | Minimal VM boot — single session |
-| `02-research-and-summarize.prose` | Two sequential sessions, implicit context passing |
-| `04-write-and-refine.prose` | Write-then-improve cycle |
+| `01-hello-world.libretto` | Minimal VM boot — single session |
+| `02-research-and-summarize.libretto` | Two sequential sessions, implicit context passing |
+| `04-write-and-refine.libretto` | Write-then-improve cycle |
 
-### Custom .prose for atp-platform
+### Custom .libretto for atp-platform
 
 1. **Simple:** "Read the atp-platform README and produce a concise architecture summary"
 2. **Two-step:** "Explore the `adapters/` directory structure, then write a summary of common patterns across adapters"
@@ -50,7 +50,7 @@ Same tasks as plain Claude Code prompts.
 
 ### What to check
 
-- `.prose/runs/{timestamp}/` directory created with state files
+- `.libretto/runs/{timestamp}/` directory created with state files
 - Subagents actually spawned (not simulated inline)
 - Result quality comparable to baseline
 - Any overhead from VM interpretation
@@ -65,11 +65,11 @@ Same tasks as plain Claude Code prompts.
 
 | Example | What it tests |
 |---------|--------------|
-| `13-variables-and-context.prose` | Named bindings, `context: { a, b }` |
-| `14-composition-blocks.prose` | Reusable blocks (function analogue) |
-| `15-inline-sequences.prose` | Chains inside blocks |
+| `13-variables-and-context.libretto` | Named bindings, `context: { a, b }` |
+| `14-composition-blocks.libretto` | Reusable blocks (function analogue) |
+| `15-inline-sequences.libretto` | Chains inside blocks |
 
-### Custom .prose for atp-platform
+### Custom .libretto for atp-platform
 
 1. **Dependency chain:** "Research evaluators/ -> extract common interface -> propose refactoring with base class" — each step consumes the previous step's output
 2. **Reusable block:** Define `review-module(path)` block, invoke it for atp-core, atp-adapters, atp-sdk — test that the same block produces tailored results per input
@@ -95,11 +95,11 @@ Same multi-step analysis as a single structured prompt.
 
 | Example | What it tests |
 |---------|--------------|
-| `16-parallel-reviews.prose` | Basic `parallel:` block |
-| `17-parallel-research.prose` | Parallel data gathering with join |
-| `19-advanced-parallel.prose` | `on-fail` strategies, nested parallelism |
+| `16-parallel-reviews.libretto` | Basic `parallel:` block |
+| `17-parallel-research.libretto` | Parallel data gathering with join |
+| `19-advanced-parallel.libretto` | `on-fail` strategies, nested parallelism |
 
-### Custom .prose for atp-platform
+### Custom .libretto for atp-platform
 
 1. **Fan-out review:** Analyze 4 workspace packages (atp-core, atp-adapters, atp-dashboard, atp-sdk) in parallel, then synthesize findings
 2. **Multi-aspect audit:** Security + performance + code quality review of one module simultaneously
@@ -111,7 +111,7 @@ Sequential prompt for the same 4 packages.
 ### What to check
 
 - Are Task calls actually dispatched in parallel (or serialized)?
-- Execution time: parallel .prose vs sequential baseline
+- Execution time: parallel .libretto vs sequential baseline
 - Join behavior: does the synthesis step receive all parallel outputs?
 - `on-fail: "continue"` — does VM proceed when one subagent fails?
 - Token cost of parallel overhead
@@ -126,11 +126,11 @@ Sequential prompt for the same 4 packages.
 
 | Example | What it tests |
 |---------|--------------|
-| `20-fixed-loops.prose` | `repeat`, `for-each` |
-| `22-error-handling.prose` | `try`/`catch`/`finally` |
-| `25-conditionals.prose` | Branching based on results |
+| `20-fixed-loops.libretto` | `repeat`, `for-each` |
+| `22-error-handling.libretto` | `try`/`catch`/`finally` |
+| `25-conditionals.libretto` | Branching based on results |
 
-### Custom .prose for atp-platform
+### Custom .libretto for atp-platform
 
 1. **Iterative refactoring:** "Find code smell -> fix -> run tests -> if tests fail, revert and try differently" (loop + error handling)
 2. **Conditional pipeline:** "Analyze module. If test coverage < 60% -> write tests. If > 60% -> hunt for bugs in existing tests"
@@ -144,7 +144,7 @@ Same logic described in natural language in a plain prompt.
 - How VM evaluates conditions (LLM judgment, not deterministic) — is it reliable?
 - Loop termination: does `repeat 3` actually repeat 3 times?
 - Error recovery: does `catch` actually get a different subagent approach?
-- **Key question:** Does formal .prose structure produce more reliable branching than verbal instructions?
+- **Key question:** Does formal .libretto structure produce more reliable branching than verbal instructions?
 
 ---
 
@@ -156,12 +156,12 @@ Same logic described in natural language in a plain prompt.
 
 | Example | What it tests |
 |---------|--------------|
-| `30-captains-chair-simple.prose` | Minimal captain + executor + critic |
-| `29-captains-chair.prose` | Full pattern: research-sweep, review-cycle, parallel implementation |
-| `40-rlm-self-refine.prose` | Recursive self-improvement of output |
-| `41-rlm-divide-conquer.prose` | Task decomposition into subtasks |
+| `30-captains-chair-simple.libretto` | Minimal captain + executor + critic |
+| `29-captains-chair.libretto` | Full pattern: research-sweep, review-cycle, parallel implementation |
+| `40-rlm-self-refine.libretto` | Recursive self-improvement of output |
+| `41-rlm-divide-conquer.libretto` | Task decomposition into subtasks |
 
-### Custom .prose for atp-platform
+### Custom .libretto for atp-platform
 
 1. **Captain's Chair for a real feature:** "Add a new evaluator for checking docstrings" — captain plans, researcher studies existing evaluators, coder implements, critic reviews, tester writes tests
 2. **RLM self-refine:** "Write an architecture document for atp-platform" -> critic evaluates -> author improves -> repeat until acceptable quality
@@ -211,22 +211,22 @@ Take **one fixed task** from Phase 5 (Captain's Chair for new evaluator) and run
 
 ## Phase 7: Stdlib and Meta-Capabilities
 
-**Goal:** Test OpenProse's self-improvement loop.
+**Goal:** Test Libretto's self-improvement loop.
 
 ### Built-in stdlib programs
 
 | Program | Purpose |
 |---------|---------|
-| `lib/inspector.prose` | Post-run fidelity analysis |
-| `lib/cost-analyzer.prose` | Cost breakdown per step |
-| `lib/profiler.prose` | Step-by-step profiling |
-| `lib/program-improver.prose` | Auto-improve .prose programs |
+| `lib/inspector.libretto` | Post-run fidelity analysis |
+| `lib/cost-analyzer.libretto` | Cost breakdown per step |
+| `lib/profiler.libretto` | Step-by-step profiling |
+| `lib/program-improver.libretto` | Auto-improve .libretto programs |
 
 ### Application to our work
 
 1. Run **inspector** on results from Phases 1-6 — how faithfully did the VM follow specs?
 2. Run **cost-analyzer** on Captain's Chair runs — quantify orchestration overhead
-3. Run **program-improver** on our custom .prose programs — does it suggest improvements that actually increase quality?
+3. Run **program-improver** on our custom .libretto programs — does it suggest improvements that actually increase quality?
 
 ### What to check
 
@@ -241,9 +241,9 @@ Take **one fixed task** from Phase 5 (Captain's Chair for new evaluator) and run
 After completing all phases, produce:
 
 1. **Results log** per phase: examples run, custom programs written, baseline comparisons, metrics
-2. **Comparative summary table:** .prose vs plain prompt across all phases (quality, cost, reproducibility)
+2. **Comparative summary table:** .libretto vs plain prompt across all phases (quality, cost, reproducibility)
 3. **Syntax experiment report:** Phase 6 findings on metaphor impact
-4. **Verdict:** Is OpenProse practically useful, or is the specification-as-VM concept more interesting than its execution?
+4. **Verdict:** Is Libretto practically useful, or is the specification-as-VM concept more interesting than its execution?
 
 ## Progression dependencies
 

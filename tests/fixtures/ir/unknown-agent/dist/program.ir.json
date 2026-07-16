@@ -10,15 +10,15 @@
     }
   },
   "blocks": {},
-  "content_hash": "sha256:bee045be758f9602de6ae1e12d2fea59323d17a35ac3f8f57bab83ddcc0f6eb6",
+  "content_hash": "sha256:ac01742df7e4dd1d32471dc4f3dd76d04a3f898c9b3c79a7f2cfe502b59db150",
   "diagnostics": [],
   "hash_algorithm": "sha256",
   "inputs": {},
   "outputs": {},
-  "program": "program.prose",
+  "program": "program.libretto",
   "source": {
     "content_hash": "sha256:3a8d49c9573b0fc13ba37e954d7c60e7551a64e74eeb39f94c2bd14d415bb692",
-    "path": "program.prose"
+    "path": "program.libretto"
   },
   "state_backend": "filesystem",
   "statements": [
@@ -39,5 +39,5 @@
       "prompt_hash": "sha256:3d3c4a8117c978e4de40a505bd3a2e74ffa6f8fc8a30c745a33af18fd1a90046"
     }
   ],
-  "v": "openprose.compile-ir.v1"
+  "v": "libretto.compile-ir.v1"
 }

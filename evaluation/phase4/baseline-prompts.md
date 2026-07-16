@@ -1,19 +1,19 @@
 # Phase 4 Baseline Prompts
 
 Plain-prompt equivalents of the two custom Phase 4 programs. Run as single
-sequential sessions (no OpenProse VM, no explicit control-flow structure),
-same model (sonnet). Key question: does formal control flow in .prose add
+sequential sessions (no Libretto VM, no explicit control-flow structure),
+same model (sonnet). Key question: does formal control flow in .libretto add
 reliability over the same logic expressed in natural language?
 
-**Path note (why these prompts differ from the .prose `src/` path):** the
-roadmap and the two `.prose` programs use `../atp-platform/packages/atp-core/src/`
+**Path note (why these prompts differ from the .libretto `src/` path):** the
+roadmap and the two `.libretto` programs use `../atp-platform/packages/atp-core/src/`
 verbatim, but that directory **does not exist** — the real source tree is
 `packages/atp-core/atp/` (tests under the repo-root `tests/unit/`). In every
-run — both `.prose` and baseline — the subagents discovered this and analyzed
+run — both `.libretto` and baseline — the subagents discovered this and analyzed
 `packages/atp-core/atp/`, so all four sessions reviewed the **same** real
 target. These baseline prompts point at the real path directly (rather than the
 nonexistent `src/`) so the baseline doesn't burn a turn rediscovering it; the
-`.prose` files keep the plan's `src/` verbatim, with the adaptation documented
+`.libretto` files keep the plan's `src/` verbatim, with the adaptation documented
 in each run's `state.md`. The comparison is therefore fair (identical target),
 and the path divergence is intentional, not an accident.
 

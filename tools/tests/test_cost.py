@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 
 from conftest import build_chain, make_receipt, write_run
-from openprose_tools.cli import main
-from openprose_tools.cost import compare_runs, cost_run
-from openprose_tools.ledger import load_run
-from openprose_tools.verify import verify_ledger
+from libretto_tools.cli import main
+from libretto_tools.cost import compare_runs, cost_run
+from libretto_tools.ledger import load_run
+from libretto_tools.verify import verify_ledger
 
 ZERO_EXACT = {
     "basis": "exact",

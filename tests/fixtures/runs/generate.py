@@ -58,8 +58,9 @@ def chain(n: int) -> list[dict]:
     return receipts
 
 
-def write(name: str, receipts: list[dict], manifest: dict | None,
-          expected: dict) -> None:
+def write(
+    name: str, receipts: list[dict], manifest: dict | None, expected: dict
+) -> None:
     run_dir = HERE / name
     run_dir.mkdir(exist_ok=True)
     (run_dir / "receipts.jsonl").write_text(
@@ -89,26 +90,40 @@ def main() -> None:
     tampered = chain(3)
     manifest = manifest_for(tampered)
     tampered[1]["agent"] = "tampered"  # hash no longer matches
-    write("tampered-content", tampered, manifest,
-          {"ok": False, "error_contains": "content_hash mismatch"})
+    write(
+        "tampered-content",
+        tampered,
+        manifest,
+        {"ok": False, "error_contains": "content_hash mismatch"},
+    )
 
     # 2. broken-chain: second receipt points at the wrong prev.
     first = receipt("s001", None)
     second = receipt("s002", "sha256:" + "ab" * 32)
-    write("broken-chain", [first, second],
-          manifest_for([first, second]),
-          {"ok": False, "error_contains": "prev broken"})
+    write(
+        "broken-chain",
+        [first, second],
+        manifest_for([first, second]),
+        {"ok": False, "error_contains": "prev broken"},
+    )
 
     # 3. truncated-ledger: tail removed; manifest still anchors old head.
     full = chain(3)
-    write("truncated-ledger", full[:2], manifest_for(full),
-          {"ok": False, "error_contains": "ledger_head"})
+    write(
+        "truncated-ledger",
+        full[:2],
+        manifest_for(full),
+        {"ok": False, "error_contains": "ledger_head"},
+    )
 
     # 4. torn-write: append succeeded, head update did not (warning only).
     torn = chain(2)
-    write("torn-write", torn,
-          manifest_for(torn[:1], status="running"),
-          {"ok": True, "warning_contains": "torn write"})
+    write(
+        "torn-write",
+        torn,
+        manifest_for(torn[:1], status="running"),
+        {"ok": True, "warning_contains": "torn write"},
+    )
 
     print("fixtures regenerated")
 

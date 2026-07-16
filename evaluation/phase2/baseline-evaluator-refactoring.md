@@ -1,6 +1,6 @@
 # Baseline: Evaluator Refactoring (plain prompt, single session)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM
+- Model: sonnet, general-purpose agent, no Libretto VM
 - Cost: 170.1K tokens, 33 tool calls, 217s wall time
 - Prompt: see baseline-prompts.md, Task 1
 
@@ -160,6 +160,6 @@ class Evaluator(ABC):
 6. **Register `GitCommitEvaluator`** — either add it to `EvaluatorRegistry` with an appropriate assertion-type mapping, or, if it's intentionally excluded (e.g. still experimental), document that explicitly in `registry.py` so it doesn't look like a dangling orphan.
 7. **(Stretch, don't couple to the above)** — document the relationship between the three "evaluator-shaped" interfaces (`Evaluator`, `SecurityChecker`, `checkers.Checker`) and `guardrails.py`'s bare `CheckResult` functions. They serve genuinely different granularities (whole-assertion vs. content-scanner vs. deterministic-grader-function vs. pre-pipeline short-circuit) so merging them is not obviously correct, but the field-naming drift between `EvalCheck` (`passed`/`score`) and `CaseVerdict` (`critical_pass`/`rubric_score`) is worth resolving or explicitly justifying so future contributors don't treat it as an oversight.
 
-**Note on prior work**: the task list for this session already shows two completed items — `atp-evaluator-refactoring.prose` and `atp-module-review.prose` — that sound like they cover exactly this ground. It may be worth diffing this analysis against whatever those OpenProse runs produced before acting on the plan above, in case some of these findings (or a differing refactor design) were already reached.
+**Note on prior work**: the task list for this session already shows two completed items — `atp-evaluator-refactoring.libretto` and `atp-module-review.libretto` — that sound like they cover exactly this ground. It may be worth diffing this analysis against whatever those Libretto runs produced before acting on the plan above, in case some of these findings (or a differing refactor design) were already reached.
 
 **Key files referenced** (all under `../atp-platform/atp/evaluators/`): `base.py`, `registry.py`, `__init__.py`, `artifact.py`, `behavior.py`, `composite.py`, `filesystem.py`, `llm_judge.py`, `code_exec.py`, `factuality.py`, `performance.py`, `style.py`, `security/evaluator.py`, `security/base.py`, `findings/evaluator.py`, `git_commit.py`, `guardrails.py`, `checkers/registry.py`, `json_path/checker.py`, `citation_grounding/checker.py`; plus `atp-platform/packages/atp-core/atp/core/results.py` (`EvalCheck`/`EvalResult`/`CaseVerdict`) and `atp-platform/packages/atp-core/atp/loader/models.py` (`Assertion.critical`).

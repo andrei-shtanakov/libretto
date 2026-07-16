@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from openprose_tools.canonical import canonical_json, receipt_content_hash
+from libretto_tools.canonical import canonical_json, receipt_content_hash
 
 RUN_ID = "20260716-120000-test01"
 
@@ -22,7 +22,7 @@ def make_receipt(
 ) -> dict[str, Any]:
     """Build one valid receipt dict (content_hash computed last)."""
     receipt: dict[str, Any] = {
-        "v": "openprose.receipt.v1",
+        "v": "libretto.receipt.v1",
         "run_id": RUN_ID,
         "statement_id": statement_id,
         "kind": kind,
@@ -76,9 +76,9 @@ def write_run(
         return run_dir
     if manifest is True or manifest is None:
         manifest = {
-            "v": "openprose.run.v1",
+            "v": "libretto.run.v1",
             "run_id": RUN_ID,
-            "program": "examples/test.prose",
+            "program": "examples/test.libretto",
             "state_backend": "filesystem",
             "status": "completed",
             "receipt_count": len(receipts),

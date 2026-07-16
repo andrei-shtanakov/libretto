@@ -1,0 +1,78 @@
+# ATP Docstring Evaluator — Borges Register
+# The same Captain's Chair, dreamed through labyrinths
+#
+# Faithful translation of ../phase5/atp-docstring-evaluator.libretto (functional
+# baseline, Phase 5). Same logic, same flat-namespace-safe conditional
+# (declare final_code once, reassign in the branch — Borges has no separate
+# "assignment" keyword, `name = expr` is unchanged across registers).
+# All produced code is PROPOSAL-ONLY — atp-platform is read-only.
+# Outputs requested CONCISELY to control cost across 3 register reruns.
+
+axiom task: "Add a DocstringEvaluator to atp-platform that evaluates whether agent outputs include proper Python docstrings in any generated code"
+axiom codebase: "../atp-platform"
+
+dreamer captain:
+  author: opus
+  query: """You are a senior engineering manager. You NEVER write code directly.
+Break down tasks, dispatch to specialists, validate results.
+Focus on: what context each specialist needs, what can run in parallel."""
+
+dreamer researcher:
+  author: sonnet
+  query: "You are a research specialist. Find specific code patterns quickly. Cite file paths and line numbers. Be concise."
+
+dreamer coder:
+  author: sonnet
+  query: "You are an expert Python engineer. Write clean, idiomatic code following existing patterns."
+
+dreamer critic:
+  author: sonnet
+  query: "You are a code reviewer. Find logic errors, missing edge cases, and deviations from project conventions. Be concise."
+
+dreamer tester:
+  author: sonnet
+  query: "You are a QA engineer. Write comprehensive pytest tests with edge cases."
+
+# Phase 1: Research
+# NOTE: the path below is kept verbatim from the roadmap, but evaluators
+# actually live in {codebase}/atp/evaluators/ (not packages/atp-core/) —
+# researchers discover this and adapt; see ../phase5/atp-docstring-evaluator.libretto
+# and phase-6.md. Reruns should expect the same redirect.
+forking:
+  evaluators = dream: researcher
+    query: "Find all evaluator implementations in {codebase}/packages/atp-core/. List their base class, evaluate() signature, and how they're registered. Be concise."
+  tests = dream: researcher
+    query: "Find all evaluator test files in {codebase}. Show the test patterns: fixtures used, how evaluators are instantiated, assertion patterns. Be concise."
+
+# Phase 2: Plan
+inscribe plan = dream: captain
+  query: """Create an implementation plan for the DocstringEvaluator based on research.
+Specify: file to create, class structure, evaluate() implementation, test file, test cases.
+Follow existing evaluator patterns exactly. Be concise."""
+  memory: { evaluators, tests }
+
+# Phase 3: Implement + Review
+inscribe implementation = dream: coder
+  query: "Implement the DocstringEvaluator according to the plan. Write the complete file."
+  memory: { plan, evaluators }
+
+inscribe review = dream: critic
+  query: "Review the implementation. Check: follows base class interface, handles edge cases (no code in output, empty docstrings, partial docstrings), matches project conventions."
+  memory: { implementation, evaluators }
+
+inscribe final_code = implementation
+should **review found critical issues**:
+  inscribe fixed = dream: coder
+    query: "Fix the critical issues identified in the review."
+    memory: { implementation, review }
+  final_code = fixed
+
+# Phase 4: Test
+inscribe test_code = dream: tester
+  query: "Write pytest tests for the DocstringEvaluator. Cover: code with good docstrings (pass), code with missing docstrings (fail), code with partial docstrings, non-code output (skip). Follow existing test patterns."
+  memory: { final_code, tests }
+
+# Phase 5: Integration summary
+theorem result = dream: captain
+  query: "Summarize: what was built, where files go, how to integrate, any remaining items. Be concise."
+  memory: { final_code, test_code, review }

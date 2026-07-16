@@ -1,11 +1,11 @@
 # Baseline: 4-Package Workspace Review (plain prompt, single sequential session)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM, no explicit parallelism
+- Model: sonnet, general-purpose agent, no Libretto VM, no explicit parallelism
 - Cost: 117.0K tokens, 33 tool calls, 225s wall time
 - Prompt: see baseline-prompts.md
 - Note: the baseline agent *itself* spawned one background sub-agent for the
   largest package (atp-dashboard) — even an unstructured single session reached
-  for parallelism on the heaviest sub-task, which is exactly what the .prose
+  for parallelism on the heaviest sub-task, which is exactly what the .libretto
   `parallel:` block makes explicit and uniform.
 
 ## Output

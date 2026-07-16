@@ -1,15 +1,15 @@
-# OpenProse
+# Libretto
 
 A programming language for AI sessions — zero-dependency, pure-specification.
 
-There is no runtime binary, no package manager, no build system. The entire project is markdown and `.prose` files that an LLM reads to become the OpenProse VM. Simulation with sufficient fidelity is implementation.
+There is no runtime binary, no package manager, no build system. The entire project is markdown and `.libretto` files that an LLM reads to become the Libretto VM. Simulation with sufficient fidelity is implementation.
 
 ## Status
 
 This repository is an **active downstream / research fork** of upstream
 [`openprose/prose`](https://github.com/openprose/prose). Upstream has since
 evolved into a responsibility-based model with a TypeScript runtime
-(Reactor); this repo keeps the original spec-as-VM `.prose` language and
+(Reactor); this repo keeps the original spec-as-VM `.libretto` language and
 adopts upstream *protocols* (receipts, compile IR, materiality) on a
 Python verification toolchain instead. See
 `docs/plans/2026-07-16-development-plan.md` for the roadmap.
@@ -18,7 +18,7 @@ Python verification toolchain instead. See
 evaluation (`evaluation/results/final-verdict.md`) found the VM executes the
 full language faithfully, with output quality matching plain single-session
 work — at a **2–6× token premium**, of which roughly half is session-boundary
-overhead (~46K tokens of context floor per session). OpenProse buys
+overhead (~46K tokens of context floor per session). Libretto buys
 **reliability, auditability, and reproducibility** — independent critic
 sessions, complete replayable run trails, context isolation — not efficiency.
 Use it when those properties matter; use a plain session when they don't.
@@ -26,19 +26,19 @@ Use it when those properties matter; use a plain session when they don't.
 ## Quick Start
 
 ```
-prose run examples/01-hello-world.prose
+libretto run examples/01-hello-world.libretto
 ```
 
 Or try something ambitious:
 
 ```
-prose run examples/37-the-forge.prose
+libretto run examples/37-the-forge.libretto
 ```
 
 ## How It Works
 
-1. You write a `.prose` program — structured instructions for orchestrating AI agents
-2. The LLM reads the VM specification (`prose.md`) and *becomes* the virtual machine
+1. You write a `.libretto` program — structured instructions for orchestrating AI agents
+2. The LLM reads the VM specification (`libretto.md`) and *becomes* the virtual machine
 3. Each `session` statement spawns a real subagent via the Task tool
 4. State persists in files, databases, or conversation context
 
@@ -49,7 +49,7 @@ The syntax is intentionally familiar (Python-like indentation) but the semantics
 | Path | Purpose |
 |------|---------|
 | `SKILL.md` | Activation triggers, command routing |
-| `prose.md` | VM specification — execution semantics |
+| `libretto.md` | VM specification — execution semantics |
 | `compiler.md` | Full grammar, validation rules |
 | `help.md` | FAQs, onboarding, syntax reference |
 | `state/` | 4 state backends (filesystem, in-context, sqlite, postgres) |
@@ -60,17 +60,17 @@ The syntax is intentionally familiar (Python-like indentation) but the semantics
 | `examples/runs/` | Committed real runs — keyless replay/verification corpus |
 | `alts/` | 5 alternative syntax registers |
 | `contracts/` | Machine contracts (receipt ledger) + pinned upstream schemas |
-| `tools/` | Optional Python verification tooling (`openprose-tools inspect\|verify`) |
+| `tools/` | Optional Python verification tooling (`libretto-tools inspect\|verify`) |
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
-| `prose run <file>` | Execute a .prose program |
-| `prose compile <file>` | Validate syntax without running |
-| `prose help` | Interactive help and onboarding |
-| `prose examples` | Browse example programs |
-| `prose update` | Migrate legacy workspace files |
+| `libretto run <file>` | Execute a .libretto program |
+| `libretto compile <file>` | Validate syntax without running |
+| `libretto help` | Interactive help and onboarding |
+| `libretto examples` | Browse example programs |
+| `libretto update` | Migrate legacy workspace files |
 
 ## Examples
 
@@ -87,9 +87,9 @@ The syntax is intentionally familiar (Python-like indentation) but the semantics
 
 ## Learn More
 
-- `prose help` — Interactive onboarding
+- `libretto help` — Interactive onboarding
 - `examples/README.md` — Full example catalog with patterns
-- `guidance/patterns.md` — Best practices for writing .prose programs
+- `guidance/patterns.md` — Best practices for writing .libretto programs
 - `ROADMAP.md` — Development roadmap
 
 ## License

@@ -3,8 +3,8 @@
 from pathlib import Path
 
 from conftest import build_chain, write_run
-from openprose_tools.cli import main
-from openprose_tools.doctor import run_doctor
+from libretto_tools.cli import main
+from libretto_tools.doctor import run_doctor
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -36,7 +36,7 @@ def test_doctor_missing_specs_fails(tmp_path: Path) -> None:
 
 def test_doctor_flags_broken_ledger(tmp_path: Path) -> None:
     receipts = build_chain([{"statement_id": "s001"}])
-    run = write_run(tmp_path / ".prose" / "runs" / "r1", receipts)
+    run = write_run(tmp_path / ".libretto" / "runs" / "r1", receipts)
     ledger = run / "receipts.jsonl"
     ledger.write_text(ledger.read_text().replace("s001", "s999"))
 

@@ -1,10 +1,6 @@
-"""Deterministic verification tooling for OpenProse runs.
+"""Compatibility alias for the renamed ``libretto_tools`` package."""
 
-Implements the reader side of ``contracts/receipt.md``
-(``openprose.receipt.v1``): canonical hashing, ledger verification
-(chain consistency), and headless run inspection. No LLM involved.
-"""
+import libretto_tools as _libretto_tools
+from libretto_tools import *  # noqa: F403
 
-__all__ = ["__version__"]
-
-__version__ = "0.1.0"
+__path__ = _libretto_tools.__path__

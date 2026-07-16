@@ -1,8 +1,8 @@
 # Phase 2 Baseline Prompts
 
-Plain Claude Code prompts equivalent to the two custom .prose programs.
-Each baseline runs as a single plain session (no OpenProse VM, no state files),
-same model (sonnet) as the .prose agents.
+Plain Claude Code prompts equivalent to the two custom .libretto programs.
+Each baseline runs as a single plain session (no Libretto VM, no state files),
+same model (sonnet) as the .libretto agents.
 
 ## Task 1: Evaluator Refactoring
 

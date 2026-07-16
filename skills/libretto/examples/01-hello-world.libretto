@@ -1,0 +1,4 @@
+# Hello World
+# The simplest Libretto program - a single session
+
+session "Say hello and briefly introduce yourself"
