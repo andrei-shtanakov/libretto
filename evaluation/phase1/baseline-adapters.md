@@ -1,6 +1,6 @@
 # ATP Adapters -- Baseline Analysis
 
-Baseline analysis of `atp-platform/packages/atp-adapters/` produced without OpenProse,
+Baseline analysis of `atp-platform/packages/atp-adapters/` produced without Libretto,
 as a plain-prompt comparison point for Phase 1 evaluation.
 
 ---

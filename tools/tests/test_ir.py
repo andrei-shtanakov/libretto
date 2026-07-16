@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from openprose_tools.canonical import canonical_json, content_address
-from openprose_tools.cli import main
-from openprose_tools.ir import check_ir, default_ir_path, file_content_hash
+from libretto_tools.canonical import canonical_json, content_address
+from libretto_tools.cli import main
+from libretto_tools.ir import check_ir, default_ir_path, file_content_hash
 
 SOURCE_TEXT = """# Tiny program
 agent worker:
@@ -25,7 +25,7 @@ def make_ir(source: Path, **overrides: Any) -> dict[str, Any]:
     # prompt_hash: sha256 over the exact prompt text bytes (no quotes)
     prompt_hash = content_address("Do the thing")
     ir: dict[str, Any] = {
-        "v": "openprose.compile-ir.v1",
+        "v": "libretto.compile-ir.v1",
         "program": str(source),
         "source": {"path": str(source), "content_hash": file_content_hash(source)},
         "state_backend": "filesystem",
@@ -72,7 +72,7 @@ def make_ir(source: Path, **overrides: Any) -> dict[str, Any]:
 
 
 def write_case(tmp_path: Path, **overrides: Any) -> Path:
-    source = tmp_path / "program.prose"
+    source = tmp_path / "program.libretto"
     source.write_text(SOURCE_TEXT, encoding="utf-8")
     ir = make_ir(source, **overrides)
     ir_path = default_ir_path(source)
@@ -88,7 +88,7 @@ def test_valid_ir_passes(tmp_path: Path) -> None:
 
 
 def test_missing_ir_fails(tmp_path: Path) -> None:
-    source = tmp_path / "program.prose"
+    source = tmp_path / "program.libretto"
     source.write_text(SOURCE_TEXT, encoding="utf-8")
     result = check_ir(source)
     assert not result.ok
@@ -167,7 +167,7 @@ def test_cli_ir_check(tmp_path: Path, capsys) -> None:
     source = write_case(tmp_path)
     assert main(["ir-check", str(source)]) == 0
     assert "ir-check: OK" in capsys.readouterr().out
-    assert main(["ir-check", str(tmp_path / "nope.prose")]) == 2
+    assert main(["ir-check", str(tmp_path / "nope.libretto")]) == 2
 
 
 def test_unreadable_files_do_not_crash(tmp_path: Path, monkeypatch) -> None:

@@ -2,16 +2,16 @@
 
 *2026-07-16. Follow-up to the seven-phase evaluation: re-running a
 committed program under the new skip semantics
-(`prose.md` → Skip Semantics; `contracts/receipt.md` → Skipped receipts).*
+(`libretto.md` → Skip Semantics; `contracts/receipt.md` → Skipped receipts).*
 
 ## Setup
 
-- **Program:** `examples/16-parallel-reviews.prose` (3 parallel reviewer
+- **Program:** `examples/16-parallel-reviews.libretto` (3 parallel reviewer
   branches + context-wired synthesis; 4 sessions total).
 - **Baseline:** the Phase 1 committed run `20260716-082734-0vx3bm` — all
   four sessions rendered by real subagents.
 - **Candidate:** `20260716-094019-fsylki`, executed as
-  `prose run … --resume 20260716-082734-0vx3bm` with the program
+  `libretto run … --resume 20260716-082734-0vx3bm` with the program
   byte-unchanged.
 
 ## Result
@@ -23,7 +23,7 @@ committed program under the new skip semantics
 | Skipped | 0 | 4/4 (100%) |
 | Chain verify | OK | OK |
 
-`openprose-tools cost --compare` reports `saved 100%`.
+`libretto-tools cost --compare` reports `saved 100%`.
 
 ## Interpretation
 
@@ -48,4 +48,4 @@ This measurement demonstrates the mechanism, not a field distribution of
 savings. The original evaluation's cost findings (2–6× premium for
 multi-session decomposition on *first* runs) are unchanged — skip
 semantics attack repeat runs, which is exactly where the composability
-value of `.prose` programs was supposed to pay off.
+value of `.libretto` programs was supposed to pay off.

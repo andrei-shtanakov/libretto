@@ -1,14 +1,15 @@
 [project]
-name = "openprose-tools"
+name = "libretto-tools"
 version = "0.1.0"
-description = "Deterministic verification tooling for OpenProse runs (receipts, inspect)"
+description = "Deterministic verification tooling for Libretto runs (receipts, inspect)"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 dependencies = ["pydantic>=2.7"]
 
 [project.scripts]
-openprose-tools = "openprose_tools.cli:main"
+libretto-tools = "libretto_tools.cli:main"
+openprose-tools = "libretto_tools.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.5", "pyrefly>=0.1"]
@@ -18,7 +19,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/openprose_tools"]
+packages = ["src/libretto_tools", "src/openprose_tools"]
 
 [tool.ruff]
 line-length = 88

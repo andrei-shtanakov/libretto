@@ -1,0 +1,110 @@
+"""Typed models mirroring ``contracts/receipt.md`` (libretto.receipt.v1).
+
+Models ignore unknown fields (the contract requires consumers to), so
+hashing must always be computed over the raw parsed JSON, never over a
+model dump. Use these for typed inspection only.
+"""
+
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+RECEIPT_SCHEMA = "libretto.receipt.v1"
+LEGACY_RECEIPT_SCHEMA = "openprose.receipt.v1"
+RECEIPT_SCHEMAS = frozenset({RECEIPT_SCHEMA, LEGACY_RECEIPT_SCHEMA})
+
+RUN_SCHEMA = "libretto.run.v1"
+LEGACY_RUN_SCHEMA = "openprose.run.v1"
+RUN_SCHEMAS = frozenset({RUN_SCHEMA, LEGACY_RUN_SCHEMA})
+
+Fingerprint = str  # "sha256:<64 hex>", validated by pattern where it matters
+
+ReceiptKind = Literal[
+    "session", "parallel_branch", "block_call", "discretion", "control"
+]
+ReceiptStatus = Literal["rendered", "skipped", "failed"]
+SurpriseCause = Literal["input", "self", "external"]
+UsageBasis = Literal["exact", "estimated", "unavailable"]
+
+_FP = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+
+
+class Usage(BaseModel):
+    """Token/cost attribution with a mandatory honesty basis."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    basis: UsageBasis
+    input_tokens: int = Field(ge=0)
+    output_tokens: int = Field(ge=0)
+    model: str
+
+    @model_validator(mode="after")
+    def _unavailable_means_zero(self) -> "Usage":
+        """Contract rule: basis 'unavailable' requires zeroed token counts."""
+        if self.basis == "unavailable" and (
+            self.input_tokens != 0 or self.output_tokens != 0
+        ):
+            raise ValueError(
+                "usage.basis 'unavailable' requires input_tokens and "
+                "output_tokens to be 0"
+            )
+        return self
+
+
+class ErrorInfo(BaseModel):
+    """Failure payload for ``status: failed`` receipts."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    type: str
+    message: str
+    retry_count: int = Field(default=0, ge=0)
+
+
+class ReusedFrom(BaseModel):
+    """Skip-provenance record (reserved for Phase 4; always null in v1)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    run_id: str
+    statement_id: str
+    output_fingerprint: Fingerprint = _FP
+
+
+class Receipt(BaseModel):
+    """One ledger line. See ``contracts/receipt.md`` for field semantics."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    v: Literal["libretto.receipt.v1", "openprose.receipt.v1"]
+    run_id: str
+    statement_id: str
+    kind: ReceiptKind
+    agent: str | None
+    input_fingerprints: dict[str, Fingerprint]
+    output_fingerprint: Fingerprint | None = None
+    status: ReceiptStatus
+    surprise_cause: SurpriseCause | None
+    usage: Usage
+    error: ErrorInfo | None
+    detail: dict[str, Any] | None
+    reused_from: ReusedFrom | None
+    prev: Fingerprint | None
+    hash_algorithm: Literal["sha256"]
+    content_hash: Fingerprint = _FP
+
+
+class RunManifest(BaseModel):
+    """``run.json`` — anchors the ledger head."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    v: Literal["libretto.run.v1", "openprose.run.v1"]
+    run_id: str
+    program: str
+    state_backend: str
+    status: str
+    receipt_count: int = Field(ge=0)
+    ledger_head: Fingerprint | None
+    reuse_source_run: str | None = None

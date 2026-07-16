@@ -1,1 +1,1 @@
-skills/prose/compiler.md
+skills/libretto/compiler.md

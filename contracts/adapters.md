@@ -1,10 +1,10 @@
-# OpenProse Host Port — adapter contract
+# Libretto Host Port — adapter contract
 
-OpenProse's portability claim is that any AI harness able to spawn
-subagents can run `.prose` programs ("Prose Complete"). This document
+Libretto's portability claim is that any AI harness able to spawn
+subagents can run `.libretto` programs ("Prose Complete"). This document
 makes that claim precise: the **host port** is the complete set of
 primitives a substrate must provide, with their semantics. Everything
-else in `prose.md` is substrate-independent VM logic.
+else in `libretto.md` is substrate-independent VM logic.
 
 A **substrate adapter** is one document per host —
 `contracts/adapters/{host}.md` — that binds each primitive to concrete
@@ -41,7 +41,7 @@ Summary: {one line}
 ```
 
 Binding target locations follow the active state backend's layout (the
-filesystem default: `.prose/runs/{run_id}/bindings/{name}.md`, frame
+filesystem default: `.libretto/runs/{run_id}/bindings/{name}.md`, frame
 locals suffixed `__{execution_id}` — `state/filesystem.md`).
 Concurrency: the VM may issue several spawns at once for `parallel:`;
 the adapter states its real concurrency model and caps.
@@ -54,7 +54,7 @@ write_state(location, bytes)
 ```
 
 VM-side state I/O for the files the VM owns: `state.md`, `run.json`,
-`program.prose` copies. Subagent outputs are NOT written through this —
+`program.libretto` copies. Subagent outputs are NOT written through this —
 subagents write their own bindings (see `spawn_session`); the VM only
 reads confirmations and locations.
 
@@ -64,7 +64,7 @@ reads confirmations and locations.
 copy_binding(source_location, target_location) -> fingerprint
 ```
 
-Byte-exact copy of a binding (used by skip semantics — `prose.md`),
+Byte-exact copy of a binding (used by skip semantics — `libretto.md`),
 returning the copy's `sha256:` fingerprint so the VM can verify it
 against the reused receipt's `output_fingerprint`.
 
@@ -75,7 +75,7 @@ check_env(requirement) -> {available: bool, detail}
   requirement: state_backend | shell | network | registry | tool name
 ```
 
-Capability probe, used by `prose doctor` and before constructs that
+Capability probe, used by `libretto doctor` and before constructs that
 need optional capabilities (e.g. remote `use`, sqlite backend).
 
 ### run_shell
@@ -119,7 +119,7 @@ An adapter author needs, besides this file: `primitives/session.md` §8
 honesty rules the adapter's usage reporting feeds), and the active state
 backend doc (`state/*.md`) for storage layout — including agent memory
 (`persist:` scoping). What the **VM** does when a primitive fails
-(abort vs fail-one-statement) is VM semantics (`prose.md`), deliberately
+(abort vs fail-one-statement) is VM semantics (`libretto.md`), deliberately
 out of the port's scope.
 
 ## Degradations
@@ -155,7 +155,7 @@ these guarantees MUST be called **unsafe/trusted** in the adapter and in
    sqlite/postgres backends never appear in receipts, state.md, bindings,
    or IRs (contracts already exclude values — this extends to
    configuration). Adapters state where credentials live (env only).
-4. **Agent memory leakage.** User-scoped agent memory (`~/.prose/agents/`)
+4. **Agent memory leakage.** User-scoped agent memory (`~/.libretto/agents/`)
    crosses projects by design — adapters MUST NOT wire user-scoped
    memory into a session unless the program declared `persist: user`.
    Project memory stays in the project.
@@ -171,7 +171,7 @@ these guarantees MUST be called **unsafe/trusted** in the adapter and in
 
 Copy this checklist into `contracts/adapters/{host}.md` and answer every
 line against the host's real behavior — the port above is deliberately
-sufficient to write an adapter without reading `prose.md`:
+sufficient to write an adapter without reading `libretto.md`:
 
 1. Bind each of the seven primitives (mechanism, limits, failure modes).
 2. Concurrency: real parallelism? caps? queueing?

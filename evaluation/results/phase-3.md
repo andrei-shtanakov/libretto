@@ -5,7 +5,7 @@
 - **Date:** 2026-07-15
 - **Claude model (VM):** claude-opus-4-8; sessions per program `model:` (sonnet / haiku), default = inherit
 - **Platform:** macOS Darwin 25.5.0
-- **Claude Code with open-prose plugin (local marketplace)**
+- **Claude Code with libretto plugin (local marketplace)**
 - **State backend:** filesystem (default)
 - **Concurrency substrate:** Agent tool; parallel branches dispatched as multiple Agent calls in a single VM turn (true concurrency)
 
@@ -13,9 +13,9 @@
 
 | Example | Sessions | Ran successfully? | Fidelity notes |
 |---------|----------|-------------------|----------------|
-| `16-parallel-reviews.prose` | 4 | yes | 3 review branches dispatched in one turn, ran concurrently (67–72s overlapping); barrier `all` held; synthesis got all 3 contexts |
-| `17-parallel-research.prose` | 4 | yes | 3 research branches concurrent (33–81s overlapping); `{ history, current, future }` all wired into summary |
-| `19-advanced-parallel.prose` | 20 | yes | All 5 join/failure strategies exercised (see fidelity table); haiku + terse prompts to keep cost down |
+| `16-parallel-reviews.libretto` | 4 | yes | 3 review branches dispatched in one turn, ran concurrently (67–72s overlapping); barrier `all` held; synthesis got all 3 contexts |
+| `17-parallel-research.libretto` | 4 | yes | 3 research branches concurrent (33–81s overlapping); `{ history, current, future }` all wired into summary |
+| `19-advanced-parallel.libretto` | 20 | yes | All 5 join/failure strategies exercised (see fidelity table); haiku + terse prompts to keep cost down |
 
 ### Join-strategy / failure-policy fidelity (example 19)
 
@@ -38,12 +38,12 @@ branch B cost 58K tokens that a real cancelling scheduler would have saved. **Se
 substrate limitation, not a spec violation, but any cost model for `"first"`/`"any"` must
 assume all branches are paid for. Candidate for ROADMAP P1 (pause/cancel protocol).
 
-## Custom .prose Programs
+## Custom .libretto Programs
 
 | Program | Sessions | Ran successfully? | Output quality (1-10) | Notes |
 |---------|----------|-------------------|----------------------|-------|
-| `atp-workspace-fanout.prose` | 5 | yes | 9 | 4-way parallel package review; branches concurrent (33–46s), block wall ~46s (= slowest branch); all 4 bindings present before synthesis; synthesis ranked sdk strongest / dashboard weakest with cross-cutting recs |
-| `atp-multi-audit.prose` | 4 | yes | 9 | 3 concurrent auditors (security/perf/quality) on atp-core; security auditor **verified 2 critical exploits** (validate_command allowlist bypass, validate_volume_mount fail-open + docker.sock) by reasoning against actual code; `on-fail: continue` armed (all 3 succeeded, so not triggered here — separately verified in ex19) |
+| `atp-workspace-fanout.libretto` | 5 | yes | 9 | 4-way parallel package review; branches concurrent (33–46s), block wall ~46s (= slowest branch); all 4 bindings present before synthesis; synthesis ranked sdk strongest / dashboard weakest with cross-cutting recs |
+| `atp-multi-audit.libretto` | 4 | yes | 9 | 3 concurrent auditors (security/perf/quality) on atp-core; security auditor **verified 2 critical exploits** (validate_command allowlist bypass, validate_volume_mount fail-open + docker.sock) by reasoning against actual code; `on-fail: continue` armed (all 3 succeeded, so not triggered here — separately verified in ex19) |
 
 ### Parallel-block behavior checks (from the plan)
 
@@ -53,15 +53,15 @@ assume all branches are paid for. Candidate for ROADMAP P1 (pause/cancel protoco
 
 ## Baseline Comparison
 
-| Task | .prose (parallel) | Baseline (sequential) | .prose wall | Baseline wall | .prose tokens | Baseline tokens | Winner |
+| Task | .libretto (parallel) | Baseline (sequential) | .libretto wall | Baseline wall | .libretto tokens | Baseline tokens | Winner |
 |------|-------------------|----------------------|-------------|---------------|---------------|-----------------|--------|
-| 4-package workspace review | 9/10 | 9/10 | ~86s (46s parallel block + 40s synthesis) | 225s | ~302K (4 branches + synthesis) | 117K | .prose on wall-clock (2.6x faster); baseline on tokens (2.6x cheaper) |
+| 4-package workspace review | 9/10 | 9/10 | ~86s (46s parallel block + 40s synthesis) | 225s | ~302K (4 branches + synthesis) | 117K | .libretto on wall-clock (2.6x faster); baseline on tokens (2.6x cheaper) |
 
 ### Analysis
 
-- **The Phase 3 trade is the mirror image of Phase 2's.** Phase 2 (composition) showed .prose paying *more tokens for depth*. Phase 3 (parallelism) shows .prose paying *more tokens for wall-clock*: the fan-out block finished in ~46s (the slowest single branch) where the sequential baseline took 225s. The speedup ceiling is `sum(branches) / max(branch)` — here 4 branches of 33–46s each: ~160s of work compressed into ~46s.
+- **The Phase 3 trade is the mirror image of Phase 2's.** Phase 2 (composition) showed .libretto paying *more tokens for depth*. Phase 3 (parallelism) shows .libretto paying *more tokens for wall-clock*: the fan-out block finished in ~46s (the slowest single branch) where the sequential baseline took 225s. The speedup ceiling is `sum(branches) / max(branch)` — here 4 branches of 33–46s each: ~160s of work compressed into ~46s.
 - **Token cost scales with branch count, wall-clock does not.** 4 parallel branches ≈ 4× the token floor (~46K each from Phase 2's finding) but ≈ 1× the wall-clock of the slowest branch. Parallelism is a latency optimization that *increases* total token spend — the opposite of what you'd want if optimizing cost, exactly what you want if optimizing time-to-result.
-- **Quality is equivalent** (both 9/10) — but the parallel .prose produced deeper per-package analysis because each reviewer had a full session budget for one package, whereas the sequential baseline amortized one budget across four (and independently chose to sub-spawn the largest package — a spontaneous parallelism that validates the pattern the `parallel:` block formalizes).
+- **Quality is equivalent** (both 9/10) — but the parallel .libretto produced deeper per-package analysis because each reviewer had a full session budget for one package, whereas the sequential baseline amortized one budget across four (and independently chose to sub-spawn the largest package — a spontaneous parallelism that validates the pattern the `parallel:` block formalizes).
 - **The multi-audit run is the strongest evidence for the pattern**: three specialists in parallel each went deep enough to *verify* findings (the security auditor confirmed two exploitable criticals against real code in 250s / 164K tokens) — depth a single generalist session rarely reaches. Parallel specialization + a synthesis join is a genuinely better shape for multi-lens review than one sequential pass.
 
 ## Token Cost Summary
@@ -86,7 +86,7 @@ assume all branches are paid for. Candidate for ROADMAP P1 (pause/cancel protoco
 
 ## Issues / Surprises
 
-1. **Even the unstructured baseline parallelized.** The single-session baseline spontaneously spawned a background sub-agent for the largest package (atp-dashboard). The instinct to fan out on heavy sub-tasks is model-level; OpenProse's contribution is making it *explicit, uniform, and inspectable* rather than ad hoc.
+1. **Even the unstructured baseline parallelized.** The single-session baseline spontaneously spawned a background sub-agent for the largest package (atp-dashboard). The instinct to fan out on heavy sub-tasks is model-level; Libretto's contribution is making it *explicit, uniform, and inspectable* rather than ad hoc.
 2. **`ROADMAP P1 concurrency limits` matters more after this phase.** `parallel:` currently launches *all* branches at once with no `max_concurrent`. Fine for 3–4 branches; a `parallel for` over 50 files would attempt 50 simultaneous subagents. The substrate's own concurrency cap saved us, but the language has no throttle — a real gap for large fan-outs.
 3. **Example 19 is expensive for a semantics test** (20 sessions, ~640K tokens even on haiku with trivial prompts) — the ~46K per-session floor dominates regardless of content. Documented the haiku+terse cost-control choice in the run's state.md.
 4. **The multi-audit security findings look genuinely actionable** (2 verified criticals in `atp/core/security.py`). They live in the run binding `report.md`; whether to action them against atp-platform is a separate, cross-repo decision (atp-platform is a read-only neighbor per repo-boundaries — would need a handoff note, not a direct edit).
@@ -99,13 +99,13 @@ Phase 3 passes. Concurrent dispatch, the `all` barrier, every join strategy (`al
 
 ## Files
 
-- `evaluation/phase3/atp-workspace-fanout.prose` — custom program (4-way fan-out + synthesis)
-- `evaluation/phase3/atp-multi-audit.prose` — custom program (parallel multi-lens audit)
+- `evaluation/phase3/atp-workspace-fanout.libretto` — custom program (4-way fan-out + synthesis)
+- `evaluation/phase3/atp-multi-audit.libretto` — custom program (parallel multi-lens audit)
 - `evaluation/phase3/baseline-prompts.md` — baseline prompt
 - `evaluation/phase3/baseline-workspace-review.md` — baseline output + cost/timing
 - `evaluation/results/phase-3.md` — this report
-- `.prose/runs/20260715-100517-a307de/` — example 16 run
-- `.prose/runs/20260715-100838-ba4c4f/` — example 17 run
-- `.prose/runs/20260715-101213-7948e7/` — example 19 run (join/failure fidelity)
-- `.prose/runs/20260715-101649-d6e08c/` — atp-workspace-fanout run
-- `.prose/runs/20260715-101924-b52ccc/` — atp-multi-audit run
+- `.libretto/runs/20260715-100517-a307de/` — example 16 run
+- `.libretto/runs/20260715-100838-ba4c4f/` — example 17 run
+- `.libretto/runs/20260715-101213-7948e7/` — example 19 run (join/failure fidelity)
+- `.libretto/runs/20260715-101649-d6e08c/` — atp-workspace-fanout run
+- `.libretto/runs/20260715-101924-b52ccc/` — atp-multi-audit run

@@ -12,8 +12,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from openprose_tools.canonical import canonical_json, content_address
-from openprose_tools.ir import file_content_hash
+from libretto_tools.canonical import canonical_json, content_address
+from libretto_tools.ir import file_content_hash
 
 HERE = Path(__file__).resolve().parent
 
@@ -29,10 +29,10 @@ session: worker
 
 def base_ir(source: Path) -> dict[str, Any]:
     return {
-        "v": "openprose.compile-ir.v1",
-        "program": "program.prose",
+        "v": "libretto.compile-ir.v1",
+        "program": "program.libretto",
         "source": {
-            "path": "program.prose",
+            "path": "program.libretto",
             "content_hash": file_content_hash(source),
         },
         "state_backend": "filesystem",
@@ -76,7 +76,7 @@ def seal(ir: dict[str, Any]) -> dict[str, Any]:
 def write(name: str, mutate, expected: dict[str, Any]) -> None:
     case = HERE / name
     (case / "dist").mkdir(parents=True, exist_ok=True)
-    source = case / "program.prose"
+    source = case / "program.libretto"
     source.write_text(PROGRAM, encoding="utf-8")
     ir = base_ir(source)
     ir = mutate(ir)

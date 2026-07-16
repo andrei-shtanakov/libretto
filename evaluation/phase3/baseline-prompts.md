@@ -1,8 +1,8 @@
 # Phase 3 Baseline Prompts
 
-Plain Claude Code prompt equivalent to the parallel `atp-workspace-fanout.prose`.
-Run as a single sequential session (no OpenProse VM, no parallelism), same
-model (sonnet). Key metric: sequential wall-clock vs the parallel .prose block.
+Plain Claude Code prompt equivalent to the parallel `atp-workspace-fanout.libretto`.
+Run as a single sequential session (no Libretto VM, no parallelism), same
+model (sonnet). Key metric: sequential wall-clock vs the parallel .libretto block.
 
 ## Task: 4-package workspace review (sequential)
 

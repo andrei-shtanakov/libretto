@@ -1,0 +1,28 @@
+{
+  "agents": {},
+  "blocks": {},
+  "content_hash": "sha256:28e6b6f0e6959fb3dd936245638b41686128061e00795b273e9a7b399d757fd7",
+  "diagnostics": [],
+  "hash_algorithm": "sha256",
+  "inputs": {},
+  "outputs": {},
+  "program": "examples/01-hello-world.libretto",
+  "source": {
+    "content_hash": "sha256:ca5df7c5bcd9ee2143992b04d64e432e550f989f9c75415398b11784a676bc59",
+    "path": "examples/01-hello-world.libretto"
+  },
+  "state_backend": "filesystem",
+  "statements": [
+    {
+      "agent": null,
+      "binding": null,
+      "context": [],
+      "id": "s001",
+      "is_output": false,
+      "kind": "session",
+      "line": 4,
+      "prompt_hash": "sha256:4c61ee1b0c5fc279671b19c015f2fbcd7f7303bdd9f20233aee92fa82fe13e22"
+    }
+  ],
+  "v": "libretto.compile-ir.v1"
+}

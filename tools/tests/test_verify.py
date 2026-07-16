@@ -4,13 +4,31 @@ import json
 from pathlib import Path
 
 from conftest import build_chain, make_receipt, write_run
-from openprose_tools.canonical import canonical_json
-from openprose_tools.ledger import load_run
-from openprose_tools.verify import verify_ledger
+from libretto_tools.canonical import canonical_json
+from libretto_tools.ledger import load_run
+from libretto_tools.verify import verify_ledger
 
 
 def test_valid_run_passes(valid_run: Path) -> None:
     result = verify_ledger(load_run(valid_run))
+    assert result.ok
+    assert result.warnings == []
+
+
+def test_legacy_openprose_schema_tags_still_verify(tmp_path: Path) -> None:
+    receipt = make_receipt("s001", prev=None, v="openprose.receipt.v1")
+    manifest = {
+        "v": "openprose.run.v1",
+        "run_id": "20260716-120000-test01",
+        "program": "examples/test.prose",
+        "state_backend": "filesystem",
+        "status": "completed",
+        "receipt_count": 1,
+        "ledger_head": receipt["content_hash"],
+    }
+    run_dir = write_run(tmp_path / "run", [receipt], manifest=manifest)
+
+    result = verify_ledger(load_run(run_dir))
     assert result.ok
     assert result.warnings == []
 
@@ -54,9 +72,9 @@ def test_truncation_detected_via_ledger_head(tmp_path: Path) -> None:
 def test_torn_write_is_warning_not_error(tmp_path: Path) -> None:
     receipts = build_chain([{"statement_id": "s001"}, {"statement_id": "s002"}])
     stale_manifest = {
-        "v": "openprose.run.v1",
+        "v": "libretto.run.v1",
         "run_id": "20260716-120000-test01",
-        "program": "examples/test.prose",
+        "program": "examples/test.libretto",
         "state_backend": "filesystem",
         "status": "running",
         "receipt_count": 1,
@@ -72,9 +90,9 @@ def test_torn_write_is_warning_not_error(tmp_path: Path) -> None:
 def test_torn_write_on_first_receipt_is_warning(tmp_path: Path) -> None:
     receipts = build_chain([{"statement_id": "s001"}])
     fresh_manifest = {
-        "v": "openprose.run.v1",
+        "v": "libretto.run.v1",
         "run_id": "20260716-120000-test01",
-        "program": "examples/test.prose",
+        "program": "examples/test.libretto",
         "state_backend": "filesystem",
         "status": "running",
         "receipt_count": 0,

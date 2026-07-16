@@ -1,6 +1,6 @@
 # Baseline Prompts for Phase 1
 
-These are the plain Claude Code prompts used for baseline comparison against the .prose programs.
+These are the plain Claude Code prompts used for baseline comparison against the .libretto programs.
 
 ## Task 1: Architecture Summary
 

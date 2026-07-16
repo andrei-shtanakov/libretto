@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 
 from conftest import build_chain, write_run
-from openprose_tools.cli import main
-from openprose_tools.inspect_run import inspect_run, render_text
-from openprose_tools.ledger import load_run
+from libretto_tools.cli import main
+from libretto_tools.inspect_run import inspect_run, render_text
+from libretto_tools.ledger import load_run
 
 
 def _mixed_run(tmp_path: Path) -> Path:

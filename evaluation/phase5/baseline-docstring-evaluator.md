@@ -1,6 +1,6 @@
 # Baseline: Docstring Evaluator (single session vs Captain's Chair)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM
+- Model: sonnet, general-purpose agent, no Libretto VM
 - Cost: 157.8K tokens, 63 tool calls, 657s wall time (11 min)
 - Prompt: see baseline-prompts.md, Task 1
 - Proposal-only; verified `git status` clean in atp-platform afterwards
@@ -20,7 +20,7 @@
    correctness is machine-checkable, a single session with test execution
    reaches verification quality close to an independent critic.
 3. **What it did NOT have**: an adversarial reviewer hunting for semantic
-   gaps. The .prose critic found the empty-docstring bug by *thinking* about
+   gaps. The .libretto critic found the empty-docstring bug by *thinking* about
    edge cases and then proving it live; the baseline covered placeholder
    docstrings via its own `min_docstring_length` design choice — the same
    class of issue, prevented by design rather than caught by review. Honest
@@ -57,6 +57,6 @@ keep the evaluation record readable — the comparison verdict is what matters.
 
 ## Comparison hook
 
-See phase-5.md, Baseline Comparison — the Captain's Chair (.prose) version of
+See phase-5.md, Baseline Comparison — the Captain's Chair (.libretto) version of
 this same task cost ~717K tokens across 8 sessions; this baseline cost 158K in
 one. Both produced complete, validated proposals of comparable quality.

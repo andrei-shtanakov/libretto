@@ -1,6 +1,6 @@
 # Baseline: Architecture Document (single-shot, no refine loop)
 
-- Model: opus-class (session default), general-purpose agent, no OpenProse VM
+- Model: opus-class (session default), general-purpose agent, no Libretto VM
 - Cost: 87.4K tokens, 24 tool calls, 221s wall time
 - Prompt: see baseline-prompts.md, Task 2
 - Scored post-hoc by the same evaluator rubric as the RLM run for comparability

@@ -2,7 +2,7 @@
 
 import pytest
 
-from openprose_tools.canonical import (
+from libretto_tools.canonical import (
     CanonicalizationError,
     canonical_json,
     content_address,
@@ -39,6 +39,6 @@ def test_content_address_shape() -> None:
 
 
 def test_receipt_content_hash_excludes_itself() -> None:
-    body = {"v": "openprose.receipt.v1", "prev": None}
+    body = {"v": "libretto.receipt.v1", "prev": None}
     hashed = receipt_content_hash({**body, "content_hash": "sha256:" + "0" * 64})
     assert hashed == receipt_content_hash(body)

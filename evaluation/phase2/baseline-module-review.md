@@ -1,6 +1,6 @@
 # Baseline: Module Review x3 (plain prompt, single session)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM
+- Model: sonnet, general-purpose agent, no Libretto VM
 - Cost: 72.4K tokens, 7 tool calls, 232s wall time
 - Prompt: see baseline-prompts.md, Task 2
 

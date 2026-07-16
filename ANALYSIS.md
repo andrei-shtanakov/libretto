@@ -1,11 +1,11 @@
-# OpenProse — Полное исследование
+# Libretto — Полное исследование
 
 > Язык программирования для AI-сессий. 90 файлов, 896KB, 0 runtime-зависимостей.
 
 > **Обновление 2026-07-16.** Статус репозитория: активный downstream / research
 > fork апстрима [`openprose/prose`](https://github.com/openprose/prose)
 > (апстрим ушёл в responsibility-модель + TypeScript Reactor runtime; этот репо
-> сохраняет spec-as-VM `.prose` и перенимает протоколы — receipts, compile IR,
+> сохраняет spec-as-VM `.libretto` и перенимает протоколы — receipts, compile IR,
 > materiality — на Python-тулинге). Семифазная эмпирическая оценка
 > (`evaluation/results/final-verdict.md`) подтвердила faithful-исполнение всего
 > языка при **2–6× token premium**; ~51% затрат представительного запуска —
@@ -19,15 +19,15 @@
 
 - **Тип**: оркестрация (pure — без собственного runtime)
 - **Основные задачи**:
-  - Декларативное описание multi-agent workflows в `.prose` файлах
+  - Декларативное описание multi-agent workflows в `.libretto` файлах
   - Исполнение через "simulation is execution" — LLM читает spec VM и *становится* VM
   - Персистентная память агентов, state management, рекурсивная композиция программ
 - **Пользователи**: разработчики, работающие с Claude Code / OpenCode / Amp. Любой AI harness с поддержкой subagent spawn считается "Prose Complete"
 
 ## 1.2. Контекст
 
-- **Происхождение**: extensions/open-prose внутри проекта openclaw (AI gateway)
-- **Связь с openclaw**: минимальная (5-строчный no-op index.ts + plugin manifest). Core openclaw не зависит от open-prose, open-prose не зависит от core openclaw
+- **Происхождение**: extensions/libretto внутри проекта openclaw (AI gateway)
+- **Связь с openclaw**: минимальная (5-строчный no-op index.ts + plugin manifest). Core openclaw не зависит от libretto, libretto не зависит от core openclaw
 - **Внешние зависимости**: **ноль**. Никаких npm/pip/cargo. Только markdown-файлы, читаемые LLM
 - **Лицензия**: MIT
 
@@ -39,36 +39,36 @@
 
 - **Архстиль**: "specification-as-VM" — спецификация описывает виртуальную машину, LLM симулирует её, симуляция с достаточной точностью *является* реализацией
 - **Основные компоненты**:
-  - `prose.md` (36KB) — execution semantics, VM specification
+  - `libretto.md` (36KB) — execution semantics, VM specification
   - `compiler.md` (83KB, 2971 строк) — full grammar, validation rules, compilation
   - `state/` (4 backends) — filesystem, in-context, sqlite, postgres
   - `primitives/session.md` — subagent context management, compaction guidelines
   - `guidance/` — patterns, antipatterns, system-prompt enforcement
-  - `lib/` (9 .prose programs) — stdlib: inspector, profiler, cost-analyzer, memory и др.
-  - `examples/` (51 .prose programs) — от hello-world до "построй браузер"
+  - `lib/` (9 .libretto programs) — stdlib: inspector, profiler, cost-analyzer, memory и др.
+  - `examples/` (51 .libretto programs) — от hello-world до "построй браузер"
   - `alts/` (5 альтернативных синтаксисов) — Borges, Folk, Arabian Nights, Homer, Kafka
-- **Входы/Выходы**: `.prose` файл → VM (LLM) → Task tool calls → субагенты → артефакты + state
+- **Входы/Выходы**: `.libretto` файл → VM (LLM) → Task tool calls → субагенты → артефакты + state
 
 ### 2.2. Слои и границы
 
 | Слой | Что содержит | Формат |
 |------|-------------|--------|
 | **Language spec** | Грамматика, семантика | `compiler.md` |
-| **VM runtime** | Execution model, spawning, state | `prose.md` |
+| **VM runtime** | Execution model, spawning, state | `libretto.md` |
 | **State backends** | 4 стратегии персистентности | `state/*.md` |
 | **Session primitives** | Контекст, компактификация, output writing | `primitives/session.md` |
 | **Guidance** | Паттерны, антипаттерны, enforcement | `guidance/*.md` |
-| **Stdlib** | Meta-tools: inspect, profile, improve | `lib/*.prose` |
-| **Examples** | 51 программа-образец | `examples/*.prose` |
+| **Stdlib** | Meta-tools: inspect, profile, improve | `lib/*.libretto` |
+| **Examples** | 51 программа-образец | `examples/*.libretto` |
 | **Syntax skins** | 5 альтернативных регистров | `alts/*.md` |
 
 ### 2.3. Хранение состояния
 
 | Backend | Где хранится | Concurrent writes | Resumability | Зависимости |
 |---------|-------------|-------------------|-------------|-------------|
-| **filesystem** (default) | `.prose/runs/{id}/` | Нет (single VM) | Да, через `state.md` | Нет |
+| **filesystem** (default) | `.libretto/runs/{id}/` | Нет (single VM) | Да, через `state.md` | Нет |
 | **in-context** | Conversation history | Нет | Нет (ephemeral) | Нет |
-| **sqlite** | `.prose/runs/{id}/state.db` | Ограничено (table locks) | Да, atomic | `sqlite3` CLI |
+| **sqlite** | `.libretto/runs/{id}/state.db` | Ограничено (table locks) | Да, atomic | `sqlite3` CLI |
 | **postgres** | PostgreSQL database | Да (row-level locks) | Да | `psql` + PostgreSQL server |
 
 **Модель консистентности**: VM — единственный writer для `state.md`. Субагенты пишут свои bindings и agent memory. VM *никогда* не держит полные значения — только указатели (pointer-based context passing).
@@ -94,7 +94,7 @@
 
 ### 3.2. Планирование и управление задачами
 
-- **Формат задания**: `.prose` файл — Python-like indentation syntax, self-evident by design
+- **Формат задания**: `.libretto` файл — Python-like indentation syntax, self-evident by design
 - **Исполнение**: sequential top-to-bottom с explicit control flow
 - **Чекпоинты**: `state.md` (filesystem) или narration markers (in-context) обновляются после каждого statement
 - **Откаты**: `try/catch` для error recovery. Resumption через чтение `state.md`
@@ -134,11 +134,11 @@
 
 | Инструмент | Назначение | Input | Output |
 |-----------|-----------|-------|--------|
-| `inspector.prose` | Post-run evaluation | run path, depth, target | verdicts, scores, diagrams |
-| `profiler.prose` | Performance analysis | run path | cost, time, tokens, cache efficiency |
-| `cost-analyzer.prose` | Cost patterns | run path, scope | hotspots, trends, optimization tips |
-| `calibrator.prose` | Evaluation reliability | run paths, sample | agreement rates, confidence |
-| `error-forensics.prose` | Root cause analysis | run path, focus | classification, chain, fixes |
+| `inspector.libretto` | Post-run evaluation | run path, depth, target | verdicts, scores, diagrams |
+| `profiler.libretto` | Performance analysis | run path | cost, time, tokens, cache efficiency |
+| `cost-analyzer.libretto` | Cost patterns | run path, scope | hotspots, trends, optimization tips |
+| `calibrator.libretto` | Evaluation reliability | run paths, sample | agreement rates, confidence |
+| `error-forensics.libretto` | Root cause analysis | run path, focus | classification, chain, fixes |
 
 ### 4.3. Управление и аудит
 
@@ -152,7 +152,7 @@
 
 ### 5.1. Спецификации задач/флоу
 
-- **Формат**: `.prose` — Python-like indentation, markdown-friendly
+- **Формат**: `.libretto` — Python-like indentation, markdown-friendly
 - **Исполняемость**: полностью исполняемый — VM парсит и выполняет
 - **Грамматика**: формально специфицирована в `compiler.md` (2971 строк, BNF-style)
 - **Версионирование**: нет встроенного. Файлы — обычные текстовые, хранятся в git
@@ -161,19 +161,19 @@
 
 - **Агенты**: `agent name:` с model, prompt, persist, permissions, skills, retry, backoff
 - **Permissions**: `permissions:` блок с read/write/bash allow/deny (enforcement через substrate)
-- **Хранение конфигов**: inline в `.prose` файле. `.prose/.env` для runtime config (key=value)
-- **Разделение**: agents определяются в программе, runtime state в `.prose/runs/`
+- **Хранение конфигов**: inline в `.libretto` файле. `.libretto/.env` для runtime config (key=value)
+- **Разделение**: agents определяются в программе, runtime state в `.libretto/runs/`
 
 ### 5.3. Расширяемость
 
 | Механизм | Что расширяет | Как |
 |----------|-------------|-----|
-| `use "handle/slug"` | Импорт программ из реестра `p.prose.md` | Fetch + parse + execute |
+| `use "handle/slug"` | Импорт программ из реестра `p.libretto.md` | Fetch + parse + execute |
 | `agent name:` | Новые типы агентов | Inline definition |
 | `block name():` | Reusable workflows | Parameterized procedures |
 | `alts/*.md` | Синтаксические скины | Keyword translation map |
 | `state/*.md` | State backends | New backend = new .md spec |
-| `lib/*.prose` | Meta-tools | Self-contained .prose programs |
+| `lib/*.libretto` | Meta-tools | Self-contained .libretto programs |
 
 **Что зашито жёстко**: базовые конструкты языка (session, parallel, loop, if, try). Всё остальное расширяемо.
 
@@ -183,9 +183,9 @@
 
 ### 6.1. Тестирование
 
-- **Отсутствует формальное тестирование** — нет unit tests, нет CI. Это spec-first система: "тестирование" = компиляция .prose файлов через `prose compile`
-- **Compiler (`prose compile`)**: валидирует syntax correctness, semantic validity, self-evidence
-- **Inspector (lib/inspector.prose)**: post-run evaluation, quasi-тестирование через анализ запусков
+- **Отсутствует формальное тестирование** — нет unit tests, нет CI. Это spec-first система: "тестирование" = компиляция .libretto файлов через `libretto compile`
+- **Compiler (`libretto compile`)**: валидирует syntax correctness, semantic validity, self-evidence
+- **Inspector (lib/inspector.libretto)**: post-run evaluation, quasi-тестирование через анализ запусков
 - **Calibrator**: meta-тестирование — насколько light evaluation надёжна vs deep
 - **51 пример** как implicit test suite — если VM может их интерпретировать, spec работает
 
@@ -203,8 +203,8 @@
 ### 6.3. Операционные практики
 
 - **CI/CD**: отсутствует (pure specification)
-- **Миграции**: `prose update` конвертирует legacy format (state.json → .env, execution/ → runs/)
-- **Impact analysis**: любое изменение в `prose.md` или `compiler.md` потенциально влияет на ВСЕ .prose программы
+- **Миграции**: `libretto update` конвертирует legacy format (state.json → .env, execution/ → runs/)
+- **Impact analysis**: любое изменение в `libretto.md` или `compiler.md` потенциально влияет на ВСЕ .libretto программы
 
 ---
 
@@ -212,7 +212,7 @@
 
 ### 7.1. "Simulation is Execution"
 
-Центральная идея: LLM — это универсальный симулятор. Если дать ему достаточно детальное описание VM (prose.md = 36KB), он начинает её симулировать. Но когда симуляция порождает реальные субагенты (Task tool), реальные файлы, реальное состояние — различие между "симулирует VM" и "является VM" исчезает.
+Центральная идея: LLM — это универсальный симулятор. Если дать ему достаточно детальное описание VM (libretto.md = 36KB), он начинает её симулировать. Но когда симуляция порождает реальные субагенты (Task tool), реальные файлы, реальное состояние — различие между "симулирует VM" и "является VM" исчезает.
 
 ### 7.2. Discretion (`**...**`)
 
@@ -229,7 +229,7 @@ if **the review found critical security issues**:
 VM никогда не держит полные значения bindings. Только указатели:
 ```
 Binding written: research
-Location: .prose/runs/20260115-143052-a7b3c9/bindings/research.md
+Location: .libretto/runs/20260115-143052-a7b3c9/bindings/research.md
 Summary: AI safety research covering alignment, robustness...
 ```
 Это позволяет arbitrarily large intermediate values без раздувания контекста VM.
@@ -238,7 +238,7 @@ Summary: AI safety research covering alignment, robustness...
 
 ```
 Run Program → Inspector → VM Improver → PR (улучшает VM)
-                       → Program Improver → PR (улучшает .prose)
+                       → Program Improver → PR (улучшает .libretto)
                        → Cost Analyzer → оптимизации
                        → Calibrator → reliability check
 ```
@@ -274,10 +274,10 @@ Run Program → Inspector → VM Improver → PR (улучшает VM)
 | Метрика | Значение |
 |---------|---------|
 | Файлов всего | 90 |
-| .prose файлов | 64 (51 examples + 9 lib + 4 roadmap) |
+| .libretto файлов | 64 (51 examples + 9 lib + 4 roadmap) |
 | .md файлов | 25 (specs + guidance + alts + README + ROADMAP) |
 | Общий размер | 896 KB |
-| VM spec (prose.md) | 36 KB, 1237 строк |
+| VM spec (libretto.md) | 36 KB, 1237 строк |
 | Compiler spec | 83 KB, 2971 строк |
 | Examples | 51 программа |
 | Stdlib programs | 9 |
@@ -291,7 +291,7 @@ Run Program → Inspector → VM Improver → PR (улучшает VM)
 
 ## 9. Сравнение с аналогами
 
-| | OpenProse | LangChain/LangGraph | AutoGen | CrewAI |
+| | Libretto | LangChain/LangGraph | AutoGen | CrewAI |
 |---|---|---|---|---|
 | **Подход** | Spec → LLM simulates VM | Python library | Python framework | Python framework |
 | **Runtime** | Любой "Prose Complete" LLM | Python process | Python process | Python process |
@@ -331,7 +331,7 @@ Run Program → Inspector → VM Improver → PR (улучшает VM)
 7. **Нет rate limiting / cost budgets**: встроенных средств ограничения расходов нет
 8. **Нет built-in pause/cancel**: зависит от substrate capabilities
 9. **Single point of failure**: VM (LLM session) — единственный оркестратор, если падает — нужен resume
-10. **Registry dependency**: `use "handle/slug"` зависит от `p.prose.md` — single point of failure для imports
+10. **Registry dependency**: `use "handle/slug"` зависит от `p.libretto.md` — single point of failure для imports
 
 ---
 
@@ -349,7 +349,7 @@ Run Program → Inspector → VM Improver → PR (улучшает VM)
 | Паттерн | Источник | Применимость |
 |---------|---------|-------------|
 | Observer vtable | nullclaw | Pluggable observability для run monitoring |
-| Invariant rules | arbiter | Validation constraints для `prose compile` |
+| Invariant rules | arbiter | Validation constraints для `libretto compile` |
 | A11y tree | pinchtab | Browser automation examples |
 | HITL gate | plannotator | `input` mid-program approval patterns |
 
@@ -363,4 +363,4 @@ Run Program → Inspector → VM Improver → PR (улучшает VM)
 
 ---
 
-*Исследование выполнено 2026-02-23. Источник: openclaw/extensions/open-prose → open-prose (standalone copy).*
+*Исследование выполнено 2026-02-23. Источник: openclaw/extensions/libretto → libretto (standalone copy).*

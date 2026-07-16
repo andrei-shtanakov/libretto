@@ -1,7 +1,7 @@
 {
-  "name": "open-prose",
+  "name": "libretto",
   "version": "1.0.0",
-  "description": "OpenProse — a programming language for AI sessions. Zero-dependency, pure-specification VM for orchestrating multi-agent workflows.",
+  "description": "Libretto — a programming language for AI sessions. Zero-dependency, pure-specification VM for orchestrating multi-agent workflows.",
   "license": "MIT",
   "keywords": ["ai", "agents", "orchestration", "programming-language", "workflow"]
 }

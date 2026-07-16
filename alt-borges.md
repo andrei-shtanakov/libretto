@@ -1,1 +1,1 @@
-skills/prose/alt-borges.md
+skills/libretto/alt-borges.md

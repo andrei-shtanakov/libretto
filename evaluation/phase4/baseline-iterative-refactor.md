@@ -1,6 +1,6 @@
 # Baseline: Iterative Refactor (plain prompt, single session, NL control flow)
 
-- Model: sonnet, general-purpose agent, no OpenProse VM
+- Model: sonnet, general-purpose agent, no Libretto VM
 - Cost: 105.1K tokens, 18 tool calls, 214s wall time
 - Iterations actually performed: **1** (self-verified; first attempt passed)
 - Prompt: see baseline-prompts.md, Task 1
@@ -9,12 +9,12 @@
 
 The baseline expressed the loop ("if your fix has problems, try a different
 approach — up to 2 times") as natural language in ONE session. It found the
-same class of smell as the .prose run (list-redaction gap in secret redaction),
+same class of smell as the .libretto run (list-redaction gap in secret redaction),
 proposed a fix, and **self-verified in a single iteration** — its first fix was
 inherently safe (a localized `_redact_list_secrets` helper), so no retry fired.
 
-Contrast with the .prose run: there the fixer and tester were SEPARATE sessions
-with independent context. The .prose fixer's first approach (delegate logging.py
+Contrast with the .libretto run: there the fixer and tester were SEPARATE sessions
+with independent context. The .libretto fixer's first approach (delegate logging.py
 to security.py's helper) introduced a real regression, which the independent
 tester caught, triggering the retry loop. The baseline's single agent verified
 its own work — a weaker, non-adversarial check that happened to pass because the

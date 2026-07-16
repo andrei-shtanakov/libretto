@@ -1,22 +1,22 @@
-# openprose-tools
+# libretto-tools
 
-Deterministic verification tooling for OpenProse runs — the reader side of
-`contracts/receipt.md` (`openprose.receipt.v1`). No LLM involved; output is
+Deterministic verification tooling for Libretto runs — the reader side of
+`contracts/receipt.md` (`libretto.receipt.v1`). No LLM involved; output is
 byte-stable across invocations.
 
-**This package is optional.** Running `.prose` programs never requires it —
+**This package is optional.** Running `.libretto` programs never requires it —
 the spec core stays zero-dependency. The tools exist for CI, audit, and
 inspection of run artifacts after the fact.
 
 ## Commands
 
 ```sh
-uv run openprose-tools inspect <run-dir> [--json]
-uv run openprose-tools verify <run-dir>
-uv run openprose-tools lint <file.prose> [...]
-uv run openprose-tools ir-check <file.prose> [--ir <path>]
-uv run openprose-tools cost <run-dir> [--json] [--compare <baseline-run>]
-uv run openprose-tools doctor [root]
+uv run libretto-tools inspect <run-dir> [--json]
+uv run libretto-tools verify <run-dir>
+uv run libretto-tools lint <file.libretto> [...]
+uv run libretto-tools ir-check <file.libretto> [--ir <path>]
+uv run libretto-tools cost <run-dir> [--json] [--compare <baseline-run>]
+uv run libretto-tools doctor [root]
 ```
 
 - **inspect** — headless summary of a run: dispositions
@@ -34,15 +34,15 @@ uv run openprose-tools doctor [root]
   `compiler.md`: indentation, known keywords (canonical + all five
   alternative registers), balanced blocks, root-scope flat-namespace
   duplicates, agent/block reference resolution. **A linter, not the
-  compiler** — semantic validation stays with `prose compile` (LLM).
+  compiler** — semantic validation stays with `libretto compile` (LLM).
   Diagnostics OP001–OP008 are errors; OP009 marks constructs bundled
   programs use that the grammar doesn't define yet (warning; see
   ROADMAP P2.5). Exit 0 = no errors.
 
 - **ir-check** — validates a compile IR (`contracts/ir.md`,
-  `openprose.compile-ir.v1`) produced by the LLM compiler: schema,
+  `libretto.compile-ir.v1`) produced by the LLM compiler: schema,
   content hash, **source freshness** (the `compile --check` stale gate),
-  dense static statement IDs (per `openprose.statement-id.v1`), and
+  dense static statement IDs (per `libretto.statement-id.v1`), and
   reference integrity. Default IR location:
   `<source-dir>/dist/<stem>.ir.json`. Exit 0 fresh/valid, 1
   missing/stale/invalid, 2 source unreadable.
@@ -55,11 +55,11 @@ uv run openprose-tools doctor [root]
 - **doctor** — keyless workspace health check: spec/contract files
   present, state directory writable, compiled IRs fresh, run ledgers
   chain-consistent (pre-receipt legacy runs are recognized and skipped,
-  not flagged). The host-capability half of `prose doctor` (can this
+  not flagged). The host-capability half of `libretto doctor` (can this
   substrate actually spawn sessions, etc.) is the embodied VM's job —
   see `SKILL.md` and `contracts/adapters.md`.
 
-`<run-dir>` is a `.prose/runs/{run-id}/` directory containing
+`<run-dir>` is a `.libretto/runs/{run-id}/` directory containing
 `receipts.jsonl` (+ `run.json`). Committed sample runs live in
 `examples/runs/` and verify keylessly. The regression corpus for lint and
 verify lives in `tests/fixtures/` (repo checkout only, not shipped).

@@ -9,7 +9,7 @@ on and the reference for `usage.basis` judgments.
 | Primitive | Binding |
 | --------- | ------- |
 | `spawn_session` | **Task tool** (`general-purpose` subagent). Prompt carries: task text, binding target path, context reference paths, do-the-work-yourself leaf constraint (`guidance/patterns.md` → leaf-constraint). Model per session/agent `model:` property |
-| `read_state` / `write_state` | Read / Write / Edit tools on the `.prose/` tree |
+| `read_state` / `write_state` | Read / Write / Edit tools on the `.libretto/` tree |
 | `copy_binding` | File copy (`cp`) + `shasum -a 256` verification |
 | `check_env` | Bash probes (`command -v`, path checks) |
 | `run_shell` | Bash tool. Timeout enforceable (tool-level `timeout`); sandboxing per the host's permission mode — see Security posture |
@@ -39,7 +39,7 @@ Use `max_concurrent:` for programs with more than a handful of branches.
    persists it via `write_state` and proceeds. Fingerprints stay valid
    (they hash the file as written); note the fallback in `state.md`.
 2. **No in-flight cancellation** (see Timeouts) — affects join
-   strategies and budget enforcement exactly as specified in `prose.md`.
+   strategies and budget enforcement exactly as specified in `libretto.md`.
 3. **Usage split unavailable.** The host reports per-subagent token
    totals without an input/output split → `usage.basis: "estimated"`
    with the estimation method (output ≈ binding bytes / 4) noted in

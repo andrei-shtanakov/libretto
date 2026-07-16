@@ -1,6 +1,6 @@
-# OpenProse Receipt Contract — `openprose.receipt.v1`
+# Libretto Receipt Contract — `libretto.receipt.v1`
 
-Machine-readable audit contract for OpenProse runs. Every statement the VM
+Machine-readable audit contract for Libretto runs. Every statement the VM
 completes appends one **receipt** — a JSON object on its own line — to the
 run's ledger. The ledger is the deterministic, replayable record of what
 happened; the human-readable `state.md` narrative is written *alongside* it,
@@ -8,14 +8,14 @@ never instead of it.
 
 This contract is adapted from the upstream `openprose/prose` Reactor receipt
 envelope (see `contracts/vendored/prose-receipt-schema/`), reshaped from
-node/responsibility scope to OpenProse v1 statement scope.
+node/responsibility scope to Libretto v1 statement scope.
 
 ## Files
 
 | File | Purpose |
 | ---- | ------- |
-| `.prose/runs/{run_id}/receipts.jsonl` | Append-only ledger, one receipt per line |
-| `.prose/runs/{run_id}/run.json` | Run manifest; anchors `ledger_head` |
+| `.libretto/runs/{run_id}/receipts.jsonl` | Append-only ledger, one receipt per line |
+| `.libretto/runs/{run_id}/run.json` | Run manifest; anchors `ledger_head` |
 
 Both are written by the VM via the `emit_receipt` host primitive
 (`primitives/session.md`). Subagents never write them.
@@ -26,7 +26,7 @@ A concrete `rendered` example:
 
 ```json
 {
-  "v": "openprose.receipt.v1",
+  "v": "libretto.receipt.v1",
   "run_id": "20260716-093000-a1b2c3",
   "statement_id": "s003",
   "kind": "session",
@@ -54,7 +54,7 @@ A concrete `rendered` example:
 
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
-| `v` | string | Schema tag. Always `"openprose.receipt.v1"` for this version |
+| `v` | string | Schema tag. Always `"libretto.receipt.v1"` for this version |
 | `run_id` | string | The run this receipt belongs to (`{YYYYMMDD}-{HHMMSS}-{random6}`) |
 | `statement_id` | string | Stable statement instance ID (see statement-id contract below) |
 | `kind` | enum | `session` \| `parallel_branch` \| `block_call` \| `discretion` \| `control` |
@@ -104,7 +104,7 @@ the basis — a cost rollup built on estimates says so.
 All numeric fields in a receipt are **integers**. Floats are forbidden by the
 canonical form (see below), which keeps hashing portable across languages.
 
-### Skipped receipts (skip semantics — `prose.md`)
+### Skipped receipts (skip semantics — `libretto.md`)
 
 A `status: skipped` receipt records a memoized reuse, not absence of work:
 
@@ -117,7 +117,7 @@ A `status: skipped` receipt records a memoized reuse, not absence of work:
 - `surprise_cause` — null.
 
 The run manifest of a resuming run carries `reuse_source_run: "<run_id>"`
-(optional field of `openprose.run.v1`; absent when the run reused
+(optional field of `libretto.run.v1`; absent when the run reused
 nothing).
 
 ## Fingerprints and facets
@@ -136,7 +136,7 @@ facet means only that span's fingerprint participates in the memo
 identity. Facet fingerprints appear in `input_fingerprints` under the
 dotted key (`"review.summary": "sha256:…"`).
 
-## Statement IDs — `openprose.statement-id.v1`
+## Statement IDs — `libretto.statement-id.v1`
 
 Receipts need statement identities that are stable across runs of the same
 program and across tooling generations. This contract is **frozen**: the
@@ -178,7 +178,7 @@ Examples:
 - `s009.x3.i2.b1` — inside frame 3, loop iteration 2, parallel branch 1.
 - `s021.d1` — the first discretion condition evaluated within statement 21.
 
-`execution_id` is the VM's monotonic block-frame counter (`prose.md`, Call
+`execution_id` is the VM's monotonic block-frame counter (`libretto.md`, Call
 Stack Management) — unique within a run, so recursive invocations of the same
 block get distinct IDs.
 
@@ -216,9 +216,9 @@ so each receipt commits to the entire chain behind it.
 
 ```json
 {
-  "v": "openprose.run.v1",
+  "v": "libretto.run.v1",
   "run_id": "20260716-093000-a1b2c3",
-  "program": "examples/01-hello-world.prose",
+  "program": "examples/01-hello-world.libretto",
   "state_backend": "filesystem",
   "status": "completed",
   "receipt_count": 7,
@@ -234,7 +234,7 @@ matches the anchored head.
 
 **Guaranteed (chain consistency):** given a trusted `run.json`, any
 corruption, reordering, insertion, deletion, or truncation of
-`receipts.jsonl` is detectable by recomputing hashes (`openprose-tools
+`receipts.jsonl` is detectable by recomputing hashes (`libretto-tools
 verify`).
 
 **Not guaranteed:** tamper-proofing. Whoever can rewrite the ledger can
@@ -265,7 +265,7 @@ be added as a new optional field, never by reinterpreting existing ones.
 
 ## Versioning
 
-`openprose.receipt.v1` is append-frozen: fields may be **added** in future
+`libretto.receipt.v1` is append-frozen: fields may be **added** in future
 versions (bumping `v`), existing fields are never renamed, retyped, or
 reinterpreted. Consumers MUST ignore unknown fields and MUST refuse ledgers
 whose `v` they do not know.
