@@ -5,7 +5,7 @@
 - **Date:** 2026-07-16
 - **Claude model (VM):** claude-opus-4-8; stdlib programs set their own per-agent tiers
 - **Platform:** macOS Darwin 25.5.0
-- **Claude Code with open-prose plugin (local marketplace)**
+- **Tooling:** Claude Code with open-prose plugin (local marketplace)
 - **State backend:** filesystem (default)
 - **Target of analysis:** the Phase 5 Captain's Chair run `20260715-144402-64bf89` (inspector + cost-analyzer) and the Phase 3 fan-out program (program-improver)
 
@@ -15,7 +15,7 @@
 |----------------|--------|----------|--------|
 | `lib/inspector.prose` | `20260716-053914-7ca2cc` | 9 | vm=pass (10/10), task=pass (9/9), fidelity 10, efficiency 8; no undetected issues |
 | `lib/cost-analyzer.prose` | `20260716-054439-d72464` | 5 | 51.3% orchestration overhead quantified; opus captains = 51% of cost from 17% of tokens |
-| `lib/program-improver.prose` | `20260716-055102-30d0e9` | 2 + skip | 8 actionable improvement opportunities for atp-workspace-fanout.prose |
+| `lib/program-improver.prose` | `20260716-055102-30d0e9` | 2 + skip | 8 actionable improvement opportunities for `evaluation/phase3/atp-workspace-fanout.prose` |
 
 ## 1. Inspector — does it produce meaningful fidelity scores? Detect issues we missed?
 
