@@ -118,7 +118,7 @@ Traditional dependency injection containers wire up components from configuratio
 | `use "handle/slug" as name` | Fetch program from p.prose.md, register in Import Registry |
 | `input topic: "..."`        | Bind value from caller, make available as variable         |
 | `output findings = ...`     | Register program output (root scope; register-only)        |
-| `output expr` (in block)    | Return `expr` from the block invocation immediately         |
+| `output expr` (in block)    | Return `expr` from the block invocation immediately        |
 | `agent researcher:`         | Register this agent template for later use                 |
 | `session: researcher`       | Resolve the agent, merge properties, spawn the session     |
 | `resume: captain`           | Load agent memory, spawn session with memory context       |

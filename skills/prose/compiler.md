@@ -518,14 +518,21 @@ The `output expression` form:
 
 #### Validation Rules
 
+Program outputs (`output name = expr`):
+
 | Check                                | Severity | Message                                            |
 | ------------------------------------ | -------- | -------------------------------------------------- |
 | Empty output name                    | Error    | Output name cannot be empty                        |
 | Duplicate output name                | Error    | Output already declared                            |
 | Output name conflicts                | Error    | Output name conflicts with variable                |
-| `output name = expr` in block body   | Error    | Program outputs must be declared at root scope; use `output <expr>` to return from a block |
-| `output expr` at root scope          | Error    | Block return outside a block; use `output name = expr` to declare a program output |
-| Unreachable statements after `output`| Warning  | Statements after an unconditional block return never execute |
+| Declared in block body               | Error    | Program outputs must be declared at root scope; use `output <expr>` to return from a block |
+
+Block returns (`output expr`):
+
+| Check                                | Severity | Message                                            |
+| ------------------------------------ | -------- | -------------------------------------------------- |
+| Used at root scope                   | Error    | Block return outside a block; use `output name = expr` to declare a program output |
+| Unreachable statements after return  | Warning  | Statements after an unconditional block return never execute |
 
 ---
 
@@ -3081,8 +3088,9 @@ parallelBranch → ( IDENTIFIER "=" )? statement
 
 # Loops
 repeatBlock → "repeat" NUMBER ( "as" IDENTIFIER )? ":" NEWLINE INDENT statement* DEDENT
-forEachBlock → "parallel"? "for" IDENTIFIER ( "," IDENTIFIER )? "in" collection parallelMods? ":" NEWLINE INDENT statement* DEDENT
-             # parallelMods (e.g. max_concurrent) valid only with "parallel" prefix
+forEachBlock → forEachSeq | forEachPar
+forEachSeq   → "for" IDENTIFIER ( "," IDENTIFIER )? "in" collection ":" NEWLINE INDENT statement* DEDENT
+forEachPar   → "parallel" "for" IDENTIFIER ( "," IDENTIFIER )? "in" collection parallelMods? ":" NEWLINE INDENT statement* DEDENT
 loopBlock   → "loop" ( ( "until" | "while" ) discretion )? loopMods? ( "as" IDENTIFIER )? ":" NEWLINE INDENT statement* DEDENT
 loopMods    → "(" "max" ":" NUMBER ")"
 
