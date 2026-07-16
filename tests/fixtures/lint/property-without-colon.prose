@@ -1,0 +1,9 @@
+# Fixture: a property keyword used without the `key:` shape is not a
+# valid statement. Expected: OP004 on the colon-less prompt line.
+
+agent worker:
+  model: haiku
+  prompt: "You do the work"
+
+session: worker
+  prompt "missing the colon"

@@ -221,8 +221,12 @@ let approved = session: architect
   """
   context: { top_candidates, user_review }
 
+# Declared once; both halt paths assign the same output key. Empty on a
+# run that proceeds past the gates (register-only semantics).
+output result = ""
+
 if **there are no approved proposals**:
-  output result = {
+  result = {
     status: "no-changes",
     synthesis: synthesis,
     proposals: top_candidates,
@@ -302,7 +306,7 @@ if **the guardian recommends halting**:
   """
 
   if **the user declined to override**:
-    output guardian_halt_result = {
+    result = {
       status: "halted-by-guardian",
       proposals: approved,
       risks: risks

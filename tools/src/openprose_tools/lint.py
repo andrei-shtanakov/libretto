@@ -387,7 +387,7 @@ def _check_statement_keyword(line: _Line, path: str, diags: list[Diagnostic]) ->
         return  # punctuation-led lines (e.g. bare `***:`) are not checked
     word = first.group(1)
 
-    if word in _STARTERS or word in _PROPERTIES:
+    if word in _STARTERS:
         return
     if word in _UNSPECIFIED_STARTERS:
         diags.append(

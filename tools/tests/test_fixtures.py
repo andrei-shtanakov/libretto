@@ -38,6 +38,17 @@ def _run_cases() -> list[Path]:
 
 
 @in_repo
+def test_fixture_corpus_is_present() -> None:
+    """Both fixture families exist and are non-empty in a repo checkout.
+
+    Guards against parametrized tests silently collecting zero cases
+    when a corpus directory is deleted or moved.
+    """
+    assert _lint_cases(), "tests/fixtures/lint is empty"
+    assert _run_cases(), "tests/fixtures/runs is empty"
+
+
+@in_repo
 @pytest.mark.parametrize("case", _lint_cases(), ids=lambda p: p.stem)
 def test_lint_fixture(case: Path) -> None:
     expected = json.loads(
