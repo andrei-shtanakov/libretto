@@ -34,7 +34,8 @@ When a user invokes `prose <command>`, intelligently route based on intent:
 | `prose help`            | Load `help.md`, guide user to what they need                  |
 | `prose run <file>`      | Load VM (`prose.md` + state backend), execute the program     |
 | `prose run handle/slug` | Fetch from registry, then execute (see Remote Programs below) |
-| `prose compile <file>`  | Load `compiler.md`, validate the program                      |
+| `prose compile <file>`  | Load `compiler.md`, validate + emit compile IR (`contracts/ir.md`) |
+| `prose compile --check <file>` | Freshness gate: `openprose-tools ir-check` — never recompiles |
 | `prose inspect <run>`   | Deterministic run summary (see Inspecting Runs below)         |
 | `prose update`          | Run migration (see Migration section below)                   |
 | `prose examples`        | Show or run example programs from `examples/`                 |

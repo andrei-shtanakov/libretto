@@ -3,8 +3,10 @@
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from .inspect_run import inspect_run, render_text
+from .ir import check_ir, default_ir_path
 from .ledger import LedgerLoadError, load_run
 from .lint import lint_file
 from .verify import verify_ledger
@@ -39,7 +41,32 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_lint.add_argument("files", nargs="+", help=".prose files to lint")
 
+    p_ir = sub.add_parser(
+        "ir-check",
+        help="validate a compiled IR: schema, hashes, freshness, consistency",
+    )
+    p_ir.add_argument("source", help="the .prose source file")
+    p_ir.add_argument(
+        "--ir",
+        default=None,
+        help="IR path (default: <source-dir>/dist/<stem>.ir.json)",
+    )
+
     args = parser.parse_args(argv)
+
+    if args.command == "ir-check":
+        source = Path(args.source)
+        if not source.is_file():
+            print(f"error: source not found: {source}", file=sys.stderr)
+            return 2
+        result = check_ir(source, args.ir)
+        for warning in result.warnings:
+            print(f"warning: {warning}")
+        for error in result.errors:
+            print(f"error: {error}")
+        ir_path = Path(args.ir) if args.ir else default_ir_path(source)
+        print(f"ir-check: {'OK' if result.ok else 'FAIL'} ({ir_path})")
+        return 0 if result.ok else 1
 
     if args.command == "lint":
         errors = warnings = 0

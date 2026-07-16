@@ -45,6 +45,13 @@ jobs:
         run: |
           uv run --project tools openprose-tools lint \
             skills/prose/examples/*.prose skills/prose/lib/*.prose
+      - name: ir-check committed compile IRs (freshness gate)
+        run: |
+          set -e
+          for ir in skills/prose/examples/dist/*.ir.json; do
+            src="skills/prose/examples/$(basename "$ir" .ir.json).prose"
+            uv run --project tools openprose-tools ir-check "$src" --ir "$ir"
+          done
 
   verify-runs:
     name: verify committed run ledgers
