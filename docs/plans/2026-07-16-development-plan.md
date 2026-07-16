@@ -25,10 +25,13 @@ justifies it.
 
 ## Sources / inputs
 
-- `../_cowork_output/open-prose-lessons-from-prose-2026-07-16.md` — what to
-  adopt from upstream `prose` (receipts, IR, materiality, fixtures, doctor).
-- `../_cowork_output/prose-open-prose-comparison-2026-07-16.md` — provenance,
-  divergence, governance gaps.
+- **External** (dev-workspace analyses, not shipped in this repo — they live
+  in the polyrepo coordination workspace and are unavailable in a standalone
+  clone): *"OpenProse — lessons from prose"* (2026-07-16) — what to adopt
+  from upstream `prose` (receipts, IR, materiality, fixtures, doctor); and
+  *"prose / open-prose comparison"* (2026-07-16) — provenance, divergence,
+  governance gaps. Their actionable conclusions are restated in this plan,
+  which is self-contained without them.
 - `evaluation/results/final-verdict.md` — 7-phase empirical evaluation:
   faithful execution, but ~2–6× token premium, ~51% session-boundary
   overhead, concrete spec gaps.
@@ -56,9 +59,10 @@ archive. Rationale:
 - Zero-dependency rule applies to the *spec core*: running a `.prose` program
   must never require the Python tooling. Tooling is for verification, CI, and
   inspection only.
-- All Python code follows the workspace standards: `uv` only (never pip),
-  type hints everywhere, `pyrefly check` clean, `ruff` clean, 88-char lines,
-  `pytest` with anyio for async.
+- All Python code **introduced by this plan** (the `tools/` package,
+  Phase 1 onward — the repo has none today) must follow the workspace
+  standards: `uv` only (never pip), type hints everywhere, `pyrefly check`
+  clean, `ruff` clean, 88-char lines, `pytest` with anyio for async.
 - Cross-repo contracts from `prose` are **vendored as pinned copies** under
   `contracts/vendored/` with source commit hash recorded — never referenced by
   path into `../prose/` (repo-boundaries rule).
@@ -148,29 +152,38 @@ repo's killer feature (auditability) *checkable by code*.
 - Create: `tools/tests/`
 - Create: `examples/runs/` — 2–3 committed sample runs (keyless replay corpus)
 
-**Receipt schema (`receipts.jsonl`, one JSON object per line):**
+**Receipt format (`receipts.jsonl`, one JSON object per line).** A concrete
+example instance:
 
 ```json
 {
   "v": "openprose.receipt.v1",
   "run_id": "20260716-093000-a1b2c3",
   "statement_id": "s014",
-  "kind": "session | parallel_branch | block_call | discretion | control",
+  "kind": "session",
   "agent": "researcher",
-  "input_fingerprints": {"topic": "sha256:..."},
-  "output_fingerprint": "sha256:...",
-  "status": "rendered | skipped | failed",
-  "surprise_cause": "input | self | external | null",
+  "input_fingerprints": {"topic": "sha256:9f2c..."},
+  "output_fingerprint": "sha256:4b7e...",
+  "status": "rendered",
+  "surprise_cause": null,
   "usage": {
-    "basis": "exact | estimated | unavailable",
-    "input_tokens": 0,
-    "output_tokens": 0,
-    "model": "..."
+    "basis": "exact",
+    "input_tokens": 46210,
+    "output_tokens": 1840,
+    "model": "claude-sonnet-5"
   },
   "error": null,
-  "prev_receipt_hash": "sha256:..."
+  "prev_receipt_hash": "sha256:c81d..."
 }
 ```
+
+Allowed enum values (normative list lives in `contracts/receipt.md`):
+
+- `kind`: `session`, `parallel_branch`, `block_call`, `discretion`, `control`
+- `status`: `rendered`, `skipped`, `failed`
+- `surprise_cause`: `input`, `self`, `external`, or JSON `null`
+- `usage.basis`: `exact`, `estimated`, `unavailable`
+- `error`: JSON `null`, or a structured object on `status: failed`
 
 `usage.basis` is mandatory and honest: `exact` only when the substrate
 reports real token counts; `estimated` when the VM approximates (method
