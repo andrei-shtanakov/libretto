@@ -14,9 +14,11 @@
 
 ## P2 — Developer Experience
 
-- **Deterministic replay** — save all discretion evaluations (`**...**`) and their outcomes in state. On replay, substitute saved decisions instead of re-evaluating
-- **Structured error reporting** — on runtime failure emit: statement, line context, agent state, retry count. Currently errors depend on substrate
-- **`prose inspect <run>`** — CLI command for viewing completed runs (wrapper over `lib/inspector.prose`)
+- **Deterministic replay** — save all discretion evaluations (`**...**`) and their outcomes in state. On replay, substitute saved decisions instead of re-evaluating.
+  *Recording half done (Phase 1, 2026-07-16): every discretion emits a receipt with condition/outcome/branch (`contracts/receipt.md`). Remaining: a VM replay mode that substitutes recorded outcomes.*
+- **Structured error reporting** — on runtime failure emit: statement, line context, agent state, retry count. Currently errors depend on substrate.
+  *Partially done (Phase 1): failed statements emit receipts with `error.type/message/retry_count`. Remaining: line context + agent state capture.*
+- [x] **`prose inspect <run>`** — done (Phase 1, 2026-07-16): deterministic `openprose-tools inspect|verify` over the receipt ledger; `lib/inspector.prose` remains the no-tooling fallback
 
 ## P3 — Language Extensions
 
