@@ -40,7 +40,8 @@ adopt into the grammar or rewrite the programs:
 
 - **Type annotations for bindings** — optional typing: `let research: ResearchReport = session "..."`. Compile-time validation via `compiler.md`
 - **`timeout:` property** — native timeout for sessions (`timeout: 60s`). Currently no way to limit subagent execution time
-- **`watch:` event blocks** — react to external events (filesystem, webhooks). New primitive for event-driven workflows
+- **`watch:` event blocks** — react to external events (filesystem, webhooks). New primitive for event-driven workflows.
+  *Phase-6-gated (ADR 2026-07-16, accepted—deferred: `docs/decisions/2026-07-16-phase6-responsibility-v2.md`) — only makes sense with standing responsibilities; interim pattern: scheduled `--resume` (`guidance/patterns.md` → scheduled-resume)*
 
 ## P4 — Ecosystem
 
