@@ -285,6 +285,31 @@ Each session also carries a fixed context-loading floor (~46K tokens
 observed), so the cheapest session is the one you don't spawn: prefer fewer,
 better-scoped sessions before tuning their models.
 
+#### scheduled-resume (standing work without standing jobs)
+
+For "keep this fresh" needs — a recurring report, a periodically
+re-checked audit — you do not need a standing-job model. Re-run the same
+program on a schedule with `--resume` pointing at the previous run:
+
+```sh
+# e.g. from cron / CI: re-run daily, reusing everything unchanged
+prose run reports/weekly-digest.prose --resume <last-run-id>
+```
+
+Skip semantics (`prose.md`) make cost scale with surprise: sessions whose
+material inputs are unchanged are skipped with full provenance — measured
+at **100% token savings** on an unchanged program
+(`evaluation/results/phase-4-skip-addendum.md`) — and only the statements
+whose inputs actually moved re-render. Each scheduled run leaves its own
+verifiable ledger; `openprose-tools cost --compare` shows what changed
+between runs.
+
+Use `material:` to keep the memo identity tight (e.g. re-render the
+digest only when source data moved, not when a style guide was touched).
+Standing responsibilities (`watch:`/gateway, upstream's `*.prose.md`
+model) are deliberately out of scope — see
+`docs/decisions/2026-07-16-phase6-responsibility-v2.md`.
+
 ```prose
 agent captain:
   model: sonnet  # Orchestration and coordination
