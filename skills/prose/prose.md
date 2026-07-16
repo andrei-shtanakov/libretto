@@ -369,6 +369,16 @@ The `statement_id` follows `openprose.statement-id.v1` (defined in
 dynamic suffixes `.x{execution_id}` / `.i{n}` / `.b{n}` / `.d{n}`,
 outermost context first.
 
+**Adopt a fresh compile IR when one exists.** Before deriving statement
+IDs yourself, check `.prose/dist/{program-stem}.ir.json` (contract:
+`contracts/ir.md`). If it is present and fresh (`source.content_hash`
+matches the program's current bytes — `openprose-tools ir-check` decides
+this deterministically), the VM MUST take base statement IDs, agent
+tables, and session wiring from the IR rather than re-deriving them.
+This is what keeps receipts from two runs of the same program mutually
+comparable. A stale or missing IR is not an error — derive per the
+contract and note in `state.md` that the run executed uncompiled.
+
 Receipts are deterministic reader material: `prose inspect <run>` and
 `openprose-tools verify` consume them without an LLM.
 

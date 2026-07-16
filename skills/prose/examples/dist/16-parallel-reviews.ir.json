@@ -1,0 +1,93 @@
+{
+  "agents": {
+    "reviewer": {
+      "backoff": null,
+      "model": "sonnet",
+      "persist": null,
+      "prompt_hash": "sha256:8186cbfaf80c7670d58e293e5bca92aa39dd4e42421210f3f777a03021194f91",
+      "retry": null,
+      "skills": []
+    }
+  },
+  "blocks": {},
+  "content_hash": "sha256:8a356abbf4cf6a9f2ca80ae419b947d8b307e4b5ae3be5f1eed1a2400ee0d828",
+  "diagnostics": [],
+  "hash_algorithm": "sha256",
+  "inputs": {},
+  "outputs": {},
+  "program": "examples/16-parallel-reviews.prose",
+  "source": {
+    "content_hash": "sha256:cdce5073a4f3fe4aaa871cb9ee3a7890076fe1561ba77221fba91df3567796d1",
+    "path": "examples/16-parallel-reviews.prose"
+  },
+  "state_backend": "filesystem",
+  "statements": [
+    {
+      "id": "s001",
+      "kind": "agent_def",
+      "line": 4,
+      "name": "reviewer"
+    },
+    {
+      "branches": [
+        "s003",
+        "s004",
+        "s005"
+      ],
+      "id": "s002",
+      "kind": "parallel",
+      "line": 9,
+      "modifiers": {
+        "count": null,
+        "join": "all",
+        "max_concurrent": null,
+        "on_fail": "fail-fast"
+      }
+    },
+    {
+      "agent": "reviewer",
+      "binding": "security",
+      "context": [],
+      "id": "s003",
+      "is_output": false,
+      "kind": "session",
+      "line": 10,
+      "prompt_hash": "sha256:ab291ae95742adf006de1fb6de1d4b9a574db5c3c959dd09ef49b1fb8d02e8af"
+    },
+    {
+      "agent": "reviewer",
+      "binding": "perf",
+      "context": [],
+      "id": "s004",
+      "is_output": false,
+      "kind": "session",
+      "line": 12,
+      "prompt_hash": "sha256:2bbc3d4e86cfce6eee701f7edb92a06fc4ac7c4cff925aca6a66b21ccf78f6a5"
+    },
+    {
+      "agent": "reviewer",
+      "binding": "style",
+      "context": [],
+      "id": "s005",
+      "is_output": false,
+      "kind": "session",
+      "line": 14,
+      "prompt_hash": "sha256:16679f9bc5e06d6af77520338865db51a77404b1e17002daf3b7cc0bc62fa0a2"
+    },
+    {
+      "agent": null,
+      "binding": null,
+      "context": [
+        "security",
+        "perf",
+        "style"
+      ],
+      "id": "s006",
+      "is_output": false,
+      "kind": "session",
+      "line": 18,
+      "prompt_hash": "sha256:b4538dc3d2d04c1e71414bc6e75029229ddd2e63ebf8e2d19726d12e9990ed32"
+    }
+  ],
+  "v": "openprose.compile-ir.v1"
+}

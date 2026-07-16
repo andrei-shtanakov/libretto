@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 
+from openprose_tools.ir import check_ir
 from openprose_tools.ledger import load_run
 from openprose_tools.lint import REGISTER_ALIASES, lint_file
 from openprose_tools.verify import verify_ledger
@@ -18,6 +19,7 @@ from openprose_tools.verify import verify_ledger
 REPO = Path(__file__).resolve().parents[2]
 LINT_FIXTURES = REPO / "tests" / "fixtures" / "lint"
 RUN_FIXTURES = REPO / "tests" / "fixtures" / "runs"
+IR_FIXTURES = REPO / "tests" / "fixtures" / "ir"
 ALTS = REPO / "skills" / "prose" / "alts"
 
 in_repo = pytest.mark.skipif(
@@ -37,15 +39,47 @@ def _run_cases() -> list[Path]:
     return sorted(p for p in RUN_FIXTURES.iterdir() if p.is_dir())
 
 
+def _ir_cases() -> list[Path]:
+    if not IR_FIXTURES.is_dir():
+        return []
+    return sorted(p for p in IR_FIXTURES.iterdir() if p.is_dir())
+
+
 @in_repo
 def test_fixture_corpus_is_present() -> None:
-    """Both fixture families exist and are non-empty in a repo checkout.
+    """All fixture families exist and are non-empty in a repo checkout.
 
     Guards against parametrized tests silently collecting zero cases
     when a corpus directory is deleted or moved.
     """
     assert _lint_cases(), "tests/fixtures/lint is empty"
     assert _run_cases(), "tests/fixtures/runs is empty"
+    assert _ir_cases(), "tests/fixtures/ir is empty"
+
+
+@in_repo
+@pytest.mark.parametrize("case", _ir_cases(), ids=lambda p: p.name)
+def test_ir_fixture(case: Path) -> None:
+    expected = json.loads((case / "expected.json").read_text())
+    result = check_ir(case / "program.prose")
+
+    assert result.ok == expected["ok"]
+    if "error_contains" in expected:
+        assert any(expected["error_contains"] in error for error in result.errors), (
+            result.errors
+        )
+
+
+@in_repo
+def test_committed_example_irs_are_fresh() -> None:
+    """Every committed IR in examples/dist/ validates against its source."""
+    dist = REPO / "skills" / "prose" / "examples" / "dist"
+    irs = sorted(dist.glob("*.ir.json"))
+    assert irs, "examples/dist is empty"
+    for ir_path in irs:
+        source = dist.parent / f"{ir_path.name.removesuffix('.ir.json')}.prose"
+        result = check_ir(source, ir_path)
+        assert result.ok, (ir_path.name, result.errors)
 
 
 @in_repo

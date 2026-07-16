@@ -14,6 +14,7 @@ inspection of run artifacts after the fact.
 uv run openprose-tools inspect <run-dir> [--json]
 uv run openprose-tools verify <run-dir>
 uv run openprose-tools lint <file.prose> [...]
+uv run openprose-tools ir-check <file.prose> [--ir <path>]
 ```
 
 - **inspect** — headless summary of a run: dispositions
@@ -35,6 +36,14 @@ uv run openprose-tools lint <file.prose> [...]
   Diagnostics OP001–OP008 are errors; OP009 marks constructs bundled
   programs use that the grammar doesn't define yet (warning; see
   ROADMAP P2.5). Exit 0 = no errors.
+
+- **ir-check** — validates a compile IR (`contracts/ir.md`,
+  `openprose.compile-ir.v1`) produced by the LLM compiler: schema,
+  content hash, **source freshness** (the `compile --check` stale gate),
+  dense static statement IDs (per `openprose.statement-id.v1`), and
+  reference integrity. Default IR location:
+  `<source-dir>/dist/<stem>.ir.json`. Exit 0 fresh/valid, 1
+  missing/stale/invalid, 2 source unreadable.
 
 `<run-dir>` is a `.prose/runs/{run-id}/` directory containing
 `receipts.jsonl` (+ `run.json`). Committed sample runs live in

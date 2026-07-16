@@ -3166,6 +3166,42 @@ When a user invokes `/prose-compile` or asks you to compile a `.prose` file:
 2. **Parse** the program according to the syntax grammar
 3. **Validate** syntax correctness, semantic validity, and self-evidence
 4. **Transform** to canonical form (expand syntax sugar, normalize structure)
-5. **Output** the compiled program or report errors/warnings with line numbers
+5. **Emit the compile IR** (see below) — the machine-checkable artifact
+6. **Output** the compiled program or report errors/warnings with line numbers
 
 For direct interpretation without compilation, read `prose.md` and execute statements as described in the Session Statement section.
+
+## Compile IR (Mandatory Artifact)
+
+Compilation MUST produce a deterministic JSON artifact — the compile IR —
+alongside any human-readable report. The normative contract is
+`contracts/ir.md` (`openprose.compile-ir.v1`); the essentials:
+
+- **Where:** `.prose/dist/{program-stem}.ir.json` in user projects (update
+  `.prose/dist/manifest.active.json` to point at it); `examples/dist/` for
+  this repo's committed corpus.
+- **What:** source path + content hash (the freshness anchor), the full
+  statement inventory with **static base statement IDs** per
+  `openprose.statement-id.v1` (`contracts/receipt.md` — the IR adopts that
+  contract, it does not redefine it), agent/block tables with prompt
+  hashes, session wiring (`context` names, bindings), resolved properties,
+  and every diagnostic you found. Hashes only — never prompt text or
+  values.
+- **How:** canonical JSON (sorted keys, no whitespace, integers only) with
+  a `content_hash` over everything except itself. Rules identical to the
+  receipt contract.
+- **Errors too:** if the program does not compile, still emit the IR with
+  `diagnostics` carrying `severity: "error"` entries — a failed compile is
+  a recorded fact, and `ir-check` will hold the gate closed.
+
+### `prose compile --check`
+
+Freshness gate, not a recompile: verify that a current IR exists for the
+file. Delegate to the deterministic tool when available:
+
+```sh
+uv run --project <repo>/tools openprose-tools ir-check <file.prose>
+```
+
+Exit 0 = IR exists, valid, fresh; exit 1 = missing/stale/invalid. Report
+the result; never silently recompile on `--check`.
