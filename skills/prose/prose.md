@@ -328,6 +328,52 @@ The VM:
 
 ---
 
+## Receipts (Mandatory Audit Ledger)
+
+Every run produces a machine-readable ledger alongside the human-readable
+`state.md`. The normative contract is `contracts/receipt.md`
+(`openprose.receipt.v1`); this section states the VM's obligations.
+
+**After every completed statement instance**, the VM MUST append one receipt
+to `.prose/runs/{run_id}/receipts.jsonl` via the `emit_receipt` host
+primitive (`primitives/session.md`), and keep `run.json`'s `ledger_head`
+current. One receipt per instance means:
+
+| Event | Receipt kind |
+| ----- | ------------ |
+| Session completes (or fails, incl. each retry) | `session` |
+| A parallel branch completes | `parallel_branch` |
+| The parallel block joins | `control` |
+| A `do name(...)` invocation returns | `block_call` |
+| A `**...**` condition is evaluated | `discretion` |
+| Loop iteration ends, try/catch transition, run start/end | `control` |
+
+Rules the VM must not bend:
+
+1. **Append-only.** Never edit or reorder `receipts.jsonl`. A correction is
+   a new receipt.
+2. **Discretion outcomes are always recorded** — `detail.condition`,
+   `detail.outcome`, `detail.branch`. This is the deterministic-replay
+   primitive: a replay substitutes recorded outcomes instead of
+   re-evaluating.
+3. **Honest usage.** `usage.basis` is `exact` only when the substrate
+   reported real token counts; `estimated` when the VM approximated (note
+   the method in `state.md`); otherwise `unavailable` with zeroed counts.
+4. **Failures are receipts too** — `status: failed` with `error` populated,
+   after the configured retries are exhausted (`error.retry_count`).
+5. **Run start and end** emit `control` receipts, so interrupted runs are
+   distinguishable from completed ones.
+
+The `statement_id` follows `openprose.statement-id.v1` (defined in
+`contracts/receipt.md`): static source-order base (`s001`, `s002`, …) plus
+dynamic suffixes `.x{execution_id}` / `.i{n}` / `.b{n}` / `.d{n}`,
+outermost context first.
+
+Receipts are deterministic reader material: `prose inspect <run>` and
+`openprose-tools verify` consume them without an LLM.
+
+---
+
 ## Syntax Grammar (Condensed)
 
 ```

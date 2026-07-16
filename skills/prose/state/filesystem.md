@@ -39,6 +39,8 @@ File-based state persists all execution artifacts to disk. This enables:
 │   └── {YYYYMMDD}-{HHMMSS}-{random}/
 │       ├── program.prose             # Copy of running program
 │       ├── state.md                  # Execution state with code snippets
+│       ├── receipts.jsonl            # Append-only receipt ledger (contracts/receipt.md)
+│       ├── run.json                  # Run manifest; anchors ledger_head
 │       ├── bindings/
 │       │   ├── {name}.md             # Root scope bindings
 │       │   └── {name}__{execution_id}.md  # Scoped bindings (block invocations)
@@ -363,11 +365,36 @@ prompt: "Review the research findings"
 | File                          | Written By       |
 | ----------------------------- | ---------------- |
 | `state.md`                    | VM only          |
+| `receipts.jsonl`              | VM only (append-only, via `emit_receipt`) |
+| `run.json`                    | VM only          |
 | `bindings/{name}.md`          | Subagent         |
 | `agents/{name}/memory.md`     | Persistent agent |
 | `agents/{name}/{name}-NNN.md` | Persistent agent |
 
 The VM orchestrates; subagents write their own outputs directly to the filesystem. **The VM never holds full binding values—it tracks file paths.**
+
+---
+
+## Receipt Ledger
+
+Alongside the narrative `state.md`, the filesystem backend stores the
+machine-readable audit trail (normative contract: `contracts/receipt.md`):
+
+- **`receipts.jsonl`** — append-only; one canonical-JSON receipt per line,
+  hash-chained via `prev`/`content_hash`. The VM appends after every
+  completed statement instance using the `emit_receipt` primitive
+  (`primitives/session.md`). Never rewritten, never reordered.
+- **`run.json`** — the run manifest: program path, state backend, run
+  status, `receipt_count`, and `ledger_head` (the last receipt's
+  `content_hash`). Updated on every append; this anchor is what makes
+  ledger truncation detectable.
+
+Fingerprints in receipts are `sha256:` hashes over the exact bytes of the
+binding files being referenced (`bindings/{name}.md` content at the time the
+receipt is written).
+
+Deterministic tooling (`openprose-tools inspect|verify`) reads these two
+files without an LLM; keep them strictly machine-parseable.
 
 ---
 

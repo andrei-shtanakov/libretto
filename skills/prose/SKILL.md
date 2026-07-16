@@ -35,6 +35,7 @@ When a user invokes `prose <command>`, intelligently route based on intent:
 | `prose run <file>`      | Load VM (`prose.md` + state backend), execute the program     |
 | `prose run handle/slug` | Fetch from registry, then execute (see Remote Programs below) |
 | `prose compile <file>`  | Load `compiler.md`, validate the program                      |
+| `prose inspect <run>`   | Deterministic run summary (see Inspecting Runs below)         |
 | `prose update`          | Run migration (see Migration section below)                   |
 | `prose examples`        | Show or run example programs from `examples/`                 |
 | Other                   | Intelligently interpret based on context                      |
@@ -259,6 +260,29 @@ To execute a `.prose` file, you become the OpenProse VM:
 ## Help & FAQs
 
 For syntax reference, FAQs, and getting started guidance, load `help.md`.
+
+---
+
+## Inspecting Runs (`prose inspect <run>`)
+
+Every run leaves a machine-readable receipt ledger
+(`.prose/runs/{run-id}/receipts.jsonl` + `run.json`; contract:
+`contracts/receipt.md`). `prose inspect` is a **deterministic reader** over
+those artifacts — prefer tooling over LLM re-reading:
+
+1. **If the Python tooling is available** (repo checkout with `tools/`, or
+   `openprose-tools` installed): run it and relay the output —
+   ```sh
+   uv run --project <repo>/tools openprose-tools inspect <run-dir> [--json]
+   uv run --project <repo>/tools openprose-tools verify <run-dir>
+   ```
+   Use `--json` when the consumer is a program or CI, text otherwise.
+2. **Fallback** (no tooling on this host): run `lib/inspector.prose` via
+   `prose run` — the LLM-driven inspector. Note in your answer that the
+   summary was produced by an LLM pass, not the deterministic reader.
+
+Never recompute or "fix" receipts by hand — the ledger is append-only and
+`verify` exists precisely to catch edits.
 
 ---
 

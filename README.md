@@ -57,7 +57,10 @@ The syntax is intentionally familiar (Python-like indentation) but the semantics
 | `guidance/` | Best practices and antipatterns |
 | `lib/` | Standard library (9 programs) |
 | `examples/` | 51 example programs |
+| `examples/runs/` | Committed real runs — keyless replay/verification corpus |
 | `alts/` | 5 alternative syntax registers |
+| `contracts/` | Machine contracts (receipt ledger) + pinned upstream schemas |
+| `tools/` | Optional Python verification tooling (`openprose-tools inspect\|verify`) |
 
 ## Commands
 

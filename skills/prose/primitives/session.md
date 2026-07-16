@@ -577,6 +577,44 @@ Segment: captain-003.md
 
 ---
 
+## 8. Receipts — a VM-Side Primitive (Not Yours)
+
+Every run carries an append-only audit ledger, `receipts.jsonl`, plus a
+`run.json` manifest (normative contract: `contracts/receipt.md`). These are
+written **exclusively by the VM** through the `emit_receipt` host primitive.
+
+**As a subagent you MUST NOT create, append to, or modify `receipts.jsonl`
+or `run.json`** — your write surface is your binding location and (for
+persistent agents) your memory files. If your substrate permissions happen
+to allow it, still don't: a subagent-written receipt corrupts the chain.
+
+### emit_receipt (host primitive, VM-side)
+
+Definition the VM executes after every completed statement instance
+(forward-compatible stub of the Phase 5 host-adapter contract —
+`contracts/adapters.md`, future):
+
+```
+emit_receipt(run_dir, receipt) :=
+  1. Set receipt.prev = current run.json ledger_head (null if this is
+     the first receipt) — prev is covered by content_hash
+  2. Render `receipt` in canonical form (sorted keys, no whitespace,
+     integers only) WITHOUT content_hash
+  3. content_hash = "sha256:" + hex(sha256(canonical bytes))
+  4. Append canonical(receipt + content_hash field) as one line to
+     {run_dir}/receipts.jsonl with a trailing newline
+  5. Update {run_dir}/run.json: ledger_head = content_hash,
+     receipt_count += 1
+```
+
+Steps 3–5 are one logical operation: never append without updating the
+head. On substrates without atomic multi-file writes, append first, update
+`run.json` immediately after; `openprose-tools verify` treats a head that
+trails the ledger by exactly one receipt as a torn write (warning), anything
+else as corruption (error).
+
+---
+
 ## Summary
 
 As a subagent in an OpenProse program:
