@@ -1,0 +1,76 @@
+# ATP Docstring Evaluator — Homeric Register
+# The same trial, undertaken by heroes
+#
+# Faithful translation of ../phase5/atp-docstring-evaluator.prose. Same logic,
+# same flat-namespace-safe conditional. Homer's `if` alias is "should" /
+# "or should" / "otherwise" per alts/homer.md.
+# PROPOSAL-ONLY — atp-platform is read-only. Concise outputs to control cost.
+
+omen task: "Add a DocstringEvaluator to atp-platform that evaluates whether agent outputs include proper Python docstrings in any generated code"
+omen codebase: "../atp-platform"
+
+hero captain:
+  muse: opus
+  charge: """You are a senior engineering manager. You NEVER write code directly.
+Break down tasks, dispatch to specialists, validate results.
+Focus on: what context each specialist needs, what can run in parallel."""
+
+hero researcher:
+  muse: sonnet
+  charge: "You are a research specialist. Find specific code patterns quickly. Cite file paths and line numbers. Be concise."
+
+hero coder:
+  muse: sonnet
+  charge: "You are an expert Python engineer. Write clean, idiomatic code following existing patterns."
+
+hero critic:
+  muse: sonnet
+  charge: "You are a code reviewer. Find logic errors, missing edge cases, and deviations from project conventions. Be concise."
+
+hero tester:
+  muse: sonnet
+  charge: "You are a QA engineer. Write comprehensive pytest tests with edge cases."
+
+# Phase 1: Research
+# NOTE: the path below is kept verbatim from the roadmap, but evaluators
+# actually live in {codebase}/atp/evaluators/ (not packages/atp-core/) —
+# researchers discover this and adapt; see ../phase5/atp-docstring-evaluator.prose
+# and phase-6.md. Reruns should expect the same redirect.
+host:
+  evaluators = trial: researcher
+    charge: "Find all evaluator implementations in {codebase}/packages/atp-core/. List their base class, evaluate() signature, and how they're registered. Be concise."
+  tests = trial: researcher
+    charge: "Find all evaluator test files in {codebase}. Show the test patterns: fixtures used, how evaluators are instantiated, assertion patterns. Be concise."
+
+# Phase 2: Plan
+decree plan = trial: captain
+  charge: """Create an implementation plan for the DocstringEvaluator based on research.
+Specify: file to create, class structure, evaluate() implementation, test file, test cases.
+Follow existing evaluator patterns exactly. Be concise."""
+  tidings: { evaluators, tests }
+
+# Phase 3: Implement + Review
+decree implementation = trial: coder
+  charge: "Implement the DocstringEvaluator according to the plan. Write the complete file."
+  tidings: { plan, evaluators }
+
+decree review = trial: critic
+  charge: "Review the implementation. Check: follows base class interface, handles edge cases (no code in output, empty docstrings, partial docstrings), matches project conventions."
+  tidings: { implementation, evaluators }
+
+decree final_code = implementation
+should **review found critical issues**:
+  decree fixed = trial: coder
+    charge: "Fix the critical issues identified in the review."
+    tidings: { implementation, review }
+  final_code = fixed
+
+# Phase 4: Test
+decree test_code = trial: tester
+  charge: "Write pytest tests for the DocstringEvaluator. Cover: code with good docstrings (pass), code with missing docstrings (fail), code with partial docstrings, non-code output (skip). Follow existing test patterns."
+  tidings: { final_code, tests }
+
+# Phase 5: Integration summary
+glory result = trial: captain
+  charge: "Summarize: what was built, where files go, how to integrate, any remaining items. Be concise."
+  tidings: { final_code, test_code, review }
