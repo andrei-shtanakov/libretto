@@ -10,7 +10,12 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def _status(checks, name: str) -> str:
-    return next(c.status for c in checks if c.name == name)
+    for check in checks:
+        if check.name == name:
+            return check.status
+    raise AssertionError(
+        f"check {name!r} not emitted; got: {[c.name for c in checks]}"
+    )
 
 
 def test_doctor_on_this_repo_is_green() -> None:
@@ -25,6 +30,8 @@ def test_doctor_on_this_repo_is_green() -> None:
 def test_doctor_missing_specs_fails(tmp_path: Path) -> None:
     checks = run_doctor(tmp_path)
     assert _status(checks, "specs") == "fail"
+    # Check order is stable: contracts is emitted even when specs fail.
+    assert _status(checks, "contracts") == "warn"
     assert _status(checks, "compile-ir") == "warn"
     assert _status(checks, "run-ledgers") == "warn"
 

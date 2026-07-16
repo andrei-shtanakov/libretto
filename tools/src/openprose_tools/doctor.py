@@ -45,9 +45,10 @@ def _check_specs(root: Path, checks: list[Check]) -> None:
                 "(neither repo nor installed-skill layout)",
             )
         )
-        return
-    checks.append(Check("specs", "ok", f"VM/compiler specs at {spec_root}"))
+    else:
+        checks.append(Check("specs", "ok", f"VM/compiler specs at {spec_root}"))
 
+    # Always emitted, so the check order is stable across workspace states.
     contracts = root / "contracts"
     missing = [n for n in CONTRACT_FILES if not (contracts / n).is_file()]
     if not missing:
@@ -117,13 +118,14 @@ def _check_runs(root: Path, checks: list[Check]) -> None:
         if not (run_dir / "receipts.jsonl").is_file():
             legacy += 1  # pre-receipt run (before openprose.receipt.v1)
             continue
+        label = str(run_dir.relative_to(root))
         try:
             if verify_ledger(load_run(run_dir)).ok:
                 verified += 1
             else:
-                broken.append(run_dir.name)
+                broken.append(label)
         except LedgerLoadError:
-            broken.append(run_dir.name)
+            broken.append(label)
     if broken:
         checks.append(
             Check(
