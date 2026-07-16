@@ -62,11 +62,11 @@ A concrete `rendered` example:
 | `input_fingerprints` | object | Map of wired context/input names → fingerprints of the values consumed. `{}` when the statement consumed nothing |
 | `output_fingerprint` | string \| null | Fingerprint of the value the statement produced; null if it produced none |
 | `status` | enum | `rendered` \| `skipped` \| `failed` |
-| `surprise_cause` | enum \| null | `input` \| `self` \| `external`; null until materiality semantics land (Phase 4) |
+| `surprise_cause` | enum \| null | Why a `rendered` statement spent: `input` (a material fingerprint moved), `self` (first-ever render), `external` (user-forced re-render). Null on `skipped`, `failed`, and non-spending kinds |
 | `usage` | object | Token/cost attribution — see below |
 | `error` | object \| null | On `failed`: `{"type": string, "message": string, "retry_count": number}`; null otherwise |
 | `detail` | object \| null | Kind-specific payload. For `discretion`: `{"condition": string, "outcome": string, "branch": string \| null, "reason": string \| null}` — the replay primitive. `outcome` MUST be a stable literal a replayer can consume without parsing (`"true"`/`"false"` for boolean conditions, the chosen option name for `choice`); free-text justification goes in `reason`. For `control`: loop/join bookkeeping. Null for plain sessions |
-| `reused_from` | object \| null | Reserved for Phase 4 skip semantics: `{"run_id", "statement_id", "output_fingerprint"}`. Always null in v1 |
+| `reused_from` | object \| null | Skip provenance: `{"run_id", "statement_id", "output_fingerprint"}` of the receipt whose output this statement reused. Non-null exactly when `status: skipped` with a reused binding (see Skipped receipts below) |
 | `prev` | string \| null | `content_hash` of the previous receipt in this ledger; null for the first line |
 | `hash_algorithm` | string | Always `"sha256"` |
 | `content_hash` | string | This receipt's chain identity — see Hashing |
@@ -103,6 +103,38 @@ the basis — a cost rollup built on estimates says so.
 
 All numeric fields in a receipt are **integers**. Floats are forbidden by the
 canonical form (see below), which keeps hashing portable across languages.
+
+### Skipped receipts (skip semantics — `prose.md`)
+
+A `status: skipped` receipt records a memoized reuse, not absence of work:
+
+- `input_fingerprints` — the current (matching) material fingerprints.
+- `output_fingerprint` — copied forward from the reused receipt; the
+  binding file copied into this run MUST hash to it.
+- `reused_from` — the source coordinates (required).
+- `usage` — zero tokens with `basis: "exact"` (zero spend is exactly
+  known), `model: "none"`.
+- `surprise_cause` — null.
+
+The run manifest of a resuming run carries `reuse_source_run: "<run_id>"`
+(optional field of `openprose.run.v1`; absent when the run reused
+nothing).
+
+## Fingerprints and facets
+
+A **fingerprint** is `"sha256:" + hex(sha256(bytes))` over the exact bytes
+of the value being referenced — for filesystem bindings, the binding
+file's content at receipt time.
+
+A **facet** is an independently fingerprintable named part of a binding,
+addressed as `binding.facet` (used by `material:` — compiler.md). For v1
+markdown bindings: facet `f` of binding `b` is the exact byte span of the
+top-level section titled `f` in `bindings/b.md` — from the line `## f`
+(exclusive) to the next top-level `##` heading or end of file
+(exclusive), trailing newline included. A `material:` entry naming a
+facet means only that span's fingerprint participates in the memo
+identity. Facet fingerprints appear in `input_fingerprints` under the
+dotted key (`"review.summary": "sha256:…"`).
 
 ## Statement IDs — `openprose.statement-id.v1`
 

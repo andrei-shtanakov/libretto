@@ -15,6 +15,7 @@ uv run openprose-tools inspect <run-dir> [--json]
 uv run openprose-tools verify <run-dir>
 uv run openprose-tools lint <file.prose> [...]
 uv run openprose-tools ir-check <file.prose> [--ir <path>]
+uv run openprose-tools cost <run-dir> [--json] [--compare <baseline-run>]
 ```
 
 - **inspect** — headless summary of a run: dispositions
@@ -44,6 +45,11 @@ uv run openprose-tools ir-check <file.prose> [--ir <path>]
   reference integrity. Default IR location:
   `<source-dir>/dist/<stem>.ir.json`. Exit 0 fresh/valid, 1
   missing/stale/invalid, 2 source unreadable.
+
+- **cost** — token rollups by statement, agent, model, status, and
+  `usage.basis`; skip share and `reused_from` provenance; `--compare`
+  reports the delta between a baseline run and a (possibly skip-heavy)
+  re-run. Integer percentages, deterministic output.
 
 `<run-dir>` is a `.prose/runs/{run-id}/` directory containing
 `receipts.jsonl` (+ `run.json`). Committed sample runs live in

@@ -102,3 +102,4 @@ class RunManifest(BaseModel):
     status: str
     receipt_count: int = Field(ge=0)
     ledger_head: Fingerprint | None
+    reuse_source_run: str | None = None

@@ -384,6 +384,83 @@ Receipts are deterministic reader material: `prose inspect <run>` and
 
 ---
 
+## Skip Semantics (Cost Scales with Surprise)
+
+Expensive model work must not re-run when nothing material changed. The
+memo identity of a session instance is:
+
+```
+(program source content_hash, statement_id, material input fingerprints)
+```
+
+`material:` (compiler.md) narrows the fingerprint set; without it, all
+wired context names count.
+
+**Before spawning a session**, the VM looks for a prior receipt with the
+same statement_id:
+
+- **Within the run** — for `repeat`/`loop` iterations of the same
+  statement (`sNNN.i1` vs `sNNN.i2`: compare against the previous
+  iteration's receipt).
+- **Across runs** — when invoked as `prose run <program> --resume <prior
+  run-id>`: the prior run must be a completed run of the **byte-identical
+  program** (compare `program.prose` content hashes; a fresh compile IR
+  for both is the cheap way to know). No `--resume`, no cross-run reuse —
+  reuse is always explicit, never ambient.
+
+If a prior receipt exists, its status is `rendered` or `skipped`, and
+every material input fingerprint is unchanged, the VM MUST NOT spawn.
+Instead:
+
+1. **Copy the binding file** from the source run's `bindings/` into this
+   run's `bindings/` (byte-identical; verify the copy's sha256 equals the
+   prior `output_fingerprint`). Reuse is **copy-with-provenance** — run
+   dirs stay self-contained; referencing another run's files in place is
+   forbidden (it breaks the keyless replay corpus and cross-machine
+   reproducibility).
+2. **Emit a `skipped` receipt**: current (matching) `input_fingerprints`,
+   the reused `output_fingerprint` copied forward,
+   `reused_from: {"run_id", "statement_id", "output_fingerprint"}`,
+   zero usage with `basis: "exact"` (zero spend is exactly known),
+   `surprise_cause: null`.
+3. Record `reuse_source_run` in `run.json` (once, at run start).
+
+If fingerprints moved (or there is no prior receipt), render as usual and
+set `surprise_cause`: `"input"` when a material fingerprint moved,
+`"self"` for a first-ever render, `"external"` when the user forced a
+re-render (`--force`).
+
+Discretion outcomes are NOT skipped by this rule — replaying recorded
+discretion decisions is the separate deterministic-replay mechanism
+(receipt `detail`); a `--resume` run re-evaluates discretion unless
+replay is explicitly requested.
+
+---
+
+## Budget Enforcement
+
+If the program declares `budget:` (compiler.md), the VM tracks cumulative
+spend from its own receipts: sum of `usage.input_tokens +
+usage.output_tokens` over the ledger (dollar budgets: convert per-model
+with known prices — always an estimate).
+
+- **Check before every spawn.** If cumulative spend ≥ budget: do not
+  spawn. Emit a `control` receipt — `detail: {"event":
+  "budget_exceeded", "budget": <n>, "spent": <n>, "basis": "exact" |
+  "estimated"}` (basis is `estimated` if ANY counted receipt had
+  estimated/unavailable usage, or the budget is in dollars) — set
+  `run.json` status to `halted`, and stop executing statements.
+- **No in-flight cancellation**: already-running parallel branches
+  complete and their receipts append after the halt receipt; they are
+  part of the true cost.
+- `try`/`finally` do not intercept a budget halt — it is a VM-level stop,
+  not a program error (`catch` never sees it).
+- Skipped sessions cost zero and never trigger the gate — skip semantics
+  and budgets compose: a `--resume` run of an unchanged program fits in
+  any budget.
+
+---
+
 ## Syntax Grammar (Condensed)
 
 ```

@@ -71,10 +71,42 @@ def verify_ledger(raw: RawLedger) -> VerificationResult:
                 f"found {line.get('prev')!r})"
             )
 
+        _check_reuse_consistency(line, where, result)
+
         prev_hash = actual if isinstance(actual, str) else expected
 
     _verify_manifest(raw, result, last_hash=prev_hash)
     return result
+
+
+def _check_reuse_consistency(
+    line: dict, where: str, result: VerificationResult
+) -> None:
+    """Skip/reuse rules from contracts/receipt.md (Skipped receipts)."""
+    reused = line.get("reused_from")
+    if reused is None:
+        return
+    if line.get("status") != "skipped":
+        result.errors.append(f"{where}: reused_from is only valid on skipped receipts")
+    usage = line.get("usage") or {}
+    if (
+        usage.get("input_tokens") != 0
+        or usage.get("output_tokens") != 0
+        or usage.get("basis") != "exact"
+        or usage.get("model") != "none"
+    ):
+        result.errors.append(
+            f"{where}: a skipped receipt with reused_from must carry "
+            "zero usage with basis 'exact' and model 'none'"
+        )
+    if line.get("surprise_cause") is not None:
+        result.errors.append(
+            f"{where}: surprise_cause must be null on skipped receipts"
+        )
+    if line.get("output_fingerprint") != reused.get("output_fingerprint"):
+        result.errors.append(
+            f"{where}: output_fingerprint must equal reused_from.output_fingerprint"
+        )
 
 
 def _verify_manifest(
