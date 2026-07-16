@@ -13,9 +13,7 @@ def _status(checks, name: str) -> str:
     for check in checks:
         if check.name == name:
             return check.status
-    raise AssertionError(
-        f"check {name!r} not emitted; got: {[c.name for c in checks]}"
-    )
+    raise AssertionError(f"check {name!r} not emitted; got: {[c.name for c in checks]}")
 
 
 def test_doctor_on_this_repo_is_green() -> None:
