@@ -1,8 +1,12 @@
 # Libretto
 
-A programming language for AI sessions — zero-dependency, pure-specification.
+A programming language for AI sessions — spec-as-VM plus deterministic
+verification tooling.
 
-There is no runtime binary, no package manager, no build system. The entire project is markdown and `.libretto` files that an LLM reads to become the Libretto VM. Simulation with sufficient fidelity is implementation.
+The language core is markdown and `.libretto` files that an LLM reads to become
+the Libretto VM. Optional Python tooling under `tools/` verifies committed run
+ledgers and IR artifacts; it is not the VM itself. Simulation with sufficient
+fidelity is implementation.
 
 ## Status
 

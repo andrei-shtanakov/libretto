@@ -99,7 +99,7 @@ Those are orchestration libraries—they coordinate agents from outside. Librett
 
 ## Syntax at a Glance
 
-```prose
+```libretto
 session "prompt"              # Spawn subagent
 agent name:                   # Define agent template
 let x = session "..."         # Capture result

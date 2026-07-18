@@ -95,7 +95,7 @@ These keywords already work or are too functional to replace sensibly:
 
 ### Simple Program
 
-```prose
+```libretto
 # Functional
 use "@alice/research" as research
 input topic: "What to investigate"
@@ -110,7 +110,7 @@ output summary = session "Summarize"
   context: findings
 ```
 
-```prose
+```libretto
 # Kafka
 requisition "@alice/research" as research
 petition topic: "What to investigate"
@@ -127,7 +127,7 @@ verdict summary = proceeding "Summarize"
 
 ### Parallel Execution
 
-```prose
+```libretto
 # Functional
 parallel:
   security = session "Check security"
@@ -138,7 +138,7 @@ session "Synthesize review"
   context: { security, perf, style }
 ```
 
-```prose
+```libretto
 # Kafka
 departments:
   security = proceeding "Check security"
@@ -151,13 +151,13 @@ proceeding "Synthesize review"
 
 ### Loop with Condition
 
-```prose
+```libretto
 # Functional
 loop until **the code is bug-free** (max: 5):
   session "Find and fix bugs"
 ```
 
-```prose
+```libretto
 # Kafka
 appeal until **the code is bug-free** (max: 5):
   proceeding "Find and fix bugs"
@@ -165,7 +165,7 @@ appeal until **the code is bug-free** (max: 5):
 
 ### Error Handling
 
-```prose
+```libretto
 # Functional
 try:
   session "Risky operation"
@@ -176,7 +176,7 @@ finally:
   session "Cleanup"
 ```
 
-```prose
+```libretto
 # Kafka
 submit:
   proceeding "Risky operation"
@@ -189,7 +189,7 @@ regardless:
 
 ### Choice Block
 
-```prose
+```libretto
 # Functional
 choice **the severity level**:
   option "Critical":
@@ -198,7 +198,7 @@ choice **the severity level**:
     session "Log for later"
 ```
 
-```prose
+```libretto
 # Kafka
 tribunal **the severity level**:
   ruling "Critical":
@@ -209,7 +209,7 @@ tribunal **the severity level**:
 
 ### Conditionals
 
-```prose
+```libretto
 # Functional
 if **has security issues**:
   session "Fix security"
@@ -219,7 +219,7 @@ else:
   session "Approve"
 ```
 
-```prose
+```libretto
 # Kafka
 in the event that **has security issues**:
   proceeding "Fix security"
@@ -231,7 +231,7 @@ otherwise:
 
 ### Reusable Blocks
 
-```prose
+```libretto
 # Functional
 block review(topic):
   session "Research {topic}"
@@ -240,7 +240,7 @@ block review(topic):
 do review("quantum computing")
 ```
 
-```prose
+```libretto
 # Kafka
 regulation review(topic):
   proceeding "Research {topic}"
@@ -251,13 +251,13 @@ invoke review("quantum computing")
 
 ### Fixed Iteration
 
-```prose
+```libretto
 # Functional
 repeat 3:
   session "Attempt connection"
 ```
 
-```prose
+```libretto
 # Kafka
 3 hearings:
   proceeding "Attempt connection"
@@ -265,12 +265,12 @@ repeat 3:
 
 ### Immutable Binding
 
-```prose
+```libretto
 # Functional
 const config = { model: "opus", retries: 3 }
 ```
 
-```prose
+```libretto
 # Kafka
 statute config = { authority: "opus", resubmit: 3 }
 ```

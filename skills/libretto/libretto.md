@@ -36,7 +36,7 @@ port checklist. The VM logic in this file does not change.
 
 ## CLI Commands
 
-Libretto is invoked via `prose` commands:
+Libretto is invoked via `libretto` commands:
 
 | Command                  | Action                            |
 | ------------------------ | --------------------------------- |
@@ -53,7 +53,7 @@ You can run any `.libretto` program from a URL or registry reference:
 
 ```bash
 # Direct URL — any fetchable URL works
-libretto run https://raw.githubusercontent.com/libretto/prose/main/skills/libretto/examples/48-habit-miner.libretto
+libretto run https://raw.githubusercontent.com/andrei-shtanakov/libretto/main/skills/libretto/examples/48-habit-miner.libretto
 
 # Registry shorthand — handle/slug resolves to p.libretto.md
 libretto run irl-danb/habit-miner     # Fetches https://p.libretto.md/irl-danb/habit-miner

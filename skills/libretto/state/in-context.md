@@ -259,7 +259,7 @@ analysis: "Risk assessment shows..."
 
 ## Complete Execution Trace Example
 
-```prose
+```libretto
 agent researcher:
   model: sonnet
 

@@ -96,7 +96,7 @@ These keywords already have poetic quality or are too functional to replace sens
 
 ### Simple Program
 
-```prose
+```libretto
 # Functional
 use "@alice/research" as research
 input topic: "What to investigate"
@@ -111,7 +111,7 @@ output summary = session "Summarize"
   context: findings
 ```
 
-```prose
+```libretto
 # Folk
 summon "@alice/research" as research
 given topic: "What to investigate"
@@ -128,7 +128,7 @@ yield summary = scene "Summarize"
 
 ### Parallel Execution
 
-```prose
+```libretto
 # Functional
 parallel:
   security = session "Check security"
@@ -139,7 +139,7 @@ session "Synthesize review"
   context: { security, perf, style }
 ```
 
-```prose
+```libretto
 # Folk
 ensemble:
   security = scene "Check security"
@@ -152,13 +152,13 @@ scene "Synthesize review"
 
 ### Loop with Condition
 
-```prose
+```libretto
 # Functional
 loop until **the code is bug-free** (max: 5):
   session "Find and fix bugs"
 ```
 
-```prose
+```libretto
 # Folk
 loop until **the code is bug-free** (max: 5):
   scene "Find and fix bugs"
@@ -166,7 +166,7 @@ loop until **the code is bug-free** (max: 5):
 
 ### Error Handling
 
-```prose
+```libretto
 # Functional
 try:
   session "Risky operation"
@@ -177,7 +177,7 @@ finally:
   session "Cleanup"
 ```
 
-```prose
+```libretto
 # Folk
 venture:
   scene "Risky operation"
@@ -190,7 +190,7 @@ ever after:
 
 ### Choice Block
 
-```prose
+```libretto
 # Functional
 choice **the severity level**:
   option "Critical":
@@ -199,7 +199,7 @@ choice **the severity level**:
     session "Log for later"
 ```
 
-```prose
+```libretto
 # Folk
 crossroads **the severity level**:
   path "Critical":
@@ -210,7 +210,7 @@ crossroads **the severity level**:
 
 ### Conditionals
 
-```prose
+```libretto
 # Functional
 if **has security issues**:
   session "Fix security"
@@ -220,7 +220,7 @@ else:
   session "Approve"
 ```
 
-```prose
+```libretto
 # Folk
 when **has security issues**:
   scene "Fix security"
@@ -232,7 +232,7 @@ otherwise:
 
 ### Reusable Blocks
 
-```prose
+```libretto
 # Functional
 block review(topic):
   session "Research {topic}"
@@ -241,7 +241,7 @@ block review(topic):
 do review("quantum computing")
 ```
 
-```prose
+```libretto
 # Folk
 act review(topic):
   scene "Research {topic}"

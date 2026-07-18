@@ -175,7 +175,7 @@ Comments provide documentation within programs and are ignored during execution.
 
 ### Syntax
 
-```prose
+```libretto
 # This is a standalone comment
 
 session "Hello"  # This is an inline comment
@@ -190,7 +190,7 @@ session "Hello"  # This is an inline comment
 
 ### Examples
 
-```prose
+```libretto
 # Program header comment
 # Author: Example
 
@@ -208,14 +208,14 @@ Comments are **stripped during compilation**. The Libretto VM never sees them. T
 
 - **Comments inside strings are NOT comments**:
 
-  ```prose
+  ```libretto
   session "Say hello # this is part of the string"
   ```
 
   The `#` inside the string literal is part of the prompt, not a comment.
 
 - **Comments inside indented blocks are allowed**:
-  ```prose
+  ```libretto
   agent researcher:
       # This comment is inside the block
       model: sonnet
@@ -232,7 +232,7 @@ String literals represent text values, primarily used for session prompts.
 
 Strings are enclosed in double quotes:
 
-```prose
+```libretto
 "This is a string"
 ```
 
@@ -249,7 +249,7 @@ The following escape sequences are supported:
 
 ### Examples
 
-```prose
+```libretto
 session "Hello world"
 session "Line one\nLine two"
 session "She said \"hello\""
@@ -267,7 +267,7 @@ session "Column1\tColumn2"
 
 Multi-line strings use triple double-quotes (`"""`) and preserve internal whitespace and newlines:
 
-```prose
+```libretto
 session """
 This is a multi-line prompt.
 It preserves:
@@ -288,7 +288,7 @@ It preserves:
 
 Strings can embed variable references using `{varname}` syntax:
 
-```prose
+```libretto
 let name = session "Get the user's name"
 
 session "Hello {name}, welcome to the system!"
@@ -303,7 +303,7 @@ session "Hello {name}, welcome to the system!"
 
 #### Examples
 
-```prose
+```libretto
 let research = session "Research the topic"
 let analysis = session "Analyze findings"
 
@@ -346,7 +346,7 @@ Use statements import other Libretto programs from the registry at `p.libretto.m
 
 ### Syntax
 
-```prose
+```libretto
 use "@handle/slug"
 use "@handle/slug" as alias
 ```
@@ -362,7 +362,7 @@ An optional alias (`as name`) allows referencing by a shorter name.
 
 ### Examples
 
-```prose
+```libretto
 # Import a program
 use "@alice/research"
 
@@ -402,7 +402,7 @@ Use statements are processed before any agent definitions or sessions. The Libre
 A program may cap its own spend. At most one `budget:` declaration,
 placed with the input declarations (before any executable statement):
 
-```prose
+```libretto
 budget: 500000 tokens
 # or
 budget: $5.00
@@ -439,13 +439,13 @@ Inputs declare what values a program expects from its caller.
 
 ### Syntax
 
-```prose
+```libretto
 input name: "description"
 ```
 
 ### Examples
 
-```prose
+```libretto
 input topic: "The subject to research"
 input depth: "How deep to go (shallow, medium, deep)"
 ```
@@ -490,13 +490,13 @@ block return.
 
 #### Syntax
 
-```prose
+```libretto
 output name = expression
 ```
 
 ### Examples
 
-```prose
+```libretto
 let raw = session "Research {topic}"
 output findings = session "Synthesize research"
   context: raw
@@ -524,7 +524,7 @@ The `output name = expression` form:
 Inside a block body (a named `block` definition or a `do:` block), `output`
 takes a bare expression and acts as a **return statement**:
 
-```prose
+```libretto
 block search(docs, q, depth):
   if **docs is empty** or depth <= 0:
     output []                # early return: terminates this invocation
@@ -580,13 +580,13 @@ Call imported programs by providing their inputs.
 
 ### Syntax
 
-```prose
+```libretto
 name(input1: value1, input2: value2)
 ```
 
 ### Examples
 
-```prose
+```libretto
 use "@alice/research" as research
 
 let result = research(topic: "quantum computing")
@@ -596,7 +596,7 @@ let result = research(topic: "quantum computing")
 
 The result contains all outputs from the invoked program, accessible as properties:
 
-```prose
+```libretto
 session "Write summary"
   context: result.findings
 
@@ -608,7 +608,7 @@ session "Cite sources"
 
 For convenience, outputs can be destructured:
 
-```prose
+```libretto
 let { findings, sources } = research(topic: "quantum computing")
 ```
 
@@ -640,7 +640,7 @@ Agents are reusable templates that configure subagent behavior. Once defined, ag
 
 ### Syntax
 
-```prose
+```libretto
 agent name:
   model: sonnet
   prompt: "System prompt for this agent"
@@ -664,7 +664,7 @@ agent name:
 
 The `persist` property enables agents to maintain memory across invocations:
 
-```prose
+```libretto
 # Execution-scoped persistence (memory dies with run)
 agent captain:
   model: opus
@@ -694,7 +694,7 @@ agent shared:
 
 The `skills` property assigns imported skills to an agent:
 
-```prose
+```libretto
 use "@anthropic/web-search"
 use "@anthropic/summarizer" as summarizer
 
@@ -708,7 +708,7 @@ Skills must be imported before they can be assigned. Referencing an unimported s
 
 The `permissions` property controls agent access:
 
-```prose
+```libretto
 agent secure-agent:
   permissions:
     read: ["*.md", "*.txt"]
@@ -738,7 +738,7 @@ agent secure-agent:
 
 ### Examples
 
-```prose
+```libretto
 # Define a research agent
 agent researcher:
   model: sonnet
@@ -805,25 +805,25 @@ The session statement is the primary executable construct in Libretto. It spawns
 
 #### Simple Session (with inline prompt)
 
-```prose
+```libretto
 session "prompt text"
 ```
 
 #### Session with Agent Reference
 
-```prose
+```libretto
 session: agentName
 ```
 
 #### Named Session with Agent
 
-```prose
+```libretto
 session sessionName: agentName
 ```
 
 #### Session with Properties
 
-```prose
+```libretto
 session: agentName
   prompt: "Override the agent's default prompt"
   model: opus  # Override the agent's model
@@ -833,7 +833,7 @@ session: agentName
 
 When a session references an agent, it can override the agent's properties:
 
-```prose
+```libretto
 agent researcher:
   model: sonnet
   prompt: "You are a research assistant"
@@ -859,7 +859,7 @@ a re-run, the VM may skip the session only if every input fingerprint is
 unchanged (see `libretto.md`, Skip Semantics). `material:` narrows that to
 the parts that actually matter:
 
-```prose
+```libretto
 let report = session "Summarize the findings"
   context: { research, style_guide }
   material: [research]          # style_guide changes don't force a re-run
@@ -918,7 +918,7 @@ Libretto VM                    Subagent
 
 Multiple sessions execute sequentially:
 
-```prose
+```libretto
 session "First task"
 session "Second task"
 session "Third task"
@@ -960,7 +960,7 @@ Task({
 
 ### Examples
 
-```prose
+```libretto
 # Simple session
 session "Hello world"
 
@@ -1004,7 +1004,7 @@ The `resume` statement continues a persistent agent with its accumulated memory.
 
 ### Syntax
 
-```prose
+```libretto
 resume: agentName
   prompt: "Continue from where we left off"
 ```
@@ -1018,7 +1018,7 @@ resume: agentName
 
 ### Examples
 
-```prose
+```libretto
 agent captain:
   model: opus
   persist: true
@@ -1058,7 +1058,7 @@ Variables allow you to capture the results of sessions and pass them as context 
 
 The `let` keyword creates a mutable variable bound to a session result:
 
-```prose
+```libretto
 let research = session "Research the topic thoroughly"
 
 # research now holds the output of that session
@@ -1066,7 +1066,7 @@ let research = session "Research the topic thoroughly"
 
 Variables can be reassigned:
 
-```prose
+```libretto
 let draft = session "Write initial draft"
 
 # Revise the draft
@@ -1078,7 +1078,7 @@ draft = session "Improve the draft"
 
 The `const` keyword creates an immutable variable:
 
-```prose
+```libretto
 const config = session "Get configuration settings"
 
 # This would be an error:
@@ -1091,7 +1091,7 @@ The `context` property passes previous session outputs to a new session:
 
 #### Single Context
 
-```prose
+```libretto
 let research = session "Research quantum computing"
 
 session "Write summary"
@@ -1100,7 +1100,7 @@ session "Write summary"
 
 #### Multiple Contexts
 
-```prose
+```libretto
 let research = session "Research the topic"
 let analysis = session "Analyze the findings"
 
@@ -1112,7 +1112,7 @@ session "Write final report"
 
 Use an empty array to start a session without inherited context:
 
-```prose
+```libretto
 session "Independent task"
   context: []
 ```
@@ -1121,7 +1121,7 @@ session "Independent task"
 
 For passing multiple named results (especially from parallel blocks), use object shorthand:
 
-```prose
+```libretto
 parallel:
   a = session "Task A"
   b = session "Task B"
@@ -1161,7 +1161,7 @@ only value a block exports is its return value — capture it
 
 ### Complete Example
 
-```prose
+```libretto
 agent researcher:
   model: sonnet
   prompt: "You are a research assistant"
@@ -1205,7 +1205,7 @@ do NOT open a new scope; declarations there are root-scope declarations.
 
 **This is a compile error:**
 
-```prose
+```libretto
 let result = session "Outer task"
 
 for item in items:
@@ -1215,7 +1215,7 @@ for item in items:
 
 So is declaring the same name in two branches of a conditional:
 
-```prose
+```libretto
 if **review passed**:
   let verdict = session "Summarize approval"     # declares 'verdict'
 else:
@@ -1225,7 +1225,7 @@ else:
 **The flat-namespace-safe pattern** is declare-once + bare reassignment
 (exactly one declaration; assignments reuse it):
 
-```prose
+```libretto
 let verdict = base_report          # declare once, with the default value
 if **review raised critical concerns**:
   verdict = session "Summarize concerns"   # bare assignment, not a new `let`
@@ -1269,7 +1269,7 @@ The `do:` keyword creates an explicit sequential block. All statements in the bl
 
 #### Syntax
 
-```prose
+```libretto
 do:
   statement1
   statement2
@@ -1278,7 +1278,7 @@ do:
 
 #### Examples
 
-```prose
+```libretto
 # Explicit sequential block
 do:
   session "Research the topic"
@@ -1297,7 +1297,7 @@ Named blocks create reusable workflow components. Define once, invoke multiple t
 
 #### Syntax
 
-```prose
+```libretto
 block name:
   statement1
   statement2
@@ -1308,13 +1308,13 @@ block name:
 
 Use `do` followed by the block name to invoke a defined block:
 
-```prose
+```libretto
 do blockname
 ```
 
 #### Examples
 
-```prose
+```libretto
 # Define a review pipeline
 block review-pipeline:
   session "Security review"
@@ -1338,7 +1338,7 @@ Blocks can accept parameters to make them more flexible and reusable.
 
 #### Syntax
 
-```prose
+```libretto
 block name(param1, param2):
   # param1 and param2 are available here
   statement1
@@ -1349,13 +1349,13 @@ block name(param1, param2):
 
 Pass arguments when invoking a parameterized block:
 
-```prose
+```libretto
 do name(arg1, arg2)
 ```
 
 #### Examples
 
-```prose
+```libretto
 # Define a parameterized block
 block review(topic):
   session "Research {topic} thoroughly"
@@ -1370,7 +1370,7 @@ do review("blockchain")
 
 #### Multiple Parameters
 
-```prose
+```libretto
 block process-item(item, mode):
   session "Process {item} using {mode} mode"
   session "Verify {item} processing"
@@ -1398,13 +1398,13 @@ The `->` operator chains sessions into a sequence on a single line. This is synt
 
 #### Syntax
 
-```prose
+```libretto
 session "A" -> session "B" -> session "C"
 ```
 
 This is equivalent to:
 
-```prose
+```libretto
 session "A"
 session "B"
 session "C"
@@ -1412,7 +1412,7 @@ session "C"
 
 #### Examples
 
-```prose
+```libretto
 # Quick pipeline
 session "Plan" -> session "Execute" -> session "Review"
 
@@ -1424,7 +1424,7 @@ let workflow = session "Draft" -> session "Edit" -> session "Finalize"
 
 Block definitions are hoisted - you can use a block before it's defined in the source:
 
-```prose
+```libretto
 # Use before definition
 do validation-checks
 
@@ -1438,7 +1438,7 @@ block validation-checks:
 
 Blocks and do: blocks can be nested:
 
-```prose
+```libretto
 block outer-workflow:
   session "Start"
   do:
@@ -1455,7 +1455,7 @@ do:
 
 Blocks work with the context system:
 
-```prose
+```libretto
 # Capture do block result
 let research = do:
   session "Gather information"
@@ -1483,7 +1483,7 @@ Parallel blocks allow multiple sessions to run concurrently. All branches execut
 
 ### Basic Syntax
 
-```prose
+```libretto
 parallel:
   session "Security review"
   session "Performance review"
@@ -1496,7 +1496,7 @@ All three sessions start at the same time and run concurrently. The program wait
 
 Capture the results of parallel branches into variables:
 
-```prose
+```libretto
 parallel:
   security = session "Security review"
   perf = session "Performance review"
@@ -1509,7 +1509,7 @@ These variables can then be used in subsequent sessions.
 
 Pass multiple parallel results to a session using object shorthand:
 
-```prose
+```libretto
 parallel:
   security = session "Security review"
   perf = session "Performance review"
@@ -1525,7 +1525,7 @@ The object shorthand `{ a, b, c }` is equivalent to passing an object with prope
 
 #### Parallel Inside Sequential
 
-```prose
+```libretto
 do:
   session "Setup"
   parallel:
@@ -1538,7 +1538,7 @@ The setup runs first, then Task A and Task B run in parallel, and finally cleanu
 
 #### Sequential Inside Parallel
 
-```prose
+```libretto
 parallel:
   do:
     session "Multi-step task 1a"
@@ -1552,7 +1552,7 @@ Each parallel branch contains a sequential workflow. The two workflows run concu
 
 ### Assigning Parallel Blocks to Variables
 
-```prose
+```libretto
 let results = parallel:
   session "Task A"
   session "Task B"
@@ -1560,7 +1560,7 @@ let results = parallel:
 
 ### Complete Example
 
-```prose
+```libretto
 agent reviewer:
   model: sonnet
 
@@ -1587,7 +1587,7 @@ By default, parallel blocks wait for all branches to complete. You can specify a
 Return as soon as the first branch completes; the losing branches' results
 are discarded:
 
-```prose
+```libretto
 parallel ("first"):
   session "Try approach A"
   session "Try approach B"
@@ -1607,7 +1607,7 @@ The first successful result wins. The other branches' results are discarded.
 
 Return when any N branches complete successfully:
 
-```prose
+```libretto
 # Default: any 1 success
 parallel ("any"):
   session "Attempt 1"
@@ -1624,7 +1624,7 @@ parallel ("any", count: 2):
 
 Wait for all branches to complete:
 
-```prose
+```libretto
 # Implicit - this is the default
 parallel:
   session "Task A"
@@ -1646,7 +1646,7 @@ If any branch fails, the parallel block fails as soon as that failure is
 observed; results from other branches are discarded (in-flight branches are
 not cancelled — see the note under First (Race)):
 
-```prose
+```libretto
 parallel:  # Implicit fail-fast
   session "Critical task 1"
   session "Critical task 2"
@@ -1661,7 +1661,7 @@ parallel (on-fail: "fail-fast"):
 
 Let all branches complete, then report all failures:
 
-```prose
+```libretto
 parallel (on-fail: "continue"):
   session "Task 1"
   session "Task 2"
@@ -1675,7 +1675,7 @@ session "Process results, including failures"
 
 Ignore all failures, always succeed:
 
-```prose
+```libretto
 parallel (on-fail: "ignore"):
   session "Optional enrichment 1"
   session "Optional enrichment 2"
@@ -1691,7 +1691,7 @@ large fan-outs this can overwhelm the substrate (rate limits, session caps)
 and removes any cost backpressure. The `max_concurrent` modifier bounds how
 many branches run at once:
 
-```prose
+```libretto
 # At most 3 branches in flight at any moment
 parallel (max_concurrent: 3):
   session "Review package A"
@@ -1718,7 +1718,7 @@ Semantics:
 Join strategies, failure policies, and the concurrency throttle can be
 combined:
 
-```prose
+```libretto
 # Race with resilience
 parallel ("first", on-fail: "continue"):
   session "Fast but unreliable"
@@ -1793,7 +1793,7 @@ The `repeat` block executes its body a fixed number of times.
 
 #### Basic Syntax
 
-```prose
+```libretto
 repeat 3:
   session "Generate a creative idea"
 ```
@@ -1802,7 +1802,7 @@ repeat 3:
 
 Access the current iteration index using `as`:
 
-```prose
+```libretto
 repeat 5 as i:
   session "Process item"
     context: i
@@ -1816,7 +1816,7 @@ The `for` block iterates over a collection.
 
 #### Basic Syntax
 
-```prose
+```libretto
 let fruits = ["apple", "banana", "cherry"]
 for fruit in fruits:
   session "Describe this fruit"
@@ -1825,7 +1825,7 @@ for fruit in fruits:
 
 #### With Inline Array
 
-```prose
+```libretto
 for topic in ["AI", "climate", "space"]:
   session "Research this topic"
     context: topic
@@ -1835,7 +1835,7 @@ for topic in ["AI", "climate", "space"]:
 
 Access both the item and its index:
 
-```prose
+```libretto
 let items = ["a", "b", "c"]
 for item, i in items:
   session "Process item with index"
@@ -1846,7 +1846,7 @@ for item, i in items:
 
 The `parallel for` block runs all iterations concurrently (fan-out pattern):
 
-```prose
+```libretto
 let topics = ["AI", "climate", "space"]
 parallel for topic in topics:
   session "Research this topic"
@@ -1857,7 +1857,7 @@ session "Combine all research"
 
 This is equivalent to:
 
-```prose
+```libretto
 parallel:
   session "Research AI" context: "AI"
   session "Research climate" context: "climate"
@@ -1874,7 +1874,7 @@ Loop variables are scoped to the loop body:
 - They shadow outer variables of the same name (with a warning)
 - They are not accessible outside the loop
 
-```prose
+```libretto
 let item = session "outer"
 for item in ["a", "b"]:
   # 'item' here is the loop variable
@@ -1889,7 +1889,7 @@ session "use outer item"
 
 Loops can be nested:
 
-```prose
+```libretto
 repeat 2:
   repeat 3:
     session "Inner task"
@@ -1897,7 +1897,7 @@ repeat 2:
 
 Different loop types can be combined:
 
-```prose
+```libretto
 let items = ["a", "b"]
 repeat 2:
   for item in items:
@@ -1907,7 +1907,7 @@ repeat 2:
 
 ### Complete Example
 
-```prose
+```libretto
 # Generate multiple variations of ideas
 repeat 3:
   session "Generate a creative startup idea"
@@ -1942,7 +1942,7 @@ Unbounded loops provide iteration with AI-evaluated termination conditions. Unli
 
 Unbounded loops use **discretion markers** (`**...**`) to wrap AI-evaluated conditions. These markers signal that the enclosed text should be interpreted intelligently by the Libretto VM at runtime, not as a literal boolean expression.
 
-```prose
+```libretto
 # The text inside **...** is evaluated by the AI
 loop until **the poem has vivid imagery and flows smoothly**:
   session "Review and improve the poem"
@@ -1950,7 +1950,7 @@ loop until **the poem has vivid imagery and flows smoothly**:
 
 For multi-line conditions, use triple-asterisks:
 
-```prose
+```libretto
 loop until ***
   the document is complete
   all sections have been reviewed
@@ -1963,14 +1963,14 @@ loop until ***
 
 The simplest unbounded loop runs indefinitely until explicitly limited:
 
-```prose
+```libretto
 loop:
   session "Process next item"
 ```
 
 **Warning**: Loops without termination conditions or max iterations generate a warning. Always include a safety limit:
 
-```prose
+```libretto
 loop (max: 50):
   session "Process next item"
 ```
@@ -1979,7 +1979,7 @@ loop (max: 50):
 
 The `loop until` variant runs until a condition becomes true:
 
-```prose
+```libretto
 loop until **the task is complete**:
   session "Continue working on the task"
 ```
@@ -1990,7 +1990,7 @@ The Libretto VM evaluates the discretion condition after each iteration and exit
 
 The `loop while` variant runs while a condition remains true:
 
-```prose
+```libretto
 loop while **there are still items to process**:
   session "Process the next item"
 ```
@@ -2001,7 +2001,7 @@ Semantically, `loop while **X**` is equivalent to `loop until **not X**`.
 
 Track the current iteration number using `as`:
 
-```prose
+```libretto
 loop until **done** as attempt:
   session "Try approach"
     context: attempt
@@ -2018,7 +2018,7 @@ The iteration variable:
 
 Specify maximum iterations with `(max: N)`:
 
-```prose
+```libretto
 # Stop after 10 iterations even if condition not met
 loop until **all bugs fixed** (max: 10):
   session "Find and fix a bug"
@@ -2033,7 +2033,7 @@ The loop exits when:
 
 All options can be combined:
 
-```prose
+```libretto
 loop until **condition** (max: N) as i:
   body...
 ```
@@ -2044,7 +2044,7 @@ Order matters: condition comes before modifiers, modifiers before `as`.
 
 #### Iterative Improvement
 
-```prose
+```libretto
 session "Write an initial draft"
 
 loop until **the draft is polished and ready for review** (max: 5):
@@ -2056,7 +2056,7 @@ session "Present the final draft"
 
 #### Debugging Workflow
 
-```prose
+```libretto
 session "Run tests to identify failures"
 
 loop until **all tests pass** (max: 20) as attempt:
@@ -2069,7 +2069,7 @@ session "Confirm all tests pass and summarize fixes"
 
 #### Consensus Building
 
-```prose
+```libretto
 parallel:
   opinion1 = session "Get first expert opinion"
   opinion2 = session "Get second expert opinion"
@@ -2084,7 +2084,7 @@ session "Document the final consensus"
 
 #### Quality Threshold
 
-```prose
+```libretto
 let draft = session "Create initial document"
 
 loop while **quality score is below threshold** (max: 10):
@@ -2129,7 +2129,7 @@ The Libretto VM uses its intelligence to evaluate discretion conditions:
 
 Unbounded loops can be nested with other loop types:
 
-```prose
+```libretto
 # Unbounded inside fixed
 repeat 3:
   loop until **sub-task complete** (max: 10):
@@ -2150,7 +2150,7 @@ loop until **outer condition** (max: 5):
 
 Loop variables follow the same scoping rules as fixed loops:
 
-```prose
+```libretto
 let i = session "outer"
 loop until **done** as i:
   # 'i' here is the loop variable (shadows outer)
@@ -2182,7 +2182,7 @@ Pipeline operations provide functional-style collection transformations. They al
 
 The pipe operator (`|`) passes a collection to a transformation operation:
 
-```prose
+```libretto
 let items = ["a", "b", "c"]
 let results = items | map:
   session "Process this item"
@@ -2193,7 +2193,7 @@ let results = items | map:
 
 The `map` operation transforms each element in a collection:
 
-```prose
+```libretto
 let articles = ["article1", "article2", "article3"]
 
 let summaries = articles | map:
@@ -2207,7 +2207,7 @@ Inside a map body, the implicit variable `item` refers to the current element be
 
 The `filter` operation keeps elements that match a condition:
 
-```prose
+```libretto
 let items = ["one", "two", "three", "four", "five"]
 
 let short = items | filter:
@@ -2221,7 +2221,7 @@ The session in a filter body should return something the Libretto VM can interpr
 
 The `reduce` operation accumulates elements into a single result:
 
-```prose
+```libretto
 let ideas = ["AI assistant", "smart home", "health tracker"]
 
 let combined = ideas | reduce(summary, idea):
@@ -2240,7 +2240,7 @@ The first item in the collection becomes the initial accumulator value.
 
 The `pmap` operation is like `map` but runs all transformations concurrently:
 
-```prose
+```libretto
 let tasks = ["task1", "task2", "task3"]
 
 let results = tasks | pmap:
@@ -2257,7 +2257,7 @@ This is similar to `parallel for`, but in pipeline syntax.
 
 Pipeline operations can be chained to compose complex transformations:
 
-```prose
+```libretto
 let topics = ["quantum computing", "blockchain", "machine learning", "IoT"]
 
 let result = topics
@@ -2276,7 +2276,7 @@ Operations execute left-to-right: first filter, then map.
 
 ### Complete Example
 
-```prose
+```libretto
 # Define a collection
 let articles = ["AI breakthroughs", "Climate solutions", "Space exploration"]
 
@@ -2322,7 +2322,7 @@ When the Libretto VM encounters a pipeline:
 
 Pipeline variables are scoped to their operation body:
 
-```prose
+```libretto
 let item = "outer"
 let items = ["a", "b"]
 
@@ -2355,7 +2355,7 @@ Libretto provides structured error handling with try/catch/finally blocks, throw
 
 The `try:` block wraps operations that might fail. The `catch:` block handles errors.
 
-```prose
+```libretto
 try:
   session "Attempt risky operation"
 catch:
@@ -2366,7 +2366,7 @@ catch:
 
 Use `catch as err:` to capture error context for the error handler:
 
-```prose
+```libretto
 try:
   session "Call external API"
 catch as err:
@@ -2380,7 +2380,7 @@ The error variable (`err`) contains contextual information about what went wrong
 
 The `finally:` block always executes, whether the try block succeeds or fails:
 
-```prose
+```libretto
 try:
   session "Acquire and use resource"
 catch:
@@ -2398,7 +2398,7 @@ finally:
 
 For cleanup without error handling, use try/finally:
 
-```prose
+```libretto
 try:
   session "Open connection and do work"
 finally:
@@ -2413,7 +2413,7 @@ The `throw` statement raises or re-raises errors.
 
 Inside a catch block, `throw` without arguments re-raises the caught error to outer handlers:
 
-```prose
+```libretto
 try:
   try:
     session "Inner operation"
@@ -2428,7 +2428,7 @@ catch:
 
 Throw a new error with a custom message:
 
-```prose
+```libretto
 session "Check preconditions"
 throw "Precondition not met"
 ```
@@ -2437,7 +2437,7 @@ throw "Precondition not met"
 
 Try blocks can be nested. Inner catch blocks don't trigger outer handlers unless they rethrow:
 
-```prose
+```libretto
 try:
   session "Outer operation"
   try:
@@ -2453,7 +2453,7 @@ catch:
 
 Each parallel branch can have its own error handling:
 
-```prose
+```libretto
 parallel:
   try:
     session "Branch A might fail"
@@ -2473,7 +2473,7 @@ This differs from the `on-fail:` policy which controls behavior when unhandled e
 
 The `retry:` property makes a session automatically retry on failure:
 
-```prose
+```libretto
 session "Call flaky API"
   retry: 3
 ```
@@ -2482,7 +2482,7 @@ session "Call flaky API"
 
 Add `backoff:` to control delay between retries:
 
-```prose
+```libretto
 session "Rate-limited API"
   retry: 5
   backoff: exponential
@@ -2500,7 +2500,7 @@ session "Rate-limited API"
 
 Retry works with other session properties:
 
-```prose
+```libretto
 let data = session "Get input"
 session "Process data"
   context: data
@@ -2512,7 +2512,7 @@ session "Process data"
 
 Retry and try/catch work together for maximum resilience:
 
-```prose
+```libretto
 try:
   session "Call external service"
     retry: 3
@@ -2560,7 +2560,7 @@ Choice blocks allow the Libretto VM to select from multiple labeled options base
 
 ### Syntax
 
-```prose
+```libretto
 choice **criteria**:
   option "Label A":
     statements...
@@ -2572,7 +2572,7 @@ choice **criteria**:
 
 The criteria is wrapped in discretion markers (`**...**`) and is evaluated by the Libretto VM to select which option to execute:
 
-```prose
+```libretto
 choice **the best approach for the current situation**:
   option "Quick fix":
     session "Apply a quick temporary fix"
@@ -2584,7 +2584,7 @@ choice **the best approach for the current situation**:
 
 For complex criteria, use triple-asterisks:
 
-```prose
+```libretto
 choice ***
   which strategy is most appropriate
   given the current project constraints
@@ -2600,7 +2600,7 @@ choice ***
 
 #### Simple Choice
 
-```prose
+```libretto
 let analysis = session "Analyze the code quality"
 
 choice **the severity of issues found in the analysis**:
@@ -2616,7 +2616,7 @@ choice **the severity of issues found in the analysis**:
 
 #### Choice with Multiple Statements per Option
 
-```prose
+```libretto
 choice **the user's experience level**:
   option "Beginner":
     session "Explain basic concepts first"
@@ -2629,7 +2629,7 @@ choice **the user's experience level**:
 
 #### Nested Choices
 
-```prose
+```libretto
 choice **the type of request**:
   option "Bug report":
     choice **the bug severity**:
@@ -2679,14 +2679,14 @@ If/elif/else statements provide conditional branching based on AI-evaluated cond
 
 ### If Statement
 
-```prose
+```libretto
 if **condition**:
   statements...
 ```
 
 ### If/Else
 
-```prose
+```libretto
 if **condition**:
   statements...
 else:
@@ -2695,7 +2695,7 @@ else:
 
 ### If/Elif/Else
 
-```prose
+```libretto
 if **first condition**:
   statements...
 elif **second condition**:
@@ -2710,7 +2710,7 @@ else:
 
 Conditions are wrapped in discretion markers (`**...**`) for AI evaluation:
 
-```prose
+```libretto
 let analysis = session "Analyze the codebase"
 
 if **the code has security vulnerabilities**:
@@ -2728,7 +2728,7 @@ else:
 
 Use triple-asterisks for complex conditions:
 
-```prose
+```libretto
 if ***
   the test suite passes
   and the code coverage is above 80%
@@ -2743,7 +2743,7 @@ else:
 
 #### Simple If
 
-```prose
+```libretto
 session "Check system health"
 
 if **the system is healthy**:
@@ -2752,7 +2752,7 @@ if **the system is healthy**:
 
 #### If/Else
 
-```prose
+```libretto
 let review = session "Review the pull request"
 
 if **the code changes are safe and well-tested**:
@@ -2765,7 +2765,7 @@ else:
 
 #### Multiple Elif
 
-```prose
+```libretto
 let status = session "Check project status"
 
 if **the project is on track**:
@@ -2781,7 +2781,7 @@ else:
 
 #### Nested Conditionals
 
-```prose
+```libretto
 if **the request is authenticated**:
   if **the user has admin privileges**:
     session "Process admin request"
@@ -2795,7 +2795,7 @@ else:
 
 #### With Try/Catch
 
-```prose
+```libretto
 try:
   session "Attempt operation"
   if **operation succeeded partially**:
@@ -2810,7 +2810,7 @@ catch as err:
 
 #### With Loops
 
-```prose
+```libretto
 loop until **task complete** (max: 10):
   session "Work on task"
   if **encountered blocker**:
@@ -2971,13 +2971,13 @@ Error at line 5, column 12: Unterminated string literal
 
 ### Minimal Program
 
-```prose
+```libretto
 session "Hello world"
 ```
 
 ### Research Pipeline with Agents
 
-```prose
+```libretto
 # Define specialized agents
 agent researcher:
   model: sonnet
@@ -2997,7 +2997,7 @@ session: writer
 
 ### Code Review Workflow
 
-```prose
+```libretto
 agent reviewer:
   model: sonnet
   prompt: "You are an expert code reviewer"
@@ -3014,7 +3014,7 @@ session: reviewer
 
 ### Multi-step Task with Model Override
 
-```prose
+```libretto
 agent analyst:
   model: haiku
   prompt: "You analyze data quickly"
@@ -3031,7 +3031,7 @@ session: analyst
 
 ### Comments for Documentation
 
-```prose
+```libretto
 # Project: Quarterly Report Generator
 # Author: Team Lead
 # Date: 2024-01-01
@@ -3059,7 +3059,7 @@ session: analyst
 
 ### Workflow with Skills and Permissions
 
-```prose
+```libretto
 # Import external programs
 use "@anthropic/web-search"
 use "@anthropic/file-writer" as file-writer

@@ -254,7 +254,7 @@ else:
       {implementation.changes_made}
 
       ## Improved Program
-      ```prose
+      ```libretto
       {implementation.improved_program}
       ```
 

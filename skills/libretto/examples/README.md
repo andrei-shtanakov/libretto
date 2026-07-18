@@ -132,7 +132,7 @@ The architect-by-simulation pattern is for designing systems by "implementing" t
 4. **User checkpoint**: Get plan approval BEFORE executing the pipeline
 5. **Simulation as implementation**: The spec IS the deliverable
 
-```prose
+```libretto
 # The core pattern
 agent architect:
   model: opus
@@ -176,7 +176,7 @@ The captain's chair is an orchestration paradigm where a coordinating agent (the
 4. **80/20 planning**: 80% effort on planning, 20% on execution oversight
 5. **Checkpoint validation**: User approval at key decision points
 
-```prose
+```libretto
 # The core pattern
 agent captain:
   model: opus
@@ -226,7 +226,7 @@ Recursive Language Models (RLMs) are a paradigm for handling inputs far beyond c
 3. **Filter-then-recurse**: Cheap filtering before expensive deep dives
 4. **Pairwise aggregation**: Handle O(n²) tasks through batch decomposition
 
-```prose
+```libretto
 # The core RLM pattern: recursive block with scope isolation
 block process(data, depth):
   # Base case
@@ -272,7 +272,7 @@ Execute examples/03-code-review.libretto
 
 ### Core Syntax
 
-```prose
+```libretto
 # Comments
 session "prompt"                    # Simple session
 let x = session "..."               # Variable binding
@@ -281,7 +281,7 @@ const y = session "..."             # Immutable binding
 
 ### Agents
 
-```prose
+```libretto
 agent name:
   model: sonnet                     # haiku, sonnet, opus
   prompt: "System prompt"
@@ -293,7 +293,7 @@ agent name:
 
 ### Parallel
 
-```prose
+```libretto
 parallel:                           # Basic parallel
   a = session "A"
   b = session "B"
@@ -305,7 +305,7 @@ parallel (on-fail: "continue"):     # Don't fail on errors
 
 ### Loops
 
-```prose
+```libretto
 repeat 3:                           # Fixed iterations
   session "..."
 
@@ -321,7 +321,7 @@ loop until **condition** (max: 10): # Unbounded with AI condition
 
 ### Pipelines
 
-```prose
+```libretto
 items | map:                        # Transform each
   session "..."
 items | filter:                     # Keep matching
@@ -334,7 +334,7 @@ items | pmap:                       # Parallel transform
 
 ### Error Handling
 
-```prose
+```libretto
 try:
   session "..."
 catch as err:
@@ -351,7 +351,7 @@ throw "message"                     # Raise error
 
 ### Conditionals
 
-```prose
+```libretto
 if **condition**:
   session "..."
 elif **other condition**:
@@ -362,7 +362,7 @@ else:
 
 ### Choice
 
-```prose
+```libretto
 choice **criteria**:
   option "Label A":
     session "..."
@@ -372,7 +372,7 @@ choice **criteria**:
 
 ### Blocks
 
-```prose
+```libretto
 block name(param):                  # Define with parameters
   session "... {param} ..."
 
@@ -381,7 +381,7 @@ do name("value")                    # Invoke with arguments
 
 ### String Interpolation
 
-```prose
+```libretto
 let x = session "Get value"
 session "Use {x} in prompt"         # Single-line
 
