@@ -21,7 +21,7 @@ This document catalogs patterns that lead to brittle, expensive, slow, or unmain
 
 A single session that tries to do everything. God sessions are hard to debug, impossible to parallelize, and produce inconsistent results.
 
-```prose
+```libretto
 # Bad: One session doing too much
 session """
   Read all the code in the repository.
@@ -39,7 +39,7 @@ session """
 
 **Fix**: Decompose into focused sessions:
 
-```prose
+```libretto
 # Good: Focused sessions
 parallel:
   security = session "Identify security vulnerabilities"
@@ -56,7 +56,7 @@ session "Create remediation plan"
 
 Running independent operations sequentially when they could run concurrently. Wastes wall-clock time.
 
-```prose
+```libretto
 # Bad: Sequential independent work
 let market = session "Research market"
 let tech = session "Research technology"
@@ -70,7 +70,7 @@ session "Synthesize"
 
 **Fix**: Parallelize independent work:
 
-```prose
+```libretto
 # Good: Parallel independent work
 parallel:
   market = session "Research market"
@@ -85,7 +85,7 @@ session "Synthesize"
 
 Context passed haphazardly without clear data flow. Makes programs hard to understand and modify.
 
-```prose
+```libretto
 # Bad: Unclear what context is actually used
 let a = session "Step A"
 let b = session "Step B"
@@ -104,7 +104,7 @@ let f = session "Step F"
 
 **Fix**: Minimize context to actual dependencies:
 
-```prose
+```libretto
 # Good: Clear, minimal dependencies
 let research = session "Research"
 let analysis = session "Analyze"
@@ -119,7 +119,7 @@ let report = session "Report"
 
 Spawning parallel agents for related analytical work, then synthesizing, when a single focused agent could do the entire job more efficiently.
 
-```prose
+```libretto
 # Antipattern: Parallel investigation + synthesis
 parallel:
   code = session "Analyze code path"
@@ -135,7 +135,7 @@ synthesis = session "Synthesize all findings"
 
 **Fix**: Use a single focused agent with multi-step instructions:
 
-```prose
+```libretto
 # Good: Single comprehensive investigator
 diagnosis = session "Investigate the error"
   prompt: """Analyze comprehensively:
@@ -152,7 +152,7 @@ diagnosis = session "Investigate the error"
 
 Duplicating session sequences instead of using blocks. Leads to inconsistent changes and maintenance burden.
 
-```prose
+```libretto
 # Bad: Duplicated workflow
 session "Security review of module A"
 session "Performance review of module A"
@@ -171,7 +171,7 @@ session "Synthesize reviews of module C"
 
 **Fix**: Extract into a block:
 
-```prose
+```libretto
 # Good: Reusable block
 block review-module(module):
   parallel:
@@ -193,7 +193,7 @@ do review-module("module C")
 
 A loop without max iterations. Can run forever if the condition is never satisfied.
 
-```prose
+```libretto
 # Bad: No escape hatch
 loop until **the code is perfect**:
   session "Improve the code"
@@ -203,7 +203,7 @@ loop until **the code is perfect**:
 
 **Fix**: Always specify `max:`:
 
-```prose
+```libretto
 # Good: Bounded iteration
 loop until **the code is perfect** (max: 10):
   session "Improve the code"
@@ -213,7 +213,7 @@ loop until **the code is perfect** (max: 10):
 
 Assuming everything will succeed. No error handling for operations that can fail.
 
-```prose
+```libretto
 # Bad: No error handling
 session "Call external API"
 session "Process API response"
@@ -225,7 +225,7 @@ session "Send notification"
 
 **Fix**: Handle failures explicitly:
 
-```prose
+```libretto
 # Good: Error handling
 try:
   let response = session "Call external API"
@@ -242,7 +242,7 @@ catch as err:
 
 Using `on-fail: "ignore"` when failures actually matter. Masks problems that should surface.
 
-```prose
+```libretto
 # Bad: Ignoring failures that matter
 parallel (on-fail: "ignore"):
   session "Charge customer credit card"
@@ -256,7 +256,7 @@ session "Order complete!"  # But was it really?
 
 **Fix**: Use appropriate failure policy:
 
-```prose
+```libretto
 # Good: Fail-fast for critical operations
 parallel:  # Default: fail-fast
   payment = session "Charge customer credit card"
@@ -277,7 +277,7 @@ catch:
 
 Discretion conditions that are ambiguous or unmeasurable.
 
-```prose
+```libretto
 # Bad: What does "good enough" mean?
 loop until **the output is good enough**:
   session "Improve output"
@@ -291,7 +291,7 @@ if **the user will be happy**:
 
 **Fix**: Provide concrete, evaluatable criteria:
 
-```prose
+```libretto
 # Good: Specific criteria
 loop until **all tests pass and code coverage exceeds 80%** (max: 10):
   session "Improve test coverage"
@@ -305,7 +305,7 @@ if **the response contains valid JSON with all required fields**:
 
 Catching errors without meaningful handling. Hides problems without solving them.
 
-```prose
+```libretto
 # Bad: Silent swallow
 try:
   session "Critical operation"
@@ -317,7 +317,7 @@ catch:
 
 **Fix**: Handle errors meaningfully:
 
-```prose
+```libretto
 # Good: Meaningful handling
 try:
   session "Critical operation"
@@ -337,7 +337,7 @@ catch as err:
 
 Using the most powerful (expensive) model for all tasks, including trivial ones.
 
-```prose
+```libretto
 # Bad: Opus for simple classification
 agent classifier:
   model: opus
@@ -353,7 +353,7 @@ for email in emails:
 
 **Fix**: Match model to task complexity:
 
-```prose
+```libretto
 # Good: Haiku for simple tasks
 agent classifier:
   model: haiku
@@ -365,7 +365,7 @@ agent classifier:
 Using `parallel ("first")` or `("any")` expecting to pay only for the
 winning branch.
 
-```prose
+```libretto
 # Bad: assuming the race costs one branch
 parallel ("first"):
   session: fast-model "Try the quick approach"
@@ -381,7 +381,7 @@ latency tools, not cost tools.
 **Fix**: Race only when wall-clock latency is worth paying for every branch.
 If cost matters, run the cheap approach first and escalate on failure:
 
-```prose
+```libretto
 # Good: escalate instead of racing
 let attempt = session: fast-model "Try the quick approach"
 if **the quick attempt is inadequate**:
@@ -393,7 +393,7 @@ if **the quick attempt is inadequate**:
 Launching a `parallel` block or `parallel for` over a large collection with
 no concurrency bound.
 
-```prose
+```libretto
 # Bad: 200 items -> 200 simultaneous sessions
 parallel for file in repository_files:
   session "Audit {file}"
@@ -405,7 +405,7 @@ whole fan-out's cost is committed the moment the block starts.
 
 **Fix**: Bound in-flight branches:
 
-```prose
+```libretto
 # Good: throttled fan-out
 parallel for file in repository_files (max_concurrent: 5):
   session "Audit {file}"
@@ -415,7 +415,7 @@ parallel for file in repository_files (max_concurrent: 5):
 
 Passing excessive context that the session doesn't need.
 
-```prose
+```libretto
 # Bad: Passing everything
 let full_codebase = session "Read entire codebase"
 let all_docs = session "Read all documentation"
@@ -429,7 +429,7 @@ session "Fix the typo in the README"
 
 **Fix**: Pass minimal relevant context:
 
-```prose
+```libretto
 # Good: Minimal context
 let readme = session "Read the README file"
 
@@ -441,7 +441,7 @@ session "Fix the typo in the README"
 
 Looping when a single session would suffice.
 
-```prose
+```libretto
 # Bad: Loop for what could be one call
 let items = ["apple", "banana", "cherry"]
 for item in items:
@@ -452,7 +452,7 @@ for item in items:
 
 **Fix**: Batch when possible:
 
-```prose
+```libretto
 # Good: Batch processing
 let items = ["apple", "banana", "cherry"]
 session "Describe each of these items: {items}"
@@ -462,7 +462,7 @@ session "Describe each of these items: {items}"
 
 Computing the same thing multiple times.
 
-```prose
+```libretto
 # Bad: Redundant research
 session "Research AI safety for security review"
 session "Research AI safety for ethics review"
@@ -473,7 +473,7 @@ session "Research AI safety for compliance review"
 
 **Fix**: Compute once, use many times:
 
-```prose
+```libretto
 # Good: Compute once
 let research = session "Comprehensive research on AI safety"
 
@@ -494,7 +494,7 @@ parallel:
 
 Computing everything upfront when only some results might be needed.
 
-```prose
+```libretto
 # Bad: Compute all branches even if only one is needed
 parallel:
   simple_analysis = session "Simple analysis"
@@ -521,7 +521,7 @@ choice **appropriate depth**:
 
 **Fix**: Compute lazily:
 
-```prose
+```libretto
 # Good: Only compute what's needed
 let initial = session "Initial assessment"
   model: haiku
@@ -542,7 +542,7 @@ choice **appropriate depth based on initial assessment**:
 
 Parallelizing so aggressively that overhead dominates or resources are exhausted.
 
-```prose
+```libretto
 # Bad: 100 parallel sessions
 parallel for item in large_collection:  # 100 items
   session "Process {item}"
@@ -552,7 +552,7 @@ parallel for item in large_collection:  # 100 items
 
 **Fix**: Batch or limit concurrency:
 
-```prose
+```libretto
 # Good: Process in batches
 for batch in batches(large_collection, 10):
   parallel for item in batch:
@@ -563,7 +563,7 @@ for batch in batches(large_collection, 10):
 
 Parallelizing tiny tasks where sequential would be simpler and fast enough.
 
-```prose
+```libretto
 # Bad: Parallel overkill for simple tasks
 parallel:
   a = session "Add 2 + 2"
@@ -575,7 +575,7 @@ parallel:
 
 **Fix**: Keep it simple:
 
-```prose
+```libretto
 # Good: Sequential for trivial tasks
 session "Add 2+2, 3+3, and 4+4"
 ```
@@ -584,7 +584,7 @@ session "Add 2+2, 3+3, and 4+4"
 
 Waiting for operations whose results you don't need.
 
-```prose
+```libretto
 # Bad: Waiting for logging
 session "Do important work"
 session "Log the result"  # Don't need to wait for this
@@ -595,7 +595,7 @@ session "Continue with next important work"
 
 **Fix**: Use appropriate patterns for fire-and-forget operations, or batch logging:
 
-```prose
+```libretto
 # Better: Batch non-critical work
 session "Do important work"
 session "Continue with next important work"
@@ -613,7 +613,7 @@ session "Log all operations"
 
 Hardcoded prompts repeated throughout the program.
 
-```prose
+```libretto
 # Bad: Same prompt in multiple places
 session "You are a helpful assistant. Analyze this code for bugs."
 # ... later ...
@@ -626,7 +626,7 @@ session "You are a helpful assistent. Analyze this code for bugs."  # Typo!
 
 **Fix**: Use agents:
 
-```prose
+```libretto
 # Good: Single source of truth
 agent code-analyst:
   model: sonnet
@@ -642,7 +642,7 @@ session: code-analyst
 
 No structure or comments indicating what's happening.
 
-```prose
+```libretto
 # Bad: What is this doing?
 let x = session "A"
 let y = session "B"
@@ -659,7 +659,7 @@ session "E"
 
 **Fix**: Use meaningful names and structure:
 
-```prose
+```libretto
 # Good: Clear intent
 # Phase 1: Research
 let research = session "Gather background information"
@@ -684,7 +684,7 @@ session "Create final recommendation"
 
 Relying on conversation history rather than explicit context.
 
-```prose
+```libretto
 # Bad: Implicit state
 session "Set the project name to Acme"
 session "Set the deadline to Friday"
@@ -695,7 +695,7 @@ session "Now create a project plan"  # Hopes previous info is remembered
 
 **Fix**: Explicit context:
 
-```prose
+```libretto
 # Good: Explicit state
 let config = session "Define project: name=Acme, deadline=Friday"
 
@@ -707,7 +707,7 @@ session "Create a project plan"
 
 Agents with prompts that cover too many responsibilities.
 
-```prose
+```libretto
 # Bad: Jack of all trades
 agent super-agent:
   model: opus
@@ -729,7 +729,7 @@ agent super-agent:
 
 **Fix**: Specialized agents:
 
-```prose
+```libretto
 # Good: Focused expertise
 agent security-expert:
   model: sonnet
@@ -752,7 +752,7 @@ agent technical-writer:
 
 Loops that can never satisfy their exit condition.
 
-```prose
+```libretto
 # Bad: Perfection is impossible
 loop until **the code has zero bugs**:
   session "Find and fix bugs"
@@ -762,7 +762,7 @@ loop until **the code has zero bugs**:
 
 **Fix**: Use achievable conditions:
 
-```prose
+```libretto
 # Good: Achievable condition
 loop until **all known bugs are fixed** (max: 20):
   session "Find and fix the next bug"
@@ -776,7 +776,7 @@ loop until **no significant bugs found in last iteration** (max: 10):
 
 Using conditions as actions—checking something without acting on the result.
 
-```prose
+```libretto
 # Bad: Check but don't use result
 session "Check if the system is healthy"
 session "Deploy to production"  # Deploys regardless!
@@ -786,7 +786,7 @@ session "Deploy to production"  # Deploys regardless!
 
 **Fix**: Use conditional execution:
 
-```prose
+```libretto
 # Good: Act on the check
 let health = session "Check if the system is healthy"
 
@@ -801,7 +801,7 @@ else:
 
 Putting sequential-dependent operations in a parallel block.
 
-```prose
+```libretto
 # Bad: These aren't independent!
 parallel:
   data = session "Fetch data"
@@ -815,7 +815,7 @@ parallel:
 
 **Fix**: Be honest about dependencies:
 
-```prose
+```libretto
 # Good: Sequential where needed
 let data = session "Fetch data"
 let processed = session "Process the data"
@@ -828,7 +828,7 @@ session "Store processed data"
 
 Using try/catch for expected conditions rather than exceptional errors.
 
-```prose
+```libretto
 # Bad: Exceptions for normal flow
 try:
   session "Find the optional config file"
@@ -840,7 +840,7 @@ catch:
 
 **Fix**: Use conditionals for expected cases:
 
-```prose
+```libretto
 # Good: Conditional for expected case
 let config_exists = session "Check if config file exists"
 
@@ -854,7 +854,7 @@ else:
 
 Prompting the user for decisions that have obvious or predictable answers.
 
-```prose
+```libretto
 # Antipattern: Asking the obvious
 input "Blocking error detected. Investigate?"  # Always yes
 input "Diagnosis complete. Proceed to triage?"  # Always yes
@@ -865,7 +865,7 @@ input "Tests pass. Deploy?"  # Almost always yes
 
 **Fix**: Auto-proceed for obvious cases, only prompt when genuinely ambiguous:
 
-```prose
+```libretto
 # Good: Auto-proceed with escape hatches for edge cases
 if observation.blocking_error:
   # Auto-investigate (don't ask - of course we investigate errors)
@@ -886,7 +886,7 @@ if observation.blocking_error:
 
 Waiting for a predetermined duration when the signal arrived early.
 
-```prose
+```libretto
 # Antipattern: Fixed window regardless of findings
 loop 30 times (wait: 2s each):  # Always 60 seconds
   resume: observer
@@ -898,7 +898,7 @@ loop 30 times (wait: 2s each):  # Always 60 seconds
 
 **Fix**: Use signal-driven exit conditions:
 
-```prose
+```libretto
 # Good: Exit on significant signal
 loop until **blocking error OR completion** (max: 30):
   resume: observer
@@ -908,7 +908,7 @@ loop until **blocking error OR completion** (max: 30):
 
 Or use `early_exit` if your runtime supports it:
 
-```prose
+```libretto
 # Good: Explicit early exit
 let observation = session: observer
   prompt: "Monitor for errors. Signal immediately if found."
@@ -924,7 +924,7 @@ let observation = session: observer
 
 Passing external input directly to sessions without validation.
 
-```prose
+```libretto
 # Bad: Direct injection
 let user_input = external_source
 
@@ -935,7 +935,7 @@ session "Execute this command: {user_input}"
 
 **Fix**: Validate and sanitize:
 
-```prose
+```libretto
 # Good: Validate first
 let user_input = external_source
 let validated = session "Validate this input is a safe search query"
@@ -951,7 +951,7 @@ else:
 
 Agents with more permissions than they need.
 
-```prose
+```libretto
 # Bad: Full access for simple task
 agent file-reader:
   permissions:
@@ -968,7 +968,7 @@ session: file-reader
 
 **Fix**: Least privilege:
 
-```prose
+```libretto
 # Good: Minimal permissions
 agent file-reader:
   permissions:

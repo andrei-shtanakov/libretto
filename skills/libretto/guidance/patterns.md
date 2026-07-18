@@ -21,7 +21,7 @@ This document catalogs proven patterns for orchestrating AI agents effectively. 
 
 When tasks have no data dependencies, execute them concurrently. This maximizes throughput and minimizes wall-clock time.
 
-```prose
+```libretto
 # Good: Independent research runs in parallel
 parallel:
   market = session "Research market trends"
@@ -38,7 +38,7 @@ The synthesis session waits for all branches, but total time equals the longest 
 
 For processing collections, fan out to parallel workers then collect results. Use `parallel for` instead of manual parallel branches.
 
-```prose
+```libretto
 let topics = ["AI safety", "interpretability", "alignment", "robustness"]
 
 parallel for topic in topics:
@@ -53,7 +53,7 @@ This scales naturally with collection size and keeps code DRY.
 
 Chain transformations using pipe operators for readable data flow. Each stage has a single responsibility.
 
-```prose
+```libretto
 let candidates = session "Generate 10 startup ideas"
 
 let result = candidates
@@ -72,7 +72,7 @@ let result = candidates
 
 Define agents with focused expertise. Specialized agents produce better results than generalist prompts.
 
-```prose
+```libretto
 agent security-reviewer:
   model: sonnet
   prompt: """
@@ -98,7 +98,7 @@ agent performance-reviewer:
 
 Extract repeated workflows into parameterized blocks. Blocks are the functions of Libretto.
 
-```prose
+```libretto
 block review-and-revise(artifact, criteria):
   let feedback = session "Review {artifact} against {criteria}"
   session "Revise {artifact} based on feedback"
@@ -118,7 +118,7 @@ do review-and-revise("the test plan", "coverage and edge cases")
 
 Always constrain loops with `max:` to prevent runaway execution. Even well-crafted conditions can fail to terminate.
 
-```prose
+```libretto
 # Good: Explicit upper bound
 loop until **all tests pass** (max: 20):
   session "Identify and fix the next failing test"
@@ -130,7 +130,7 @@ loop until **all tests pass** (max: 20):
 
 Use `on-fail: "continue"` when partial results are acceptable. Collect what you can rather than failing entirely.
 
-```prose
+```libretto
 parallel (on-fail: "continue"):
   primary = session "Query primary data source"
   backup = session "Query backup data source"
@@ -145,7 +145,7 @@ session "Merge available data"
 
 External services fail transiently. Retry with exponential backoff to handle rate limits and temporary outages.
 
-```prose
+```libretto
 session "Call external API"
   retry: 5
   backoff: "exponential"
@@ -153,7 +153,7 @@ session "Call external API"
 
 For critical paths, combine retry with fallback:
 
-```prose
+```libretto
 try:
   session "Call primary API"
     retry: 3
@@ -166,7 +166,7 @@ catch:
 
 Capture error context for intelligent recovery. The error variable provides information for diagnostic or remediation sessions.
 
-```prose
+```libretto
 try:
   session "Deploy to production"
 catch as err:
@@ -180,7 +180,7 @@ catch as err:
 
 Validate assumptions before expensive operations. Cheap checks prevent wasted computation.
 
-```prose
+```libretto
 let prereqs = session "Check all prerequisites: API keys, permissions, dependencies"
 
 if **prerequisites are not met**:
@@ -203,7 +203,7 @@ issues**` inherits that noise.
 
 For high-stakes gates, ground the label instead of trusting it:
 
-```prose
+```libretto
 # Good: rubric forces the critic to justify severity against fixed criteria
 let review = session: critic
   prompt: """Review the change. For each issue, assign severity using this
@@ -238,7 +238,7 @@ structure and audit trail.
 
 Add an explicit constraint to leaf prompts:
 
-```prose
+```libretto
 agent implementer:
   model: sonnet
   prompt: """You implement code changes directly. Do the work yourself in
@@ -310,7 +310,7 @@ Standing responsibilities (`watch:`/gateway, upstream's `*.libretto.md`
 model) are deliberately out of scope — see
 `docs/decisions/2026-07-16-phase6-responsibility-v2.md`.
 
-```prose
+```libretto
 agent captain:
   model: sonnet  # Orchestration and coordination
   persist: true  # Execution-scoped (dies with run)
@@ -345,7 +345,7 @@ resume: captain
 
 Pass only relevant context. Large contexts slow processing and increase costs.
 
-```prose
+```libretto
 # Bad: Passing everything
 session "Write executive summary"
   context: [raw_data, analysis, methodology, appendices, references]
@@ -362,7 +362,7 @@ session "Write executive summary"
 
 Exit loops as soon as the goal is achieved. Don't iterate unnecessarily.
 
-```prose
+```libretto
 # The condition is checked each iteration
 loop until **solution found and verified** (max: 10):
   session "Generate potential solution"
@@ -374,7 +374,7 @@ loop until **solution found and verified** (max: 10):
 
 When observing or monitoring, exit as soon as you have a definitive answer—don't wait for the full observation window.
 
-```prose
+```libretto
 # Good: Exit on signal
 let observation = session: observer
   prompt: "Watch the stream. Signal immediately if you detect a blocking error."
@@ -393,7 +393,7 @@ This respects signals when they arrive rather than waiting for arbitrary timeout
 
 For standard configuration, use constants or environment variables. Only prompt when genuinely variable.
 
-```prose
+```libretto
 # Good: Sensible defaults
 const API_URL = "https://api.example.com"
 const TEST_PROGRAM = "# Simple test\nsession 'Hello'"
@@ -409,7 +409,7 @@ If 90% of runs use the same value, hardcode it. Let users override via CLI args 
 
 When any valid result suffices, race multiple approaches and take the first success.
 
-```prose
+```libretto
 parallel ("first"):
   session "Try algorithm A"
   session "Try algorithm B"
@@ -423,7 +423,7 @@ session "Use winning result"
 
 Group similar operations to amortize overhead. One session with structured output beats many small sessions.
 
-```prose
+```libretto
 # Inefficient: Many small sessions
 for file in files:
   session "Analyze {file}"
@@ -441,7 +441,7 @@ session "Analyze all files and return structured findings for each"
 
 For tasks that would otherwise require a separate verifier, include verification as the final step in the prompt. This saves a round-trip while maintaining rigor.
 
-```prose
+```libretto
 # Good: Combined work + self-verification
 agent investigator:
   model: sonnet
@@ -467,7 +467,7 @@ Use a separate verifier when you need genuine adversarial review (different pers
 
 Use feedback loops to progressively improve outputs. Each iteration builds on the previous.
 
-```prose
+```libretto
 let draft = session "Create initial draft"
 
 loop until **draft meets quality bar** (max: 5):
@@ -484,7 +484,7 @@ session "Finalize and publish"
 
 Gather diverse viewpoints before synthesis. Different lenses catch different issues.
 
-```prose
+```libretto
 parallel:
   user_perspective = session "Evaluate from end-user viewpoint"
   tech_perspective = session "Evaluate from engineering viewpoint"
@@ -498,7 +498,7 @@ session "Synthesize feedback and prioritize improvements"
 
 Use one agent to challenge another's work. Adversarial pressure improves robustness.
 
-```prose
+```libretto
 let proposal = session "Generate proposal"
 
 let critique = session "Find flaws and weaknesses in this proposal"
@@ -515,7 +515,7 @@ session "Produce final proposal incorporating valid critiques"
 
 For critical decisions, require agreement between independent evaluators.
 
-```prose
+```libretto
 parallel:
   eval1 = session "Independently evaluate the solution"
   eval2 = session "Independently evaluate the solution"
@@ -544,7 +544,7 @@ session "Document consensus decision"
 
 Name agents for their role, not their implementation. Names should convey purpose.
 
-```prose
+```libretto
 # Good: Role-based naming
 agent code-reviewer:
 agent technical-writer:
@@ -560,7 +560,7 @@ agent helper:
 
 Write prompts that specify expected inputs and outputs. Clear contracts prevent misunderstandings.
 
-```prose
+```libretto
 agent json-extractor:
   model: haiku
   prompt: """
@@ -578,7 +578,7 @@ agent json-extractor:
 
 Each session should do one thing well. Combine simple sessions rather than creating complex ones.
 
-```prose
+```libretto
 # Good: Single responsibility per session
 let data = session "Fetch and validate input data"
 let analysis = session "Analyze data for patterns"
@@ -596,7 +596,7 @@ session "Fetch data, analyze it, generate recommendations, and format a report"
 
 Make data flow visible through explicit context passing. Avoid relying on implicit conversation history.
 
-```prose
+```libretto
 # Good: Explicit flow
 let step1 = session "First step"
 let step2 = session "Second step"
@@ -618,7 +618,7 @@ session "Third step using all previous"
 
 Defer expensive operations until their results are needed. Don't compute what might not be used.
 
-```prose
+```libretto
 session "Assess situation"
 
 if **detailed analysis needed**:
@@ -638,7 +638,7 @@ else:
 
 Start with fast, cheap operations. Escalate to expensive ones only when needed.
 
-```prose
+```libretto
 # Tier 1: Fast screening (haiku)
 let initial = session "Quick assessment"
   model: haiku
@@ -660,7 +660,7 @@ if **needs deeper review**:
 
 Use `parallel ("any", count: N)` to get results as fast as possible from a pool of workers.
 
-```prose
+```libretto
 # Get 3 good ideas as fast as possible from 5 parallel attempts
 parallel ("any", count: 3, on-fail: "ignore"):
   session "Generate creative solution approach 1"
@@ -680,7 +680,7 @@ session "Select best from the first 3 completed"
 
 Create blocks that encode entire workflow patterns. Instantiate with different parameters.
 
-```prose
+```libretto
 block research-report(topic, depth):
   let research = session "Research {topic} at {depth} level"
   let analysis = session "Analyze findings about {topic}"
@@ -698,7 +698,7 @@ do research-report("competitive landscape", "comprehensive")
 
 Wrap sessions with cross-cutting concerns like logging, timing, or validation.
 
-```prose
+```libretto
 block with-validation(task, validator):
   let result = session "{task}"
   let valid = session "{validator}"
@@ -714,7 +714,7 @@ do with-validation("Generate config file", "Validate config syntax")
 
 After repeated failures, stop trying and fail fast. Prevents cascading failures.
 
-```prose
+```libretto
 let failures = 0
 let max_failures = 3
 
@@ -738,7 +738,7 @@ loop while **service needed and failures < max_failures** (max: 10):
 
 For long workflows, emit progress markers. Helps with debugging and monitoring.
 
-```prose
+```libretto
 session "Phase 1: Data Collection"
 # ... collection work ...
 
@@ -756,7 +756,7 @@ session "Phase 4: Quality Assurance"
 
 Request structured outputs that can be reliably parsed and validated.
 
-```prose
+```libretto
 agent structured-reviewer:
   model: sonnet
   prompt: """

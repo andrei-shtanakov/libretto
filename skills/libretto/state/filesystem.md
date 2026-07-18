@@ -122,7 +122,7 @@ updated: 2026-01-15T14:35:22Z
 
 ## Execution Trace
 
-```prose
+```libretto
 agent researcher:
   model: sonnet
   prompt: "You research topics thoroughly"
@@ -211,7 +211,7 @@ All named values (input, output, let, const) are stored as binding files.
 kind: let
 
 source:
-```prose
+```libretto
 let research = session: researcher
   prompt: "Research AI safety"
 ````
@@ -244,7 +244,7 @@ since 2020 with major contributions from...
 
 Sessions without explicit output capture still produce results:
 
-```prose
+```libretto
 session "Analyze the codebase"   # No `let x = ...` capture
 ````
 
@@ -279,7 +279,7 @@ execution_id: 43
 
 source:
 
-```prose
+```libretto
 let result = session "Process chunk"
 ```
 ````
@@ -414,7 +414,7 @@ Format:
 kind: let
 
 source:
-```prose
+```libretto
 let research = session: researcher
   prompt: "Research AI safety"
 ````

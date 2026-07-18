@@ -20,7 +20,7 @@ A potential alternative register for Libretto that draws from Jorge Luis Borges'
 | `agent`    | `dreamer`   | Ephemeral, created for a purpose (Circular Ruins: dreamed into existence)        |
 | `keeper`   | `librarian` | Persistent, remembers, catalogs (Library of Babel: keeper of infinite knowledge) |
 
-```prose
+```libretto
 # Functional
 agent executor:
   model: sonnet
@@ -49,7 +49,7 @@ librarian captain:
 
 ### Invocation Patterns
 
-```prose
+```libretto
 # Functional
 session: executor
   prompt: "Do task"

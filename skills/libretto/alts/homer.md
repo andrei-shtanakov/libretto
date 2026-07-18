@@ -95,7 +95,7 @@ These keywords already work or are too functional to replace sensibly:
 
 ### Simple Program
 
-```prose
+```libretto
 # Functional
 use "@alice/research" as research
 input topic: "What to investigate"
@@ -110,7 +110,7 @@ output summary = session "Summarize"
   context: findings
 ```
 
-```prose
+```libretto
 # Homeric
 invoke "@alice/research" as research
 omen topic: "What to investigate"
@@ -127,7 +127,7 @@ glory summary = trial "Summarize"
 
 ### Parallel Execution
 
-```prose
+```libretto
 # Functional
 parallel:
   security = session "Check security"
@@ -138,7 +138,7 @@ session "Synthesize review"
   context: { security, perf, style }
 ```
 
-```prose
+```libretto
 # Homeric
 host:
   security = trial "Check security"
@@ -151,13 +151,13 @@ trial "Synthesize review"
 
 ### Loop with Condition
 
-```prose
+```libretto
 # Functional
 loop until **the code is bug-free** (max: 5):
   session "Find and fix bugs"
 ```
 
-```prose
+```libretto
 # Homeric
 ordeal until **the code is bug-free** (max: 5):
   trial "Find and fix bugs"
@@ -165,7 +165,7 @@ ordeal until **the code is bug-free** (max: 5):
 
 ### Error Handling
 
-```prose
+```libretto
 # Functional
 try:
   session "Risky operation"
@@ -176,7 +176,7 @@ finally:
   session "Cleanup"
 ```
 
-```prose
+```libretto
 # Homeric
 venture:
   trial "Risky operation"
@@ -189,7 +189,7 @@ in the end:
 
 ### Choice Block
 
-```prose
+```libretto
 # Functional
 choice **the severity level**:
   option "Critical":
@@ -198,7 +198,7 @@ choice **the severity level**:
     session "Log for later"
 ```
 
-```prose
+```libretto
 # Homeric
 crossroads **the severity level**:
   path "Critical":
@@ -209,7 +209,7 @@ crossroads **the severity level**:
 
 ### Conditionals
 
-```prose
+```libretto
 # Functional
 if **has security issues**:
   session "Fix security"
@@ -219,7 +219,7 @@ else:
   session "Approve"
 ```
 
-```prose
+```libretto
 # Homeric
 should **has security issues**:
   trial "Fix security"
@@ -231,7 +231,7 @@ otherwise:
 
 ### Reusable Blocks
 
-```prose
+```libretto
 # Functional
 block review(topic):
   session "Research {topic}"
@@ -240,7 +240,7 @@ block review(topic):
 do review("quantum computing")
 ```
 
-```prose
+```libretto
 # Homeric
 book review(topic):
   trial "Research {topic}"
@@ -251,13 +251,13 @@ do review("quantum computing")
 
 ### Fixed Iteration
 
-```prose
+```libretto
 # Functional
 repeat 12:
   session "Complete task"
 ```
 
-```prose
+```libretto
 # Homeric
 12 labors:
   trial "Complete task"
@@ -265,12 +265,12 @@ repeat 12:
 
 ### Immutable Binding
 
-```prose
+```libretto
 # Functional
 const config = { model: "opus", retries: 3 }
 ```
 
-```prose
+```libretto
 # Homeric
 fate config = { muse: "opus", persist: 3 }
 ```

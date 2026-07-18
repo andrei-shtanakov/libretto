@@ -171,7 +171,7 @@ let top_candidates = session: architect
     [What pain point does this solve? Include evidence.]
 
     ### Proposed Syntax
-    ```prose
+    ```libretto
     [Show the new syntax]
     ```
 

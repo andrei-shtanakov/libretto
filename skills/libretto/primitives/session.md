@@ -362,7 +362,7 @@ execution_id: {id} # Include if inside a block invocation (omit for root scope)
 
 source:
 
-```prose
+```libretto
 {the source code that created this binding}
 ```
 ````
@@ -381,7 +381,7 @@ source:
 kind: let
 
 source:
-```prose
+```libretto
 let research = session: researcher
   prompt: "Research AI safety"
 ````
@@ -412,7 +412,7 @@ The VM assigns sequential numbers. Write the same format but note the binding ca
 kind: let
 
 source:
-```prose
+```libretto
 session "Analyze the codebase for security issues"
 ````
 

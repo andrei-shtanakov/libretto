@@ -1,7 +1,7 @@
 [project]
 name = "libretto"
 version = "0.1.0"
-description = "Add your description here"
+description = "Spec-as-VM language for AI sessions and deterministic verification tooling"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []

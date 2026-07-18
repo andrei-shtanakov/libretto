@@ -96,7 +96,7 @@ These keywords already work or are too functional to replace sensibly:
 
 ### Simple Program
 
-```prose
+```libretto
 # Functional
 use "@alice/research" as research
 input topic: "What to investigate"
@@ -111,7 +111,7 @@ output summary = session "Summarize"
   context: findings
 ```
 
-```prose
+```libretto
 # Borges
 retrieve "@alice/research" as research
 axiom topic: "What to investigate"
@@ -128,7 +128,7 @@ theorem summary = dream "Summarize"
 
 ### Parallel Execution
 
-```prose
+```libretto
 # Functional
 parallel:
   security = session "Check security"
@@ -139,7 +139,7 @@ session "Synthesize review"
   context: { security, perf, style }
 ```
 
-```prose
+```libretto
 # Borges
 forking:
   security = dream "Check security"
@@ -152,13 +152,13 @@ dream "Synthesize review"
 
 ### Loop with Condition
 
-```prose
+```libretto
 # Functional
 loop until **the code is bug-free** (max: 5):
   session "Find and fix bugs"
 ```
 
-```prose
+```libretto
 # Borges
 labyrinth until **the code is bug-free** (max: 5):
   dream "Find and fix bugs"
@@ -166,7 +166,7 @@ labyrinth until **the code is bug-free** (max: 5):
 
 ### Error Handling
 
-```prose
+```libretto
 # Functional
 try:
   session "Risky operation"
@@ -177,7 +177,7 @@ finally:
   session "Cleanup"
 ```
 
-```prose
+```libretto
 # Borges
 venture:
   dream "Risky operation"
@@ -190,7 +190,7 @@ ultimately:
 
 ### Choice Block
 
-```prose
+```libretto
 # Functional
 choice **the severity level**:
   option "Critical":
@@ -199,7 +199,7 @@ choice **the severity level**:
     session "Log for later"
 ```
 
-```prose
+```libretto
 # Borges
 bifurcation **the severity level**:
   branch "Critical":
@@ -210,7 +210,7 @@ bifurcation **the severity level**:
 
 ### Conditionals
 
-```prose
+```libretto
 # Functional
 if **has security issues**:
   session "Fix security"
@@ -220,7 +220,7 @@ else:
   session "Approve"
 ```
 
-```prose
+```libretto
 # Borges
 should **has security issues**:
   dream "Fix security"
@@ -232,7 +232,7 @@ otherwise:
 
 ### Reusable Blocks
 
-```prose
+```libretto
 # Functional
 block review(topic):
   session "Research {topic}"
@@ -241,7 +241,7 @@ block review(topic):
 do review("quantum computing")
 ```
 
-```prose
+```libretto
 # Borges
 chapter review(topic):
   dream "Research {topic}"
@@ -252,13 +252,13 @@ do review("quantum computing")
 
 ### Fixed Iteration
 
-```prose
+```libretto
 # Functional
 repeat 3:
   session "Generate idea"
 ```
 
-```prose
+```libretto
 # Borges
 3 mirrors:
   dream "Generate idea"
@@ -266,12 +266,12 @@ repeat 3:
 
 ### Immutable Binding
 
-```prose
+```libretto
 # Functional
 const config = { model: "opus", retries: 3 }
 ```
 
-```prose
+```libretto
 # Borges
 zahir config = { author: "opus", recur: 3 }
 ```
