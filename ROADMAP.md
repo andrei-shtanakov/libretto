@@ -12,7 +12,10 @@
   (exact w.r.t. recorded usage) or `budget: $X` (estimate) in grammar;
   VM halt-on-overage with `budget_exceeded` control receipt (`libretto.md`,
   Budget Enforcement)
-- **Concurrency limits** — `parallel (max_concurrent: N):` for rate limiting. Currently parallel launches all branches simultaneously without limits
+- [x] **Concurrency limits** — done (Phase 0, 2026-07-16): `parallel (max_concurrent: N):`
+  in the grammar (`compiler.md`, `maxConcurrentMod`), also applying to `parallel for`;
+  throttle semantics in `compiler.md` (Concurrency Throttle) and enforcement in
+  `libretto.md`; two validation rules; recognised keyword in `libretto-tools lint`
 - **Pause/cancel protocol** — standardize substrate interaction for graceful stop. Format: marker in `state.md` + VM check before each session spawn
 
 ## P2 — Developer Experience
