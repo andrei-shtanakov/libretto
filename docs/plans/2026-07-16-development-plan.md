@@ -1,5 +1,29 @@
 # Libretto Development Plan (2026-07-16)
 
+> ## ⚠️ EXECUTED — HISTORICAL RECORD, NOT CURRENT STATE
+>
+> **This plan was executed on 2026-07-16.** The checkboxes below are the original
+> execution checklist as it was written before the work started. They were never
+> ticked, and they are **deliberately left unticked** as the historical artefact
+> they are. **Do not read them as current state, and do not treat an unchecked box
+> here as open work.**
+>
+> An audit on 2026-07-29 verified all 37 boxes against the working tree and the
+> tooling actually executing: **34 shipped, 1 partially shipped** (the Phase 2.3
+> advisory model-smoke tier, which exists as a documented manual pre-release step
+> rather than a CI job — closed as a management decision), **2 open but ADR-gated
+> with the precondition unmet** (Phase 6.2 and 6.3 are the "then" arm of a
+> conditional that `docs/decisions/2026-07-16-phase6-responsibility-v2.md` answered
+> *no*, accepted—deferred, with explicit reopening criteria).
+>
+> Where to look instead:
+>
+> - **Operational SSOT — accepted, currently open work:** `TODO.md` in the repo root.
+> - **Strategic backlog — candidates, not commitments:** `ROADMAP.md`.
+>
+> The rest of this document remains useful as the rationale for the two-layer
+> architecture and for the decisions locked in along the way.
+
 > **For agentic workers:** This is a roadmap-level development plan. Individual
 > phases should be broken into per-task implementation plans (in this directory)
 > before execution. Steps use checkbox (`- [ ]`) syntax for tracking.
