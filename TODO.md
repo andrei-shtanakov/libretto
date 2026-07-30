@@ -93,3 +93,24 @@
       `skills/libretto/lib/profiler.libretto`, with the condition inverted, since
       `assert` states what must hold and a guard states what must not.
       Described in `ROADMAP.md` → P2.5.
+
+- [ ] Audit the nine block-body `output NAME = expr` sites against the grammar's root-scope-only rule, before any spec decision @owner:github:andrei-shtanakov @id:output-scope-audit
+      `compiler.md:3130-3131` and `libretto.md:490-491` both state
+      `outputBinding → "output" IDENTIFIER "=" expression` is root-scope-only and
+      `outputReturn → "output" expression` is for block bodies only. Nine sites in
+      the shipped corpus use the root-scope form inside block bodies, unflagged by
+      `libretto-tools lint` (it checks keyword canonicality, not `output`'s scope
+      placement):
+      `skills/libretto/examples/44-run-endpoint-ux-test.libretto:102,139,186` and
+      `skills/libretto/examples/50-run-endpoint-ux-test-with-remediation.libretto:274,303,365,380,434,453`.
+      The P2.5 rewrite (#24, above) converted three sites paired with a
+      non-canonical `return` into the canonical block return, leaving the corpus
+      internally inconsistent — three sites now use the block return, nine still
+      use the named form inside blocks — this is the "adjacent gap" `ROADMAP.md` →
+      P2.5 flags but does not resolve. This item is the audit only, not the fix:
+      establish, per site, (1) the author's intended semantics, (2) the
+      compiler's actual behaviour per spec (the runtime is an LLM reading
+      `libretto.md`, so this means what the specs prescribe and what a
+      conforming run would produce), and (3) whether an equivalent root-scope
+      formulation exists. The audit's output feeds a later spec decision;
+      neither the grammar nor the programs change here.
