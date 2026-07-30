@@ -473,8 +473,8 @@ Follow docs/PLANNING_BEST_PRACTICES.md."""
   **
 
   if plan_approval != "approve":
-    output change_result = { success: false, reason: plan_approval, plan }
-    return
+    # Block return: sets the result and ends this invocation immediately
+    output { success: false, reason: plan_approval, plan }
 
   # Execute phases (parallel where possible)
   let phase_results = plan.phases
@@ -499,13 +499,12 @@ All phases complete? Root cause addressed?"""
     context: { plan, phase_results }
 
   if **review not approved**:
-    output change_result = { success: false, reason: "Review failed", review }
-    return
+    output { success: false, reason: "Review failed", review }
 
   # Deploy
   let deploy_result = do deploy_and_verify({ fix: phase_results, review })
 
-  output change_result = {
+  output {
     success: deploy_result.success,
     plan,
     phases: phase_results,
@@ -568,19 +567,19 @@ if **blocking error detected in synthesis**:
     # Full remediation flow
     diagnosis = do investigate_error(synthesis.error_summary, ws_results, file_results, exec)
 
-    # Verification loop
-    loop until **diagnosis verified** (max: 3):
-      let verification = do verify_diagnosis(diagnosis, synthesis.error_summary, ws_results)
+    # Verification loop. The loop's own condition is the exit: verify once up
+    # front, then each iteration refines the diagnosis and re-verifies it.
+    let verification = do verify_diagnosis(diagnosis, synthesis.error_summary, ws_results)
 
-      if verification.diagnosis_sound:
-        break
-      else:
-        diagnosis = resume: researcher
-          prompt: """Diagnosis needs refinement:
+    loop until **verification.diagnosis_sound is true** (max: 3):
+      diagnosis = resume: researcher
+        prompt: """Diagnosis needs refinement:
 
 {verification.critique}
 
 Investigate: {verification.follow_up_questions}"""
+
+      verification = do verify_diagnosis(diagnosis, synthesis.error_summary, ws_results)
 
     # User checkpoint: confirm diagnosis before action
     input diagnosis_confirmation: **

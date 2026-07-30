@@ -191,8 +191,10 @@ let tool_detection = session: detector
 # Guard: Exit if no data available
 # ============================================================
 
-assert tool_detection.tool != "not-found":
-  """
+# The guard is inverted relative to the condition it protects: throw when the
+# tool could not be detected. An unhandled throw fails the program.
+if **tool_detection.tool is "not-found"**:
+  throw """
   ERROR: Profiling requires actual data from AI tool session files.
 
   Could not find session data for this run. This can happen if:

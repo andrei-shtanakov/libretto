@@ -1,10 +1,11 @@
 # Skills and Imports Example
 # This demonstrates importing external skills and assigning them to agents.
 
-# Import skills from external sources
-import "web-search" from "github:anthropic/skills"
-import "summarizer" from "npm:@example/summarizer"
-import "file-reader" from "./local-skills/file-reader"
+# Import skills from the registry — each `use` path is "@handle/slug",
+# and the slug is the name the `skills:` property refers to below.
+use "@anthropic/web-search"
+use "@example/summarizer"
+use "@local-skills/file-reader"
 
 # Define a research agent with web search capability
 agent researcher:
