@@ -70,14 +70,18 @@
       The four classes, to be handled and verified one at a time rather than in a
       single sweep, because each has a different canonical replacement:
       (1) `import "skill" from "source"` — 4 warnings, in
-      `examples/11-skills-and-imports.libretto` and
-      `examples/12-secure-agent-permissions.libretto`; the grammar's existing means
-      are `use` for programs and the `skills:` agent property.
-      (2) `return` — 2 warnings, at `examples/50-…:477` and `:503`; Phase 0 defined
-      block-level `output` as the block-return form, which is the replacement.
-      (3) `break` — 1 warning, at `examples/50-…:576`; no loop-control statement
-      exists, so the loop has to be restructured rather than translated.
-      (4) `assert <expr>:` — 1 warning, at `lib/profiler.libretto:194`.
+      `skills/libretto/examples/11-skills-and-imports.libretto` (3) and
+      `skills/libretto/examples/12-secure-agent-permissions.libretto` (1); the
+      grammar's existing means are `use` for programs and the `skills:` agent
+      property.
+      (2) `return` — 2 warnings, in
+      `skills/libretto/examples/50-run-endpoint-ux-test-with-remediation.libretto`
+      at lines 477 and 503; Phase 0 defined block-level `output` as the block-return
+      form, which is the replacement.
+      (3) `break` — 1 warning, in the same file at line 576; no loop-control
+      statement exists, so the loop has to be restructured rather than translated.
+      (4) `assert <expr>:` — 1 warning, at
+      `skills/libretto/lib/profiler.libretto:194`.
       These files are documentation users have read, so each rewrite must keep the
       example's teaching intent, not merely silence the linter.
       Described in `ROADMAP.md` → P2.5.
