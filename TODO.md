@@ -96,7 +96,7 @@
 
 - [ ] Audit the nine block-body `output NAME = expr` sites against the grammar's root-scope-only rule, before any spec decision @owner:github:andrei-shtanakov @id:output-scope-audit
       `compiler.md:3130-3131` and `libretto.md:490-491` both state
-      `outputBinding → "output" IDENTIFIER "=" expression` is root scope only and
+      `outputBinding → "output" IDENTIFIER "=" expression` is root-scope-only and
       `outputReturn → "output" expression` is for block bodies only. Nine sites in
       the shipped corpus use the root-scope form inside block bodies, unflagged by
       `libretto-tools lint` (it checks keyword canonicality, not `output`'s scope
