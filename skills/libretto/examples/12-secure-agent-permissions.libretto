@@ -1,8 +1,8 @@
 # Secure Agent with Permissions Example
 # This demonstrates defining agents with restricted access permissions.
 
-# Import required skills
-import "code-analyzer" from "github:anthropic/code-tools"
+# Import required skills from the registry
+use "@anthropic/code-analyzer"
 
 # Define a read-only code reviewer
 # This agent can read source files but cannot modify them or run shell commands

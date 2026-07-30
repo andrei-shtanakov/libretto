@@ -28,16 +28,29 @@
 
 ## P2.5 — Spec decisions surfaced by the linter (2026-07-16)
 
-Bundled programs use four constructs absent from `compiler.md` (reported
-as OP009 warnings by `libretto-tools lint`). Each needs a decision —
-adopt into the grammar or rewrite the programs:
+Bundled programs used four constructs absent from `compiler.md` (reported
+as OP009 warnings by `libretto-tools lint`). **Decided and closed (#24):
+the programs were rewritten, the grammar was not grown.** Lint over the CI
+scope is now 0 OP009 warnings and 0 errors across 60 programs:
 
-- **`import "skill" from "source"`** — examples 11, 12 (skill imports;
-  grammar only has `use` for programs and the `skills:` agent property)
-- **`return`** — example 50 (early exit at root scope / inside blocks;
-  overlaps with the Phase 0 `output`-as-block-return semantics)
-- **`break`** — example 50 (loop exit; no loop-control statements exist)
-- **`assert <expr>:`** — lib/profiler (guard with error message)
+- [x] **`import "skill" from "source"`** — examples 11, 12 → `use "@handle/slug"`
+  plus the existing `skills:` agent property. Slugs equal the old skill names.
+  *Not covered by the rewrite:* `use` resolves only from the registry, so the
+  old `github:`/`npm:`/relative-path sources are now publisher handles. Whether
+  non-registry sources should be expressible is a separate, unopened decision.
+- [x] **`return`** — example 50 → `output <expr>`, the Phase 0 block return, which
+  both sets the result and ends the invocation. The `output name = expr` it
+  followed is root-scope-only and register-only, so it never returned.
+- [x] **`break`** — example 50 → loop restructured so the `until` condition carries
+  the exit (no loop-control statement exists, and `loopBlock` takes discretion
+  only). Verify ahead of the loop; refine and re-verify per iteration.
+- [x] **`assert <expr>:`** — lib/profiler → `if **...**:` + `throw`, condition
+  inverted; an unhandled throw fails the program, which is the guard's behaviour.
+
+Two adjacent gaps of the same family remain undecided, both unflagged by the
+linter: further `output name = expr` block returns in example 50 (latent E029 —
+program output declared in a block body), and plain relational conditions (`==`, `!=`) in `if`, which
+`ifStatement → "if" discretion` does not cover.
 
 ## P3 — Language Extensions
 
