@@ -62,26 +62,34 @@
 
 ## Spec decisions surfaced by the linter (P2.5)
 
-- [ ] Rewrite the four P2.5 cases onto already-canonical syntax, verifying each warning class separately @owner:github:andrei-shtanakov @id:p25-rewrite-noncanonical-constructs
-      Decision taken: the bundled programs are rewritten, the grammar is **not**
-      grown. `libretto-tools lint` reports these today as exactly **8 OP009 warnings
-      across 4 files**, which is the acceptance signal — the count must fall to 0 for
-      the rewritten constructs, and lint must stay at 0 errors over all 60 programs.
-      The four classes, to be handled and verified one at a time rather than in a
-      single sweep, because each has a different canonical replacement:
-      (1) `import "skill" from "source"` — 4 warnings, in
+- [x] Rewrite the four P2.5 cases onto already-canonical syntax, verifying each warning class separately (#24) @owner:github:andrei-shtanakov @id:p25-rewrite-noncanonical-constructs
+      Decision taken and executed: the bundled programs were rewritten, the grammar
+      was **not** grown — `compiler.md` and `libretto.md` are untouched. All four
+      classes landed; lint over the CI scope went from 8 OP009 warnings to **0, with
+      0 errors over all 60 programs**, and each class was counted separately before
+      and after rather than in a single sweep. What each became:
+      (1) `import "skill" from "source"` — 4 warnings → `use "@handle/slug"` plus the
+      existing `skills:` agent property, in
       `skills/libretto/examples/11-skills-and-imports.libretto` (3) and
-      `skills/libretto/examples/12-secure-agent-permissions.libretto` (1); the
-      grammar's existing means are `use` for programs and the `skills:` agent
-      property.
-      (2) `return` — 2 warnings, in
-      `skills/libretto/examples/50-run-endpoint-ux-test-with-remediation.libretto`
-      at lines 477 and 503; Phase 0 defined block-level `output` as the block-return
-      form, which is the replacement.
-      (3) `break` — 1 warning, in the same file at line 576; no loop-control
-      statement exists, so the loop has to be restructured rather than translated.
-      (4) `assert <expr>:` — 1 warning, at
-      `skills/libretto/lib/profiler.libretto:194`.
-      These files are documentation users have read, so each rewrite must keep the
-      example's teaching intent, not merely silence the linter.
+      `skills/libretto/examples/12-secure-agent-permissions.libretto` (1). Each slug
+      equals the old skill name, so the `skills: [...]` arrays are unchanged. One
+      teaching was lost and is *not* recovered by this item: `use` resolves only
+      `@handle/slug` from `p.libretto.md`, so the old example's three source schemes
+      (`github:`, `npm:`, a relative path) are now three publisher handles. Whether
+      the registry should express non-registry sources is a separate spec decision,
+      unopened.
+      (2) `return` — 2 warnings → `output <expr>`, the documented block return, in
+      `skills/libretto/examples/50-run-endpoint-ux-test-with-remediation.libretto`.
+      The `output name = expr` line each `return` followed is the root-scope-only,
+      register-only form (an E029 in a block body) and never returned, so the pair
+      collapsed into one statement; the block's final return was converted with them.
+      (3) `break` — 1 warning → the loop restructured so its `until` condition
+      carries the exit: verify once ahead of the loop, then refine and re-verify per
+      iteration. Same exit signal, now named concretely
+      (`**verification.diagnosis_sound is true**`), same bound of 3 refinements; in
+      the never-sound path it spends one extra verification and, unlike the original,
+      verifies the final diagnosis.
+      (4) `assert <expr>:` — 1 warning → `if **...**:` + `throw` at
+      `skills/libretto/lib/profiler.libretto`, with the condition inverted, since
+      `assert` states what must hold and a guard states what must not.
       Described in `ROADMAP.md` → P2.5.
