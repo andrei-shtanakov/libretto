@@ -54,7 +54,7 @@ A concrete `rendered` example:
 
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
-| `v` | string | Schema tag. Always `"libretto.receipt.v1"` for this version |
+| `v` | string | Schema tag. New receipts MUST use `"libretto.receipt.v1"`; migration readers MAY accept legacy `"openprose.receipt.v1"` ledgers as historical artifacts |
 | `run_id` | string | The run this receipt belongs to (`{YYYYMMDD}-{HHMMSS}-{random6}`) |
 | `statement_id` | string | Stable statement instance ID (see statement-id contract below) |
 | `kind` | enum | `session` \| `parallel_branch` \| `block_call` \| `discretion` \| `control` |

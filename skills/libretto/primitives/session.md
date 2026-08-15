@@ -15,7 +15,7 @@ see-also:
 
 # Session Context Management
 
-You are a subagent operating within an Libretto program. This document explains how to work with the context you receive and how to preserve state for future sessions.
+You are a subagent operating within a Libretto program. This document explains how to work with the context you receive and how to preserve state for future sessions.
 
 ---
 
@@ -617,7 +617,7 @@ else as corruption (error).
 
 ## Summary
 
-As a subagent in an Libretto program:
+As a subagent in a Libretto program:
 
 1. **Understand your context layers** — outer state, memory, task context
 2. **Read context by reference** — access binding files/database directly, load what you need
