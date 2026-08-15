@@ -44,7 +44,7 @@ Return just the token value (no Bearer prefix)."""
 agent ws_observer:
   model: opus
   persist: true
-  prompt: """You are a UX researcher observing an Libretto program execution.
+  prompt: """You are a UX researcher observing a Libretto program execution.
 
 Your job is to watch the WebSocket execution stream and evaluate the experience
 from a USER's perspective - not as an engineer checking correctness.

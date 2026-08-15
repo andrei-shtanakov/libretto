@@ -77,7 +77,7 @@ A concrete (abbreviated) instance:
 
 | Field | Type | Meaning |
 | ----- | ---- | ------- |
-| `v` | string | Always `"libretto.compile-ir.v1"` |
+| `v` | string | New IR artifacts MUST use `"libretto.compile-ir.v1"`; migration readers MAY accept legacy `"openprose.compile-ir.v1"` artifacts |
 | `program` | string | Source path as invoked (display identity) |
 | `source.path` | string | Path of the compiled file |
 | `source.content_hash` | string | `sha256:` over the source file's exact bytes — the freshness anchor |
